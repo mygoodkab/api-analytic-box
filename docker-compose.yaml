@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+ vam_webconfig-api:
+  build: .
+  image: embedded-performance-server.local:5000/eslab/webconfig-api:latest
+  ports:
+   - "8000:8000"
+  container_name: webconfig-api
+  volumes:
+   - ${HOME}/vam-data/:/vam-data/
+   - /var/run/docker.sock:/var/run/docker.sock
+  restart: always

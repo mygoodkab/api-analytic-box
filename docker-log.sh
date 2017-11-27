@@ -1,0 +1,1 @@
+curl --unix-socket /var/run/docker.sock "http:/v1.24/containers/f170d8d87c7e/logs?stdout=1"
