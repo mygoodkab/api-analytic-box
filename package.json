@@ -19,6 +19,7 @@
     "dateformat": "^3.0.2",
     "del": "^3.0.0",
     "exec-sh": "^0.2.1",
+    "extract-zip": "^1.6.6",
     "fs": "0.0.1-security",
     "hapi": "^16.6.2",
     "hapi-auto-route": "^1.1.0",
@@ -40,7 +41,8 @@
     "sqlite3": "^3.1.13",
     "uniqid": "^4.1.1",
     "vision": "^4.1.1",
-    "ws": "^3.3.1"
+    "ws": "^3.3.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/boom": "^4.3.7",

@@ -172,7 +172,17 @@ export class Util {
 		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
 			path = '/vam-data/uploads/analytics-logo-images/';
 		}
+		return path
+	}
 
+	static analyticsPath(){
+		let path: any = process.cwd().split(pathSep.sep);
+		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics-logo-images" + pathSep.sep;
+		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
+			 path = '/vam-data/uploads/analytics/';
+           // path = '/vam_env/webconfig-api/analytics/';
+			
+		}
 		return path
 	}
 	static uploadImagePath() {

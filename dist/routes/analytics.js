@@ -8,6 +8,8 @@ const fs = require('fs');
 const pathSep = require('path');
 const del = require('del');
 const mkdirp = require('mkdirp');
+var extract = require('extract-zip');
+var YAML = require('yamljs');
 module.exports = [
     {
         method: 'GET',
@@ -67,7 +69,7 @@ module.exports = [
             validate: {
                 payload: {
                     name: Joi.string().required(),
-                    paramsmeter: Joi.array(),
+                    parameter: Joi.array(),
                     cmd: Joi.string(),
                     price: Joi.string(),
                     shortDetail: Joi.string(),
@@ -124,7 +126,7 @@ module.exports = [
                 payload: {
                     _id: Joi.string().required(),
                     name: Joi.string(),
-                    paramsmeter: Joi.array(),
+                    parameter: Joi.array(),
                     cmd: Joi.string(),
                     price: Joi.string(),
                     shortDetail: Joi.string(),
@@ -438,6 +440,111 @@ module.exports = [
                             });
                         });
                     });
+                });
+            }
+            else
+                return reply({
+                    statusCode: 400,
+                    msg: 'Bad Request',
+                    data: 'No file in payload'
+                });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/analytics/upload-profile',
+        config: {
+            tags: ['api'],
+            description: 'Upload images',
+            notes: 'Upload images',
+            validate: {
+                payload: {
+                    file: Joi.any().meta({ swaggerType: 'file' }).description('file upload'),
+                    refInfo: Joi.any(),
+                }
+            },
+            payload: {
+                parse: true,
+                output: 'stream'
+            },
+        },
+        handler: (request, reply) => {
+            let req = request;
+            let payload = req.payload;
+            if (payload.file) {
+                let filename = payload.file.hapi.filename.split('.');
+                let fileType = filename.splice(filename.length - 1, 1)[0];
+                filename = filename.join('.');
+                let storeName = util_1.Util.uniqid() + "." + fileType.toLowerCase();
+                let id = objectid();
+                let analyticsFileInfo = {
+                    name: filename,
+                    storeName: storeName,
+                    fileType: fileType,
+                    ts: new Date(),
+                    refInfo: payload.refInfo
+                };
+                let path = util_1.Util.analyticsPath() + filename + pathSep.sep;
+                mkdirp(path, function (err) {
+                    if (err) {
+                        console.log("can't crate folder : " + err);
+                        return reply({
+                            statusCode: 500,
+                            msg: 'Server error',
+                            data: 'can\'t crate folder'
+                        });
+                    }
+                    else {
+                        let fileUploadName = path + analyticsFileInfo.name + "." + fileType;
+                        let file = fs.createWriteStream(fileUploadName);
+                        console.log("Upload Analytics Profile ... path /analytics/upload-profile : " + path);
+                        file.on('error', (err) => {
+                            console.log("can't upload analytics profile : " + err);
+                            return reply({
+                                statusCode: 500,
+                                msg: 'Server error',
+                                data: 'can\'t upload profile'
+                            });
+                        });
+                        payload.file.pipe(file);
+                        payload.file.on('end', (err) => {
+                            var filestat = fs.statSync(fileUploadName);
+                            analyticsFileInfo.fileSize = filestat.size;
+                            analyticsFileInfo.createdata = new Date();
+                            console.log("upload profile successful");
+                            extract(fileUploadName, { dir: path }, function (err) {
+                                if (err) {
+                                    console.log(err);
+                                }
+                                else {
+                                    console.log("extract success  path : " + path);
+                                    YAML.load(path + filename + '/docker-compose.yaml', function (result) {
+                                        var analytics = {
+                                            id: id,
+                                            refInfo: payload.refInfo,
+                                            analyticsProfile: result.analytics,
+                                            analyticsFileInfo: analyticsFileInfo,
+                                        };
+                                        db.collection('analytics').insert(analytics).callback(function (err) {
+                                            if (err) {
+                                                return reply({
+                                                    statusCode: 500,
+                                                    message: "Can't insert analytics profile ",
+                                                });
+                                            }
+                                            else {
+                                                return reply({
+                                                    statusCode: 200,
+                                                    message: "OK",
+                                                    data: "Upload Analytics  Successful"
+                                                });
+                                            }
+                                        });
+                                    });
+                                }
+                            });
+                        });
+                    }
                 });
             }
             else
