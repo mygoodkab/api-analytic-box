@@ -381,46 +381,46 @@ module.exports = [
             });
         }
     },
-    {  //test
-        method: 'GET',
-        path: '/test/',
-        config: {
-            tags: ['api'],
-            description: 'Get all faceinfo Profile',
-            notes: 'Get all faceinfo Profile'
-        },
-        handler: (request, reply) => {
-            const path = Util.uploadImagePath() ;
-            const cmd = 'echo eslab | sudo -S rm -rf ../..' + path + 'a';
+    // {  //test
+    //     method: 'GET',
+    //     path: '/test/',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'Get all faceinfo Profile',
+    //         notes: 'Get all faceinfo Profile'
+    //     },
+    //     handler: (request, reply) => {
+    //         const path = Util.uploadImagePath() ;
+    //         const cmd = 'echo eslab | sudo -S rm -rf ../..' + path + 'a';
 
-            child_process.exec(cmd, function (error, stdout, stderr) {
-                if (stdout) {
-                    console.log("Delete Image Folder Successful" + stdout)
-                    return reply({
-                        statusCode: 200,
-                        message: "Delete Image Folder Successful",
-                        data: stdout
-                    })
-                } else if (stderr) {
-                    console.log("stderr" + stderr)
-                    return reply({
-                        statusCode: 400,
-                        message: "Std Error Can't Delete Image Folder",
-                        data: stderr
-                    })
-                } else {
-                    console.log("Error "+error)
-                    return reply({
-                        statusCode: 400,
-                        message: "Error Can't Delete Image Folder",
-                        data: error
-                    })
-                }
-            })
+    //         child_process.exec(cmd, function (error, stdout, stderr) {
+    //             if (stdout) {
+    //                 console.log("Delete Image Folder Successful" + stdout)
+    //                 return reply({
+    //                     statusCode: 200,
+    //                     message: "Delete Image Folder Successful",
+    //                     data: stdout
+    //                 })
+    //             } else if (stderr) {
+    //                 console.log("stderr" + stderr)
+    //                 return reply({
+    //                     statusCode: 400,
+    //                     message: "Std Error Can't Delete Image Folder",
+    //                     data: stderr
+    //                 })
+    //             } else {
+    //                 console.log("Error "+error)
+    //                 return reply({
+    //                     statusCode: 400,
+    //                     message: "Error Can't Delete Image Folder",
+    //                     data: error
+    //                 })
+    //             }
+    //         })
 
 
-        }
-    }
+    //     }
+    // }
     // { // Get image profile from refInfo
     //     method: 'GET',
     //     path: '/images/{refInfo}',

@@ -79,7 +79,7 @@ module.exports = [
                 payload._id = objectid();
                 payload.status = 'stop';
                 db.collection('analytics').find().make((builder) => {
-                    builder.where('_id', payload._refAnalyticsId);
+                    builder.where('id', payload._refAnalyticsId);
                     builder.callback((err, res) => {
                         if (res.length == 0) {
                             return reply({
@@ -101,10 +101,10 @@ module.exports = [
                                     else {
                                         payload.nickname = payload._id;
                                         let cameraInfo = res[0];
-                                        let command = "nvidia-docker run --rm -td --name '" + payload.nickname + "' -v ${HOME}/darknet-cropping-person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights";
+                                        let command = "nvidia-docker run --rm -td --name '" + payload.nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights";
                                         let doublecode = String.fromCharCode(34);
                                         payload.cmd = command + " '" + cameraInfo.rtsp + "''";
-                                        payload.type = analyticsInfo.name;
+                                        payload.type = analyticsInfo.analyticsProfile.name;
                                         payload.analyticsInfo = analyticsInfo;
                                         payload.cameraInfo = cameraInfo;
                                         db.collection('assignAnalytics').insert(request.payload);
