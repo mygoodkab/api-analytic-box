@@ -228,7 +228,7 @@ module.exports = [
                                     console.log("extract success  path : " + path);
                                     try {
                                         jsonfile.readFile(path + '/profile.json', function (err, result) {
-                                            var analyticsProfile = result;
+                                            var analyticsProfile = result.analytics;
                                             if (err) {
                                                 return reply({
                                                     statusCode: 400,
@@ -237,28 +237,75 @@ module.exports = [
                                                 });
                                             }
                                             else {
-                                                analytics = {
-                                                    id: id,
-                                                    refInfo: payload.refInfo,
-                                                    analyticsProfile: result.analytics,
-                                                    analyticsFileInfo: analyticsFileInfo,
-                                                };
-                                                console.log(analytics);
-                                                db.collection('analytics').insert(analytics).callback(function (err) {
-                                                    if (err) {
+                                                if (typeof analyticsProfile.name == "undefined" ||
+                                                    typeof analyticsProfile.cmd == "undefined" ||
+                                                    typeof analyticsProfile.price == "undefined" ||
+                                                    typeof analyticsProfile.shortDetail == "undefined" ||
+                                                    typeof analyticsProfile.fullDetail == "undefined" ||
+                                                    typeof analyticsProfile.level == "undefined" ||
+                                                    typeof analyticsProfile.framework == "undefined" ||
+                                                    typeof analyticsProfile.proccessingUnit == "undefined" ||
+                                                    typeof analyticsProfile.language == "undefined" ||
+                                                    typeof analyticsProfile.logo == "undefined" ||
+                                                    typeof analyticsProfile.screenshot == "undefined") {
+                                                    return reply({
+                                                        statusCode: 400,
+                                                        message: "Bad Request",
+                                                        data: "Invaild data please check your file JOSN"
+                                                    });
+                                                }
+                                                else {
+                                                    var fileimages = true;
+                                                    if (!fs.existsSync(path + analyticsProfile.logo)) {
+                                                        fileimages = false;
                                                         return reply({
-                                                            statusCode: 500,
-                                                            message: "Can't insert analytics profile ",
+                                                            statusCode: 400,
+                                                            message: "Bad Request",
+                                                            data: "JSON analytics.logo not match folder"
+                                                        });
+                                                    }
+                                                    else {
+                                                        for (var screenchot of analyticsProfile.screenshot) {
+                                                            if (!fs.existsSync(path + screenchot)) {
+                                                                fileimages = false;
+                                                                return reply({
+                                                                    statusCode: 400,
+                                                                    message: "Bad Request",
+                                                                    data: "JSON analytics.screenchot not match folder"
+                                                                });
+                                                            }
+                                                        }
+                                                    }
+                                                    if (fileimages) {
+                                                        analytics = {
+                                                            id: id,
+                                                            refInfo: payload.refInfo,
+                                                            analyticsProfile: result.analytics,
+                                                            analyticsFileInfo: analyticsFileInfo,
+                                                        };
+                                                        db.collection('analytics').insert(analytics).callback(function (err) {
+                                                            if (err) {
+                                                                return reply({
+                                                                    statusCode: 500,
+                                                                    message: "Can't insert analytics profile ",
+                                                                });
+                                                            }
+                                                            else {
+                                                                return reply({
+                                                                    statusCode: 200,
+                                                                    message: "OK",
+                                                                    data: "Upload Analytics Successful"
+                                                                });
+                                                            }
                                                         });
                                                     }
                                                     else {
                                                         return reply({
-                                                            statusCode: 200,
-                                                            message: "OK",
-                                                            data: "Upload Analytics Successful"
+                                                            statusCode: 400,
+                                                            message: "Bad Request",
                                                         });
                                                     }
-                                                });
+                                                }
                                             }
                                         });
                                     }

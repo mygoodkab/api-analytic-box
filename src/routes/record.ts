@@ -6,52 +6,12 @@ const execSh = require('exec-sh');
 const { exec } = require('child_process');
 const pathSep = require('path');
 const os = require('os');
-const fs = require('fs');
+const fs = require('fs');   
 var ip = require('ip');
 var dateFormat = require('dateformat');
 
 module.exports = [
-    { // Insert match-imaget  by Recog Analytics
-        method: 'POST',
-        path: '/record/match-images',
-        config: {
-            tags: ['api'],
-            description: 'insert match-image in image',
-            notes: 'insert match-image in image',
-            validate: {
-                payload: {
-                    face_id: Joi.string().required().description('id image'),
-                    match_register: Joi.string().required().description('name Matching images'),
-                    ipCamera: Joi.string(),
-                    analytics: Joi.string()
-                }
 
-            }
-        },
-        handler: (request, reply) => {
-            let payload = request.payload;
-            //payload.face_id = payload.face_id + ".png"
-            payload.timeStamp = new Date()
-            payload.date = dateFormat(new Date(), "d/mmmm/yyyy")
-            payload.time = dateFormat(new Date(), "H:MM:ss")
-            payload._id = objectid();
-            db.collection('faceInfo').find().make((builder: any) => {  // ค้นหาโปรไฟล์ของรูปที่ Register ก่อน
-                builder.where('refInfo', payload.match_register)
-                builder.callback((err, res) => {
-                    console.log(ip.address())
-                    payload.faceInfo = res[0]
-                    db.collection('record').insert(payload)
-                    return reply({
-                        statusCode: 200,
-                        msg: "OK",
-                        ip: ip.address(),
-
-                    })
-                })
-            })
-
-        }
-    },
     { // Get all record
         method: 'GET',
         path: '/record',
@@ -193,17 +153,107 @@ module.exports = [
             db.collection('faceInfo').find().make((builder: any) => {  // ค้นหาโปรไฟล์ของรูปที่ Register ก่อน
                 builder.where('refInfo', payload.match_register)
                 builder.callback((err, res) => {
-                    console.log(ip.address())
-                    payload.faceInfo = res[0]
-                    db.collection('record').insert(payload)
-                    return reply({
-                        statusCode: 200,
-                        msg: "OK",
-                        ip: ip.address()
-                    })
+                    if (res.length == 0) {
+                        return reply({
+                            statusCode: 400,
+                            msg: "refInfo not match",
+                        })
+                    } else {
+                        console.log(ip.address())
+                        payload.faceInfo = res[0]
+                        db.collection('record').insert(payload)
+                        return reply({
+                            statusCode: 200,
+                            msg: "OK",
+                            ip: ip.address()
+                        })
+                    }
                 })
             })
 
         }
-    }
+    },
+    { // Delete 
+        method: 'POST',
+        path: '/record/delete',
+        config: {
+            tags: ['api'],
+            description: 'Delete camera data',
+            notes: 'Delete  camera data',
+            validate: {
+                payload: {
+                    match_register: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            db.collection('record').remove().make((builder: any) => {
+                builder.where("match_register", request.payload.match_register)
+                builder.callback((err: any, res: any) => {
+                    if (err) {
+                        return reply({
+                            statusCode: 400,
+                            msg: "Bad Request",
+                            data: "Invaild match_register "
+                        })
+                    } else {
+                        return reply({
+                            statusCode: 200,
+                            msg: "OK",
+                            data: "Can Delete"
+                        })
+                    }
+                })
+            })
+
+        }
+    },
+    // { // Insert match-imaget  by Recog Analytics
+    //     method: 'POST',
+    //     path: '/record/match-images',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'insert match-image in image',
+    //         notes: 'insert match-image in image',
+    //         validate: {
+    //             payload: {
+    //                 face_id: Joi.string().required().description('id image'),
+    //                 match_register: Joi.string().required().description('name Matching images'),
+    //                 ipCamera: Joi.string(),
+    //                 analytics: Joi.string()
+    //             }
+
+    //         }
+    //     },
+    //     handler: (request, reply) => {
+    //         let payload = request.payload;
+    //         //payload.face_id = payload.face_id + ".png"
+    //         payload.timeStamp = new Date()
+    //         payload.date = dateFormat(new Date(), "d/mmmm/yyyy")
+    //         payload.time = dateFormat(new Date(), "H:MM:ss")
+    //         payload._id = objectid();
+    //         db.collection('faceInfo').find().make((builder: any) => {  // ค้นหาโปรไฟล์ของรูปที่ Register ก่อน
+    //             builder.where('refInfo', payload.match_register)
+    //             builder.callback((err, res) => {
+    //                 if (res.length == 0) {
+    //                     return reply({
+    //                         statusCode: 400,
+    //                         msg: "refInfo nbt match",
+    //                     })
+    //                 } else {
+    //                     console.log(ip.address())
+    //                     payload.faceInfo = res[0]
+    //                     db.collection('record').insert(payload)
+    //                     return reply({
+    //                         statusCode: 200,
+    //                         msg: "OK",
+    //                         ip: ip.address(),
+    //                     })
+    //                 }
+
+    //             })
+    //         })
+
+    //     }
+    // },
 ]
