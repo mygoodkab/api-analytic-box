@@ -26,20 +26,39 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            request.payload._nickname = "webconfig-api"
+            request.payload._nickname = "webconfig-dist"
             // request.payload._nickname = "optimistic_clarke"
             const options = {
                 socketPath: '/var/run/docker.sock',
                 path: '/v1.24/containers/' + request.payload._nickname + '/logs?stdout=1',
             };
             var url = 'http://unix:' + options.socketPath + ':' + options.path
-            requestPath.get(url, (err, res, body) => {
+            var option = {
+                url: url,
+                headers: {
+                    "Host": "http",
+                }
+            }
+
+            requestPath.get(option, (err, res, body) => {
+
                 if (err) {
                     console.log('Error : ', err)
+                    return reply({
+                        statusCode: 400,
+                        msg: "Can't get log ",
+                        data: body
+                    })
                 } else {
-                    console.log('Res : ', res)
-                    console.log('Body :', body)
+                    console.log("log docker " + body)
+                    return reply({
+                        statusCode: 200,
+                        msg: 'Get log docker success',
+                        data: body
+                    })
+
                 }
+
             })
 
 

@@ -160,18 +160,18 @@ module.exports = [
         }
     },
     {  // Upload Analytics Profile 
-       //=========================================================================================================
-       //                                                   STEP
-       //=========================================================================================================
-       // 1. Create folder to recive zip file 
-       // 2. Upload zip file to folder
-       // 3. Extract zip file 
-       // 4. Read json file 
-       // 5. Validate profile data 
-       // 6. Check logo image
-       // 7. Chcek screenshot images
-       //=========================================================================================================
-       method: 'POST',
+        //=========================================================================================================
+        //                                                   STEP
+        //=========================================================================================================
+        // 1. Create folder to recive zip file 
+        // 2. Upload zip file to folder
+        // 3. Extract zip file 
+        // 4. Read json file 
+        // 5. Validate profile data 
+        // 6. Check logo image
+        // 7. Chcek screenshot images
+        //=========================================================================================================
+        method: 'POST',
         path: '/analytics/upload-profile',
         config: {
             tags: ['api'],
@@ -295,7 +295,7 @@ module.exports = [
                                                             }
                                                         }
                                                     }
-                                                    if (fileimages) { 
+                                                    if (fileimages) {
                                                         analytics = {
                                                             id: id,
                                                             refInfo: payload.refInfo,
@@ -483,6 +483,40 @@ module.exports = [
             });
         }
     },
+    {
+        method: 'POST',
+        path: '/analytics/yaml',
+        config: {
+            tags: ['api'],
+            description: 'Read yaml file convert to json ',
+            notes: 'Read yaml file convert to json ',
+            validate: {
+                payload: {
+                    _foldername: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            var path = Util.analyticsPath() + request.payload._foldername + pathSep.sep
+            try {
+                YAML.load(path + 'docker-compose.yaml', (result) => {
+                    console.log("docker compose : " + result)
+                       return reply({
+                        statusCode: 200,
+                        message: "Read Yaml convent to Json success",
+                        data: result
+                    })
+                });
+            } catch (e) {
+                console.log("ERROR docker compose : " + e)
+                return reply({
+                 statusCode: 200,
+                 message: "Error",
+                 data: e
+             })
+            }
+        }
+    }
     // {  // Insert analytics  
     //         method: 'POST',
     //         path: '/analytics/insert',
@@ -704,68 +738,68 @@ module.exports = [
     //         })
     //     }
     // },
-    {  // GET image file 
-        method: 'GET',
-        path: '/analytics/get-images/{id}',
-        config: {
-            tags: ['api'],
-            description: 'Get image for UI',
-            notes: 'Get image ',
-            validate: {
-                params: {
-                    id: Joi.string().required()
-                }
-            }
-        },
-        handler: (request, reply) => {
-            db.collection('analytics-images').find().make((builder: any) => {
-                builder.where("_id", request.params.id)
-                builder.callback((err: any, res: any) => {
-                    if (res.length == 0) {
-                        return reply({
-                            statusCode: 404,
-                            message: "Bad Request",
-                            data: "Data not found"
-                        })
-                    } else {
-                        // if not image
-                        res = res[0]
-                        var contentType
-                        switch (res.fileType) {
-                            case "pdf":
-                                contentType = 'application/pdf';
-                                break;
-                            case "ppt":
-                                contentType = 'application/vnd.ms-powerpoint';
-                                break;
-                            case "pptx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.preplyentationml.preplyentation';
-                                break;
-                            case "xls":
-                                contentType = 'application/vnd.ms-excel';
-                                break;
-                            case "xlsx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                                break;
-                            case "doc":
-                                contentType = 'application/msword';
-                                break;
-                            case "docx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-                                break;
-                            case "csv":
-                                contentType = 'application/octet-stream';
-                                break;
-                        }
-                        let path: any = Util.rootlogoImagePath() + res.refInfo + pathSep.sep + res.storeName; // path + folder + \ + filename.png
-                        return reply.file(path,
-                            {
-                                filename: res.name + '.' + res.fileType,
-                                mode: 'inline'
-                            }).type(contentType)
-                    }
-                });
-            });
-        }
-    },
+    // {  // GET image file 
+    //     method: 'GET',
+    //     path: '/analytics/get-images/{id}',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'Get image for UI',
+    //         notes: 'Get image ',
+    //         validate: {
+    //             params: {
+    //                 id: Joi.string().required()
+    //             }
+    //         }
+    //     },
+    //     handler: (request, reply) => {
+    //         db.collection('analytics-images').find().make((builder: any) => {
+    //             builder.where("_id", request.params.id)
+    //             builder.callback((err: any, res: any) => {
+    //                 if (res.length == 0) {
+    //                     return reply({
+    //                         statusCode: 404,
+    //                         message: "Bad Request",
+    //                         data: "Data not found"
+    //                     })
+    //                 } else {
+    //                     // if not image
+    //                     res = res[0]
+    //                     var contentType
+    //                     switch (res.fileType) {
+    //                         case "pdf":
+    //                             contentType = 'application/pdf';
+    //                             break;
+    //                         case "ppt":
+    //                             contentType = 'application/vnd.ms-powerpoint';
+    //                             break;
+    //                         case "pptx":
+    //                             contentType = 'application/vnd.openxmlformats-officedocument.preplyentationml.preplyentation';
+    //                             break;
+    //                         case "xls":
+    //                             contentType = 'application/vnd.ms-excel';
+    //                             break;
+    //                         case "xlsx":
+    //                             contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    //                             break;
+    //                         case "doc":
+    //                             contentType = 'application/msword';
+    //                             break;
+    //                         case "docx":
+    //                             contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    //                             break;
+    //                         case "csv":
+    //                             contentType = 'application/octet-stream';
+    //                             break;
+    //                     }
+    //                     let path: any = Util.rootlogoImagePath() + res.refInfo + pathSep.sep + res.storeName; // path + folder + \ + filename.png
+    //                     return reply.file(path,
+    //                         {
+    //                             filename: res.name + '.' + res.fileType,
+    //                             mode: 'inline'
+    //                         }).type(contentType)
+    //                 }
+    //             });
+    //         });
+    //     }
+    // },
 ];

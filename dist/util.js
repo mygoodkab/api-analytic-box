@@ -147,7 +147,7 @@ class Util {
     }
     static analyticsPath() {
         let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics-logo-images" + pathSep.sep;
+        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics";
         if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
             path = '/vam-data/uploads/analytics/';
         }

@@ -465,67 +465,39 @@ module.exports = [
         }
     },
     {
-        method: 'GET',
-        path: '/analytics/get-images/{id}',
+        method: 'POST',
+        path: '/analytics/yaml',
         config: {
             tags: ['api'],
-            description: 'Get image for UI',
-            notes: 'Get image ',
+            description: 'Read yaml file convert to json ',
+            notes: 'Read yaml file convert to json ',
             validate: {
-                params: {
-                    id: Joi.string().required()
+                payload: {
+                    _foldername: Joi.string().required()
                 }
             }
         },
         handler: (request, reply) => {
-            db.collection('analytics-images').find().make((builder) => {
-                builder.where("_id", request.params.id);
-                builder.callback((err, res) => {
-                    if (res.length == 0) {
-                        return reply({
-                            statusCode: 404,
-                            message: "Bad Request",
-                            data: "Data not found"
-                        });
-                    }
-                    else {
-                        res = res[0];
-                        var contentType;
-                        switch (res.fileType) {
-                            case "pdf":
-                                contentType = 'application/pdf';
-                                break;
-                            case "ppt":
-                                contentType = 'application/vnd.ms-powerpoint';
-                                break;
-                            case "pptx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.preplyentationml.preplyentation';
-                                break;
-                            case "xls":
-                                contentType = 'application/vnd.ms-excel';
-                                break;
-                            case "xlsx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                                break;
-                            case "doc":
-                                contentType = 'application/msword';
-                                break;
-                            case "docx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-                                break;
-                            case "csv":
-                                contentType = 'application/octet-stream';
-                                break;
-                        }
-                        let path = util_1.Util.rootlogoImagePath() + res.refInfo + pathSep.sep + res.storeName;
-                        return reply.file(path, {
-                            filename: res.name + '.' + res.fileType,
-                            mode: 'inline'
-                        }).type(contentType);
-                    }
+            var path = util_1.Util.analyticsPath() + request.payload._foldername + pathSep.sep;
+            try {
+                YAML.load(path + 'docker-compose.yaml', (result) => {
+                    console.log("docker compose : " + result);
+                    return reply({
+                        statusCode: 200,
+                        message: "Read Yaml convent to Json success",
+                        data: result
+                    });
                 });
-            });
+            }
+            catch (e) {
+                console.log("ERROR docker compose : " + e);
+                return reply({
+                    statusCode: 200,
+                    message: "Error",
+                    data: e
+                });
+            }
         }
-    },
+    }
 ];
 //# sourceMappingURL=analytics.js.map
