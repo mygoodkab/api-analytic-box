@@ -483,7 +483,7 @@ module.exports = [
             });
         }
     },
-    {
+    { // Read yaml file convert to json
         method: 'POST',
         path: '/analytics/yaml',
         config: {
@@ -497,23 +497,53 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            var path = Util.analyticsPath() + request.payload._foldername + pathSep.sep
+            const path = Util.analyticsPath() + request.payload._foldername + pathSep.sep
             try {
                 YAML.load(path + 'docker-compose.yaml', (result) => {
-                    console.log("docker compose : " + result)
-                       return reply({
-                        statusCode: 200,
-                        message: "Read Yaml convent to Json success",
-                        data: result
-                    })
+
+                    // result.services[a[0]].environment
+                    if (result != null) {
+                        console.log("docker compose : ", result.services)
+                        if (typeof result.services != 'undefined') {
+                            const key = Object.keys(result.services) // json docker-compose  result.services
+                        
+                            if (typeof result.services[key[0]].environment != 'undefined') { // json docker-compose  result.services.*.environment
+                                return reply({
+                                    statusCode: 200,
+                                    message: "Read Yaml convent to Json success",
+                                    data: result.services[key[0]].environment
+                                })
+                            } else {
+                                return reply({
+                                    statusCode: 400,
+                                    message: "Bad request",
+                                    data: "Can't find  result.services.*.environment in docker-compose.yaml"
+                                })
+                            }
+
+                        } else {
+                            return reply({
+                                statusCode: 400,
+                                message: "Bad request",
+                                data: "Can't find result.services in docker-compose.yaml"
+                            })
+                        }
+
+                    } else {
+                        return reply({
+                            statusCode: 400,
+                            message: "Bad request",
+                            data: "Can't find folder " + request.payload._foldername
+                        })
+                    }
                 });
             } catch (e) {
                 console.log("ERROR docker compose : " + e)
                 return reply({
-                 statusCode: 200,
-                 message: "Error",
-                 data: e
-             })
+                    statusCode: 200,
+                    message: "Error can't not find docker-compose.yaml",
+                    data: e
+                })
             }
         }
     }
