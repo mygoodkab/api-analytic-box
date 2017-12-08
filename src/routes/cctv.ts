@@ -160,6 +160,12 @@ module.exports = [
         }
     },
     {  // Upload csv convert to json and save to db 
+       //===================================STEP==================================================
+       // 1. check folder cctv if not exist ,this will create new one
+       // 2. read fileInfo
+       // 3. convert csv to json  (result is array)
+       // 4. insert to DB  (by loop data in array) 
+       //=========================================================================================
         method: 'POST',
         path: '/cctv/upload',
         config: {
@@ -204,76 +210,82 @@ module.exports = [
                         let fileType = filename.splice(filename.length - 1, 1)[0];
                         if (fileType != 'csv') {
                             badRequest("Invalid file type")
-                        }
-                        filename = filename.join('.')
-                        let storeName = Util.uniqid() + "." + fileType.toLowerCase()
-                        // create imageInfo for insert info db
-                        let id = objectid()
-                        let fileInfo: any = {
-                            id: id,
-                            name: filename,
-                            storeName: storeName,
-                            fileType: fileType,
-                            ts: new Date(),
-                        }
-                        // create file Stream
-                        const pathCSV = path + fileInfo.name + "." + fileType.toLowerCase()
-                        let file = fs.createWriteStream(pathCSV);
+                        } else {
+                            filename = filename.join('.')
+                            let storeName = Util.uniqid() + "." + fileType.toLowerCase()
+                            // create imageInfo for insert info db
+                            let id = objectid()
+                            let fileInfo: any = {
+                                id: id,
+                                name: filename,
+                                storeName: storeName,
+                                fileType: fileType,
+                                ts: new Date(),
+                            }
+                            // create file Stream
+                            const pathCSV = path + fileInfo.name + "." + fileType.toLowerCase()
+                            let file = fs.createWriteStream(pathCSV);
 
-                        file.on('error', (err: any) => {
-                            serverError("can't upload file")
-                        })
-                        // pass payload file to file stream for write info directory
-                        payload.file.pipe(file);
-                        payload.file.on('end', (err: any) => {
-                            const filestat = fs.statSync(pathCSV);
-                            fileInfo.fileSize = filestat.size;
-                            fileInfo.createdata = new Date();
-                            let csvtojson: any = [];
-                            csv()
-                                .fromFile(pathCSV)
-                                .on('json', (jsonObj) => {
-                                    if (typeof jsonObj != 'undefined') {
-                                        console.log("convert csv to json : ", jsonObj)
-                                        csvtojson.push(jsonObj)
-                                        //csvtojson.push(jsonObj)
-                                    }
-                                })
-                                .on('done', (error) => {
-                                    let isErr = false;
-                                    console.log("end : ", csvtojson)
-                                    let i = 1;
-                                      // loop insert data 
-                                    for (let data of csvtojson) {
-                                        db.collection('cctv').insert(data).callback((err) => {
-                                            if (err) {
-                                                isErr = true
-                                            }
-                                        })
-                                        //ถ้า loop จนเสร็จแล้ว
-                                        if (i == csvtojson.length) {
-                                            insertData(isErr)
+                            file.on('error', (err: any) => {
+                                serverError("can't upload file")
+                            })
+                            // pass payload file to file stream for write info directory
+                            payload.file.pipe(file);
+                            payload.file.on('end', (err: any) => {
+                                const filestat = fs.statSync(pathCSV);
+                                fileInfo.fileSize = filestat.size;
+                                fileInfo.createdata = new Date();
+                                let csvtojson: any = [];
+                                csv()
+                                    .fromFile(pathCSV)
+                                    .on('json', (jsonObj) => {
+                                        if (typeof jsonObj != 'undefined') {
+                                            console.log("convert csv to json : ", jsonObj)
+                                            csvtojson.push(jsonObj)
+                                            //csvtojson.push(jsonObj)
                                         }
-                                        i++;
-                                    }
-                                     // ต้องมา return แบบนี้เพราะ วนลูบแล้ว reply ได้รอบเดียว 
-                                    function insertData(isErr) {
-                                        if (isErr) {
-                                            serverError("Can't insert data")
+                                    })
+                                    .on('done', (error) => {
+                                        let isErr = false;
+                                        console.log("end : ", csvtojson)
+                                        let i = 1;
+                                        // loop insert data 
+                                        if (csvtojson.length == 0) {
+                                            badRequest("No data in file.csv")
                                         } else {
-                                            return reply({
-                                                statusCode: 200,
-                                                msg: 'OK',
-                                                data: csvtojson
-                                            })
+                                            for (let data of csvtojson) {
+                                                db.collection('cctv').insert(data).callback((err) => {
+                                                    if (err) {
+                                                        isErr = true
+                                                    }
+                                                })
+                                                //ถ้า loop จนเสร็จแล้ว
+                                                if (i == csvtojson.length) {
+                                                    insertData(isErr)
+                                                }
+                                                i++;
+                                            }
                                         }
-                                    }
+                                        // ต้องมา return แบบนี้เพราะ วนลูบแล้ว reply ได้รอบเดียว 
+                                        function insertData(isErr) {
+                                            if (isErr) {
+                                                serverError("Can't insert data")
+                                            } else {
+                                                return reply({
+                                                    statusCode: 200,
+                                                    msg: 'OK',
+                                                    data: csvtojson
+                                                })
+                                            }
+                                        }
 
-                                })
-                                .on('error', (error) => {
-                                    badRequest(error)
-                                })
-                        })
+                                    })
+                                    .on('error', (error) => {
+                                        badRequest(error)
+                                    })
+                            })
+                        }
+
                     }
 
                 })
