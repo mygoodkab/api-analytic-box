@@ -482,47 +482,56 @@ module.exports = [
             try {
                 YAML.load(path + 'docker-compose.yaml', (result) => {
                     if (result != null) {
-                        console.log("docker compose : ", result.services);
                         if (typeof result.services != 'undefined') {
-                            const key = Object.keys(result.services);
-                            if (typeof result.services[key[0]].environment != 'undefined') {
+                            let key = Object.keys(result.services);
+                            let environment = result.services[key[0]].environment;
+                            if (typeof environment != 'undefined') {
+                                let inputSchema = {};
+                                inputSchema.properties = [];
+                                for (let data of environment) {
+                                    let isTrue = true;
+                                    let properties = "";
+                                    let str = data.split("=");
+                                    if (str[1].toLowerCase() == 'true' || str[1].toLowerCase() == 'false') {
+                                        if (str[1].toLowerCase() == 'false') {
+                                            isTrue = false;
+                                        }
+                                        properties = '{"' + str[0] + '":{"type":"' + typeof isTrue + '","default":"' + isTrue + '","description":"' + str[0] + '"}}';
+                                    }
+                                    else {
+                                        properties = '{"' + str[0] + '":{"type":"' + typeof str[1] + '","default":"' + str[1] + '","description":"' + str[0] + '"}}';
+                                    }
+                                    console.log("convert to inputSchema : ", JSON.parse(properties));
+                                    inputSchema.properties.push(JSON.parse(properties));
+                                }
                                 return reply({
                                     statusCode: 200,
                                     message: "Read Yaml convent to Json success",
-                                    data: result.services[key[0]].environment
+                                    data: inputSchema
                                 });
                             }
                             else {
-                                return reply({
-                                    statusCode: 400,
-                                    message: "Bad request",
-                                    data: "Can't find  result.services.*.environment in docker-compose.yaml"
-                                });
+                                badRequest("Can't find  result.services.*.environment in docker-compose.yaml");
                             }
                         }
                         else {
-                            return reply({
-                                statusCode: 400,
-                                message: "Bad request",
-                                data: "Can't find result.services in docker-compose.yaml"
-                            });
+                            badRequest("Can't find result.services in docker-compose.yaml");
                         }
                     }
                     else {
-                        return reply({
-                            statusCode: 400,
-                            message: "Bad request",
-                            data: "Can't find folder " + request.payload._foldername
-                        });
+                        badRequest("Can't find folder " + request.payload._foldername);
                     }
                 });
             }
             catch (e) {
                 console.log("ERROR docker compose : " + e);
+                badRequest(e);
+            }
+            function badRequest(msg) {
                 return reply({
-                    statusCode: 200,
+                    statusCode: 400,
                     message: "Error can't not find docker-compose.yaml",
-                    data: e
+                    data: msg
                 });
             }
         }

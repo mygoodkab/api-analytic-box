@@ -503,46 +503,56 @@ module.exports = [
 
                     // result.services[a[0]].environment
                     if (result != null) {
-                        console.log("docker compose : ", result.services)
+                        // console.log("docker-compose.yaml: ", result.services)
                         if (typeof result.services != 'undefined') {
-                            const key = Object.keys(result.services) // json docker-compose  result.services
-                        
-                            if (typeof result.services[key[0]].environment != 'undefined') { // json docker-compose  result.services.*.environment
+                            let key = Object.keys(result.services) // json docker-compose  result.services
+                            let environment = result.services[key[0]].environment;
+
+                            if (typeof environment != 'undefined') { // json docker-compose  result.services.*.environment
+                                let inputSchema: any = {};
+                                inputSchema.properties = []
+                                for (let data of environment) {
+                                    let isTrue = true;
+                                    let properties: any = ""
+                                    let str = data.split("=")
+                                    // change to be inputSchema 
+                                    if (str[1].toLowerCase() == 'true' || str[1].toLowerCase() == 'false') { //ถ้าเป็นประเภทของ boolean ต้อง check แบบนี้เพราะ เราจะได้แค่ string อย่างเดียว
+                                        if (str[1].toLowerCase() == 'false') {
+                                            isTrue = false
+                                        } 
+                                        properties = '{"'+ str[0] +'":{"type":"' + typeof isTrue + '","default":"' + isTrue + '","description":"' + str[0] + '"}}'
+                                    } else {
+                                        properties = '{"'+ str[0] +'":{"type":"' + typeof str[1] + '","default":"' + str[1] + '","description":"' + str[0] + '"}}'
+                                    }
+                                    console.log("convert to inputSchema : ",JSON.parse(properties))
+                                    inputSchema.properties.push(JSON.parse(properties))
+                                }
                                 return reply({
                                     statusCode: 200,
                                     message: "Read Yaml convent to Json success",
-                                    data: result.services[key[0]].environment
+                                    data: inputSchema
                                 })
                             } else {
-                                return reply({
-                                    statusCode: 400,
-                                    message: "Bad request",
-                                    data: "Can't find  result.services.*.environment in docker-compose.yaml"
-                                })
+                                badRequest("Can't find  result.services.*.environment in docker-compose.yaml")
                             }
 
                         } else {
-                            return reply({
-                                statusCode: 400,
-                                message: "Bad request",
-                                data: "Can't find result.services in docker-compose.yaml"
-                            })
+                            badRequest("Can't find result.services in docker-compose.yaml")
                         }
 
                     } else {
-                        return reply({
-                            statusCode: 400,
-                            message: "Bad request",
-                            data: "Can't find folder " + request.payload._foldername
-                        })
+                        badRequest("Can't find folder " + request.payload._foldername)
                     }
                 });
             } catch (e) {
                 console.log("ERROR docker compose : " + e)
+                badRequest(e)
+            }
+            function badRequest(msg) {
                 return reply({
-                    statusCode: 200,
+                    statusCode: 400,
                     message: "Error can't not find docker-compose.yaml",
-                    data: e
+                    data: msg
                 })
             }
         }

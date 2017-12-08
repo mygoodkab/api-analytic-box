@@ -160,12 +160,12 @@ module.exports = [
         }
     },
     {  // Upload csv convert to json and save to db 
-       //===================================STEP==================================================
-       // 1. check folder cctv if not exist ,this will create new one
-       // 2. read fileInfo
-       // 3. convert csv to json  (result is array)
-       // 4. insert to DB  (by loop data in array) 
-       //=========================================================================================
+        //===================================STEP==================================================
+        // 1. check folder cctv if not exist ,this will create new one
+        // 2. read fileInfo
+        // 3. convert csv to json  (result is array)
+        // 4. insert to DB  (by loop data in array) 
+        //=========================================================================================
         method: 'POST',
         path: '/cctv/upload',
         config: {
@@ -253,18 +253,24 @@ module.exports = [
                                         if (csvtojson.length == 0) {
                                             badRequest("No data in file.csv")
                                         } else {
-                                            for (let data of csvtojson) {
-                                                db.collection('cctv').insert(data).callback((err) => {
-                                                    if (err) {
-                                                        isErr = true
+                                            // check ตัวแปร ว่าตรงตามกำหนดไหม
+                                            if (typeof csvtojson[0].Camera_Brand == 'undefined' || typeof csvtojson[0].RTSP == 'undefined') {
+                                                badRequest("Format data not match") 
+                                            } else {
+                                                for (let data of csvtojson) {
+                                                    db.collection('cctv').insert(data).callback((err) => {
+                                                        if (err) {
+                                                            isErr = true
+                                                        }
+                                                    })
+                                                    //ถ้า loop จนเสร็จแล้ว
+                                                    if (i == csvtojson.length) {
+                                                        insertData(isErr)
                                                     }
-                                                })
-                                                //ถ้า loop จนเสร็จแล้ว
-                                                if (i == csvtojson.length) {
-                                                    insertData(isErr)
+                                                    i++;
                                                 }
-                                                i++;
                                             }
+
                                         }
                                         // ต้องมา return แบบนี้เพราะ วนลูบแล้ว reply ได้รอบเดียว 
                                         function insertData(isErr) {

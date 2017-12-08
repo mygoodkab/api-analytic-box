@@ -238,16 +238,21 @@ module.exports = [
                                         badRequest("No data in file.csv");
                                     }
                                     else {
-                                        for (let data of csvtojson) {
-                                            db.collection('cctv').insert(data).callback((err) => {
-                                                if (err) {
-                                                    isErr = true;
+                                        if (typeof csvtojson[0].Camera_Brand == 'undefined' || typeof csvtojson[0].RTSP == 'undefined') {
+                                            badRequest("Format data not match");
+                                        }
+                                        else {
+                                            for (let data of csvtojson) {
+                                                db.collection('cctv').insert(data).callback((err) => {
+                                                    if (err) {
+                                                        isErr = true;
+                                                    }
+                                                });
+                                                if (i == csvtojson.length) {
+                                                    insertData(isErr);
                                                 }
-                                            });
-                                            if (i == csvtojson.length) {
-                                                insertData(isErr);
+                                                i++;
                                             }
-                                            i++;
                                         }
                                     }
                                     function insertData(isErr) {
