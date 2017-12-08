@@ -130,18 +130,11 @@ class Util {
         }
         return path;
     }
-    static logoImagePath() {
-        let path = '.\\uploads\\analytics-logo-images\\';
-        if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/analytics-logo-images/';
-        }
-        return path;
-    }
-    static rootlogoImagePath() {
+    static csvPath() {
         let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics-logo-images" + pathSep.sep;
+        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics";
         if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/analytics-logo-images/';
+            path = '/vam-data/uploads/cctv/';
         }
         return path;
     }

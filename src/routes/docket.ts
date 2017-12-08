@@ -50,7 +50,7 @@ module.exports = [
                         data: body
                     })
                 } else {
-                    console.log("log docker " + body)
+                  //  console.log("log docker " + body)
                     return reply({
                         statusCode: 200,
                         msg: 'Get log docker success',

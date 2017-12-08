@@ -156,37 +156,27 @@ export class Util {
 		return path
 	}
 
-	static logoImagePath() { 
-		let path: any = '.\\uploads\\analytics-logo-images\\'
-
-		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = '/vam-data/uploads/analytics-logo-images/';
-		}
-
-		return path
-	}
-
-	static rootlogoImagePath() {
+	static csvPath(){
 		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics-logo-images" + pathSep.sep;
+		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics" 
 		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = '/vam-data/uploads/analytics-logo-images/';
+			 path = '/vam-data/uploads/cctv/';
+           // path = '/vam_env/webconfig-api/analytics/';			
 		}
 		return path
 	}
-
+  
 	static analyticsPath(){
 		let path: any = process.cwd().split(pathSep.sep);
 		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics" 
 		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
 			 path = '/vam-data/uploads/analytics/';
-           // path = '/vam_env/webconfig-api/analytics/';
-			
+           // path = '/vam_env/webconfig-api/analytics/';			
 		}
 		return path
 	}
-	static uploadImagePath() {
 
+	static uploadImagePath() {
 		//pathSep.sep is check os that use / or \
 		let path: any = process.cwd().split(pathSep.sep);
 		//	path.splice(path.indexOf('src'), path.length - path.indexOf('src'));
