@@ -147,20 +147,22 @@ export class Util {
 		return path;
 	}
 
-	static imageBodySkeletonPath() {
-		let path: any = "\\home\\embedded\\ESLab\\Algorithm-Repo\\Algorithm-Repo-closeFigure\\caffe-skeleton\\"
-		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = "/vam-data/uploads/skeleton-image/";
-		}
-		
-		return path
-	}
 
 	static csvPath(){
 		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics" 
+		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "cctv" 
 		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
 			 path = '/vam-data/uploads/cctv/';
+           // path = '/vam_env/webconfig-api/analytics/';			
+		}
+		return path
+	}
+
+	static dockerAnalyticsCameraPath(){
+		let path: any = process.cwd().split(pathSep.sep);
+		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "docker-analytics-camera" 
+		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
+			 path = '/vam-data/uploads/docker-analytics-camera/';
            // path = '/vam_env/webconfig-api/analytics/';			
 		}
 		return path

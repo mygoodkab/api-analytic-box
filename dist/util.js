@@ -123,18 +123,19 @@ class Util {
         path = path.join(pathSep.sep) + pathSep.sep + "JSMpeg" + pathSep.sep;
         return path;
     }
-    static imageBodySkeletonPath() {
-        let path = "\\home\\embedded\\ESLab\\Algorithm-Repo\\Algorithm-Repo-closeFigure\\caffe-skeleton\\";
+    static csvPath() {
+        let path = process.cwd().split(pathSep.sep);
+        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "cctv";
         if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = "/vam-data/uploads/skeleton-image/";
+            path = '/vam-data/uploads/cctv/';
         }
         return path;
     }
-    static csvPath() {
+    static dockerAnalyticsCameraPath() {
         let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics";
+        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "docker-analytics-camera";
         if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/cctv/';
+            path = '/vam-data/uploads/docker-analytics-camera/';
         }
         return path;
     }

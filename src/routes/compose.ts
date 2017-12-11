@@ -10,7 +10,7 @@ const Joi = require('joi')
 module.exports = [
     {
         method: 'GET',
-        path: '/crontab/',
+        path: '/compose/',
         config: {
             tags: ['api'],
             description: 'Get analytic offline in camera to start ',
@@ -19,20 +19,54 @@ module.exports = [
         handler: (request, reply) => {
             db.collection('assignAnalytics').find().make((builder: any) => {
                 builder.callback((err: any, res: any) => {
-                    return reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: res
-                    })
+                    if (res) {
+                        let i = 1;
+                        let analytic: any = [];
+                        for (let data of res) {
+                            let arrData = {
+                                id: data.id,
+                                idCamera: data._refCameraId,
+                                idAnalytics: data._refAnalyticsId,
+                                status: data.status,
+                                dockerNickname: data.nickname,
+                                cmd: data.cmd
+                            }
+                            analytic.push(arrData)
+                            if (i == res.length) {
+                                success(analytic)
+                            }
+                            i++;
+                        }
+
+                    } else {
+                        badrequest("no Data in payload")
+                    }
+
+                    function success(data) {
+                        return reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: data
+                        })
+                    }
+
+                    function badrequest(msg) {
+                        return reply({
+                            statusCode: 400,
+                            message: "Bad Request",
+                            data: msg
+                        })
+                    }
+
                 });
             });
 
 
         }
     },
-    {  
+    {
         method: 'GET',
-        path: '/crontab/errstop/{id}',
+        path: '/compose/errstop/{id}',
         config: {
             tags: ['api'],
             description: 'Get analytic in camera to start ',
@@ -45,21 +79,21 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('assignAnalytics').modify({status: "start"}).make((builder: any) => {
-                builder.where('_id',request.params.id)
+            db.collection('assignAnalytics').modify({ status: "start" }).make((builder: any) => {
+                builder.where('_id', request.params.id)
                 builder.callback((err: any, res: any) => {
                     return reply({
                         statusCode: 200,
                         message: "OK",
- 
+
                     })
                 });
             });
         }
     },
-    { 
+    {
         method: 'GET',
-        path: '/crontab/errstart/{id}',
+        path: '/compose/errstart/{id}',
         config: {
             tags: ['api'],
             description: 'Get analytic in camera to start ',
@@ -72,13 +106,13 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('assignAnalytics').modify({status: "stop"}).make((builder: any) => {
-                builder.where('_id',request.params.id)
+            db.collection('assignAnalytics').modify({ status: "stop" }).make((builder: any) => {
+                builder.where('_id', request.params.id)
                 builder.callback((err: any, res: any) => {
                     return reply({
                         statusCode: 200,
                         message: "OK",
- 
+
                     })
                 });
             });

@@ -10,11 +10,15 @@
 //    type            :  join from Analytics
 //============================================================================================================
 import * as db from '../nosql-util';
+import { Util } from '../util';
 const objectid = require('objectid');
 const Joi = require('joi')
 const jsonfile = require('jsonfile')
+const YAML = require('yamljs');
 const child_process = require('child_process');
-
+const pathSep = require('path');
+const writeyaml = require('write-yaml');
+const fs = require('fs')
 module.exports = [
     { // Get all assignAnalytics
         method: 'GET',
@@ -80,75 +84,134 @@ module.exports = [
                 payload: {
                     _refCameraId: Joi.string().required(),
                     _refAnalyticsId: Joi.string().required(),
+                    environment: Joi.array().required(),
                 }
             }
         },
         handler: function (request, reply) {
             let payload = request.payload;
             if (payload) {
+
                 payload._id = objectid();
+                let nickname = payload._id;
                 payload.status = 'stop';
                 db.collection('analytics').find().make((builder: any) => {
                     builder.where('id', payload._refAnalyticsId)
                     builder.callback((err: any, res: any) => {
                         if (res.length == 0) {
-                            return reply({
-                                statusCode: 500,
-                                message: "Have no Analytics data ",
-                            })
+                            badRequest("Have no Analytics data ")
                         } else {
-                            let analyticsInfo = res[0];
-                            db.collection('camera').find().make((builder: any) => {
-                                builder.where('_id', payload._refCameraId)
-                                builder.callback((err: any, res: any) => {
-                                    if (res.length == 0) {
-                                        return reply({
-                                            statusCode: 500,
-                                            message: "Have no camera data ",
-                                        })
-                                    } else {
-                                        payload.nickname = payload._id
 
-                                        let cameraInfo = res[0];
-                                        //let command = "nvidia-docker run --rm -td --name \"" + payload.nickname + "\" --net=host --env=\"DISPLAY\" --volume=\"$HOME/.Xauthority:/root/.Xauthority:rw\" -v ${PWD}:/home/dev/host embedded-performance-server.local:5000/dev-cuda-image:8.0-cudnn5-opencv-devel-ubuntu16.04 "
-                                        let command = "nvidia-docker run --rm -td --name '" + payload.nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights"
-                                        //payload.cmd = command + analyticsInfo.cmd + " '" + cameraInfo.rtsp + "'\"";
-                                        let doublecode = String.fromCharCode(34);
-                                        payload.cmd = command + " '" + cameraInfo.rtsp + "''"  ;
-                                        payload.type = analyticsInfo.analyticsProfile.name;
-                                        payload.analyticsInfo = analyticsInfo;
-                                        payload.cameraInfo = cameraInfo
-                                        db.collection('assignAnalytics').insert(request.payload)
-                                        db.collection('assignAnalytics').modify({ status: 'stop' }).make((builder: any) => {
-                                            builder.where("_refCameraId", payload._refCameraId)
-                                            builder.where("status", "start")
-                                            builder.callback((err: any, res: any) => {
-                                                if (err || res.length == 0) {
-                                                    return reply({
-                                                        statusCode: 400,
-                                                        msg: 'have no assignAnalytics data to stop docker',
-                                                    })
-                                                } else {
-                                                    return reply({
-                                                        statusCode: 200,
-                                                        msg: 'stop docker and updata status success',
-                                                    })
+                            // check file docker-analytics-camera if notxist
+                            const dockerAnalyticsCameraPath = Util.dockerAnalyticsCameraPath()
+                            fs.stat(dockerAnalyticsCameraPath, function (err, stats) {
+                                if (err) { // if file  docker-analytics-camera not exist
+                                    fs.mkdir(Util.uploadRootPath() + "docker-analytics-camera", (err) => {
+                                        if (err) {
+                                            serverError("can't create folder docker-analytics-camera \n" + err)
+                                        }
 
-                                                }
-                                            })
-                                        })
+                                        existFile()
+                                    })
+                                } else { // if file docker-analytics-camera exist
 
-                                    }
-                                })
+                                    existFile()
+                                }
+                                function existFile() {
+                                    // read file yaml => change environment => generate docker-compose.yaml
+                                    const ReadYamlPath = Util.analyticsPath() + res[0].analyticsFileInfo.name + pathSep.sep
+                                    // read file yaml 
+                                    YAML.load(ReadYamlPath + 'docker-compose.yaml', (result) => {
+                                        if (result != null) {
+                                            console.log("Read YAML file from " + ReadYamlPath)
+                                            if (typeof result.services != 'undefined') {
+                                                let key = Object.keys(result.services) // json docker-compose  result.services
+                                                // change environment 
+                                                result.services[key[0]].environment = request.payload.environment;
+                                                // create folder by nickname docker 
+                                                fs.mkdir(Util.dockerAnalyticsCameraPath() + nickname, (err) => {
+                                                    if (err) {
+                                                        console.log("can't create folder : \n" + err)
+                                                        console.log(dockerAnalyticsCameraPath + nickname)
+                                                        serverError("can't create folder : \n" + err)
+                                                    } else {
+                                                        //write file docker-compose.yml
+                                                        writeyaml(dockerAnalyticsCameraPath + nickname + pathSep.sep + 'docker-compose.yml', result, function (err) {
+                                                            if (err) {
+                                                                badRequest(err)
+                                                            } else {
+                                                                console.log('create folder and docker-compose.yaml file')
+                                                                let analyticsInfo = res[0];
+                                                                db.collection('camera').find().make((builder: any) => {
+                                                                    builder.where('_id', payload._refCameraId)
+                                                                    builder.callback((err: any, res: any) => {
+                                                                        if (res.length == 0) {
+                                                                            badRequest("Have no camera data")
+                                                                        } else {
+                                                                            payload.nickname = nickname
+                                                                            let cameraInfo = res[0];
+                                                                            //let command = "nvidia-docker run --rm -td --name \"" + payload.nickname + "\" --net=host --env=\"DISPLAY\" --volume=\"$HOME/.Xauthority:/root/.Xauthority:rw\" -v ${PWD}:/home/dev/host embedded-performance-server.local:5000/dev-cuda-image:8.0-cudnn5-opencv-devel-ubuntu16.04 "
+                                                                            let command = "nvidia-docker run --rm -td --name '" + payload.nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights"
+                                                                            //payload.cmd = command + analyticsInfo.cmd + " '" + cameraInfo.rtsp + "'\"";
+                                                                            payload.cmd = command + " '" + cameraInfo.rtsp + "''";
+                                                                            payload.type = analyticsInfo.analyticsProfile.name;
+                                                                            payload.analyticsInfo = analyticsInfo;
+                                                                            payload.cameraInfo = cameraInfo
+                                                                            db.collection('assignAnalytics').insert(request.payload)
+                                                                            db.collection('assignAnalytics').modify({ status: 'stop' }).make((builder: any) => {
+                                                                                builder.where("_refCameraId", payload._refCameraId)
+                                                                                builder.where("status", "start")
+                                                                                builder.callback((err: any, res: any) => {
+                                                                                    if (err || res.length == 0) {
+                                                                                        badRequest('have no assignAnalytics data to stop docker')
+                                                                                    } else {
+                                                                                        return reply({
+                                                                                            statusCode: 200,
+                                                                                            msg: 'stop docker and updata status success',
+                                                                                        })
+                                                                                    }
+                                                                                })
+                                                                            })
+                                                                        }
+                                                                    })
+                                                                })
+                                                            }
+                                                        });
+                                                    }
+
+                                                })
+
+                                            } else {
+                                                badRequest("YAML file can't find 'service'")
+                                            }
+                                        } else {
+                                            badRequest("Can't Read YAML file \n path : " + ReadYamlPath)
+                                        }
+                                    })
+                                }
                             })
                         }
                     });
                 });
-            } else return reply({
-                statusCode: 400,
-                message: "Bad Request",
-                data: "No payload"
-            })
+            } else {
+                badRequest("No data in payload")
+            }
+
+            function badRequest(msg) {
+                return reply({
+                    statusCode: 400,
+                    message: "Bad Request",
+                    data: msg
+                })
+            }
+
+            function serverError(msg) {
+                return reply({
+                    statusCode: 500,
+                    message: "Bad Request",
+                    data: msg
+                })
+            }
         }
 
     },
