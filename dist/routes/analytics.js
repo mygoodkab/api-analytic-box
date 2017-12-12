@@ -171,6 +171,7 @@ module.exports = [
                 }
             },
             payload: {
+                maxBytes: 500000000,
                 parse: true,
                 output: 'stream'
             },
@@ -229,12 +230,8 @@ module.exports = [
                                     try {
                                         jsonfile.readFile(path + '/profile.json', function (err, result) {
                                             var analyticsProfile = result.analytics;
-                                            if (err) {
-                                                return reply({
-                                                    statusCode: 400,
-                                                    message: "Bad Request",
-                                                    data: "Can't read or find JSON file"
-                                                });
+                                            if (err || !result) {
+                                                badRequest("Can't read or find JSON file");
                                             }
                                             else {
                                                 if (typeof analyticsProfile.name == "undefined" ||
@@ -247,33 +244,25 @@ module.exports = [
                                                     typeof analyticsProfile.proccessingUnit == "undefined" ||
                                                     typeof analyticsProfile.language == "undefined" ||
                                                     typeof analyticsProfile.logo == "undefined" ||
-                                                    typeof analyticsProfile.screenshot == "undefined") {
-                                                    return reply({
-                                                        statusCode: 400,
-                                                        message: "Bad Request",
-                                                        data: "Invaild data please check your file JOSN"
-                                                    });
+                                                    typeof analyticsProfile.screenshort == "undefined") {
+                                                    badRequest("Invaild data please check your file JOSN");
                                                 }
                                                 else {
                                                     var fileimages = true;
                                                     if (!fs.existsSync(path + analyticsProfile.logo)) {
                                                         fileimages = false;
-                                                        return reply({
-                                                            statusCode: 400,
-                                                            message: "Bad Request",
-                                                            data: "JSON analytics.logo not match folder"
-                                                        });
                                                     }
                                                     else {
-                                                        for (var screenchot of analyticsProfile.screenshot) {
-                                                            if (!fs.existsSync(path + screenchot)) {
-                                                                fileimages = false;
-                                                                return reply({
-                                                                    statusCode: 400,
-                                                                    message: "Bad Request",
-                                                                    data: "JSON analytics.screenchot not match folder"
-                                                                });
+                                                        if (analyticsProfile.screenshot) {
+                                                            for (var screenchot of analyticsProfile.screenshot) {
+                                                                if (!fs.existsSync(path + screenchot)) {
+                                                                    fileimages = false;
+                                                                    console.log("JSON analytics.screenchot not match folder");
+                                                                }
                                                             }
+                                                        }
+                                                        else {
+                                                            badRequest("JSON analytics.screenchot not match folder");
                                                         }
                                                     }
                                                     if (fileimages) {
@@ -300,10 +289,7 @@ module.exports = [
                                                         });
                                                     }
                                                     else {
-                                                        return reply({
-                                                            statusCode: 400,
-                                                            message: "Bad Request",
-                                                        });
+                                                        badRequest("Please check your screenshot/logo images");
                                                     }
                                                 }
                                             }
@@ -311,11 +297,7 @@ module.exports = [
                                     }
                                     catch (err) {
                                         console.log(err);
-                                        return reply({
-                                            statusCode: 400,
-                                            message: "Bad Request (Try Catch Error)",
-                                            data: "Can't read or find JSON file"
-                                        });
+                                        badRequest("Can't read or find JSON file");
                                     }
                                 }
                             });
@@ -323,12 +305,16 @@ module.exports = [
                     }
                 });
             }
-            else
+            else {
+                badRequest("No file in payload");
+            }
+            function badRequest(msg) {
                 return reply({
                     statusCode: 400,
                     msg: 'Bad Request',
-                    data: 'No file in payload'
+                    data: msg
                 });
+            }
         }
     },
     {
@@ -473,64 +459,68 @@ module.exports = [
             notes: 'Read yaml file convert to json ',
             validate: {
                 payload: {
-                    _foldername: Joi.string().required()
+                    _analyticsId: Joi.string().required()
                 }
             }
         },
         handler: (request, reply) => {
-            const path = util_1.Util.analyticsPath() + request.payload._foldername + pathSep.sep;
-            try {
-                YAML.load(path + 'docker-compose.yaml', (result) => {
-                    if (result != null) {
-                        if (typeof result.services != 'undefined') {
-                            let key = Object.keys(result.services);
-                            let environment = result.services[key[0]].environment;
-                            if (typeof environment != 'undefined') {
-                                let inputSchema = {};
-                                inputSchema.properties = [];
-                                for (let data of environment) {
-                                    let isTrue = true;
-                                    let properties = "";
-                                    let str = data.split("=");
-                                    if (str[1].toLowerCase() == 'true' || str[1].toLowerCase() == 'false') {
-                                        if (str[1].toLowerCase() == 'false') {
-                                            isTrue = false;
+            const payload = request.payload;
+            db.collection('analytics').find().make((builder) => {
+                builder.where('id', payload._analyticsId);
+                builder.first();
+                builder.callback((err, res) => {
+                    const folderName = res.analyticsFileInfo.name;
+                    const path = util_1.Util.analyticsPath() + folderName + pathSep.sep;
+                    try {
+                        YAML.load(path + 'docker-compose.yaml', (result) => {
+                            if (result != null) {
+                                if (typeof result.services != 'undefined') {
+                                    let key = Object.keys(result.services);
+                                    let environment = result.services[key[0]].environment;
+                                    if (typeof environment != 'undefined') {
+                                        let inputSchema = { properties: {} };
+                                        for (let data of environment) {
+                                            let isTrue = true;
+                                            let str = data.split("=");
+                                            if (str[1].toLowerCase() == 'true' || str[1].toLowerCase() == 'false') {
+                                                if (str[1].toLowerCase() == 'false') {
+                                                    isTrue = false;
+                                                }
+                                                inputSchema.properties[str[0]] = JSON.parse('{"type":"' + typeof isTrue + '","default":"' + isTrue + '","description":"' + str[0] + '"}');
+                                            }
+                                            else {
+                                                inputSchema.properties[str[0]] = JSON.parse('{"type":"' + typeof str[1] + '","default":"' + str[1] + '","description":"' + str[0] + '"}');
+                                            }
                                         }
-                                        properties = '{"' + str[0] + '":{"type":"' + typeof isTrue + '","default":"' + isTrue + '","description":"' + str[0] + '"}}';
+                                        return reply({
+                                            statusCode: 200,
+                                            message: "Read Yaml convent to Json success",
+                                            data: inputSchema
+                                        });
                                     }
                                     else {
-                                        properties = '{"' + str[0] + '":{"type":"' + typeof str[1] + '","default":"' + str[1] + '","description":"' + str[0] + '"}}';
+                                        badRequest("Can't find  result.services.*.environment in docker-compose.yaml");
                                     }
-                                    console.log("convert to inputSchema : ", JSON.parse(properties));
-                                    inputSchema.properties.push(JSON.parse(properties));
                                 }
-                                return reply({
-                                    statusCode: 200,
-                                    message: "Read Yaml convent to Json success",
-                                    data: inputSchema
-                                });
+                                else {
+                                    badRequest("Can't find result.services in docker-compose.yaml");
+                                }
                             }
                             else {
-                                badRequest("Can't find  result.services.*.environment in docker-compose.yaml");
+                                badRequest("Can't find folder " + folderName);
                             }
-                        }
-                        else {
-                            badRequest("Can't find result.services in docker-compose.yaml");
-                        }
+                        });
                     }
-                    else {
-                        badRequest("Can't find folder " + request.payload._foldername);
+                    catch (e) {
+                        console.log("ERROR docker compose : " + e);
+                        badRequest(e);
                     }
                 });
-            }
-            catch (e) {
-                console.log("ERROR docker compose : " + e);
-                badRequest(e);
-            }
+            });
             function badRequest(msg) {
                 return reply({
                     statusCode: 400,
-                    message: "Error can't not find docker-compose.yaml",
+                    message: "Bad request",
                     data: msg
                 });
             }

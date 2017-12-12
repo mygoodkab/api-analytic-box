@@ -24,12 +24,12 @@ module.exports = [
                         let analytic: any = [];
                         for (let data of res) {
                             let arrData = {
-                                id: data.id,
-                                idCamera: data._refCameraId,
-                                idAnalytics: data._refAnalyticsId,
+                                //id: data._id,
+                                //idCamera: data._refCameraId,
+                                // idAnalytics: data._refAnalyticsId,
                                 status: data.status,
                                 dockerNickname: data.nickname,
-                                cmd: data.cmd
+                                //cmd: data.cmd
                             }
                             analytic.push(arrData)
                             if (i == res.length) {

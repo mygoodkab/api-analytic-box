@@ -24,6 +24,7 @@ module.exports = [
         handler: (request, reply) => {
             const id = objectid();
             const payload = request.payload;
+            payload.id = id;
             if (payload) {
                 const hash = crypto.createHmac('sha256', JSON.stringify(payload))
                     .digest('hex');
@@ -49,6 +50,75 @@ module.exports = [
                     statusCode: 400,
                     msg: "Bad Request",
                     data: "No data in payload"
+                });
+            }
+        }
+    },
+    {
+        method: 'GET',
+        path: '/analytics-record/get',
+        config: {
+            tags: ['api'],
+            description: 'Get analytics record data',
+            notes: 'Get analytics record data and',
+        },
+        handler: (request, reply) => {
+            db.collection('analytics-record').find().make((builder) => {
+                builder.callback((err, res) => {
+                    if (err) {
+                        return reply({
+                            statusCode: 400,
+                            msg: "Bad Request",
+                            data: err
+                        });
+                    }
+                    else {
+                        return reply({
+                            statusCode: 200,
+                            msg: "OK",
+                            data: res
+                        });
+                    }
+                });
+            });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/analytics-record/delete-all',
+        config: {
+            tags: ['api'],
+            description: 'delete all',
+            notes: 'delete all',
+            validate: {
+                payload: {
+                    pass: Joi.string().required(),
+                }
+            }
+        },
+        handler: (request, reply) => {
+            if (request.payload.pass == "pass") {
+                db.collection('analytics-record').remove().make((builder) => {
+                    builder.callback((err, res) => {
+                        if (err) {
+                            return reply({
+                                statusCode: 400,
+                                msg: "Bad request"
+                            });
+                        }
+                        else {
+                            return reply({
+                                statusCode: 200,
+                                msg: "OK"
+                            });
+                        }
+                    });
+                });
+            }
+            else {
+                return reply({
+                    statusCode: 400,
+                    msg: "Bad request"
                 });
             }
         }
