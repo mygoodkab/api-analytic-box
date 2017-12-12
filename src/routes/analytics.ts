@@ -264,7 +264,7 @@ module.exports = [
                                                     typeof analyticsProfile.proccessingUnit == "undefined" ||
                                                     typeof analyticsProfile.language == "undefined" ||
                                                     typeof analyticsProfile.logo == "undefined" ||
-                                                    typeof analyticsProfile.screenshort == "undefined") {
+                                                    typeof analyticsProfile.screenshot == "undefined") {
                                                     badRequest("Invaild data please check your file JOSN")
                                                 } else {
                                                     // check ข้อมูลรูปว่าตรงกับใน folder ไหม
@@ -313,7 +313,7 @@ module.exports = [
                                                 }
                                             }
                                         });
-                                    } catch (err) { // try catch error 
+                                     } catch (err) { // try catch error 
                                         console.log(err)
                                         badRequest("Can't read or find JSON file")
                                     }

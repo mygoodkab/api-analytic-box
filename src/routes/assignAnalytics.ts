@@ -127,6 +127,7 @@ module.exports = [
                                             if (typeof result.services != 'undefined') {
                                                 let key = Object.keys(result.services) // json docker-compose  result.services
                                                 // change environment 
+                                                result.services[key[0]].container_name = nickname;
                                                 result.services[key[0]].environment = request.payload.environment;
                                                 // create folder by nickname docker 
                                                 fs.mkdir(Util.dockerAnalyticsCameraPath() + nickname, (err) => {

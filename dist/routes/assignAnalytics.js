@@ -112,6 +112,7 @@ module.exports = [
                                             console.log("Read YAML file from " + ReadYamlPath);
                                             if (typeof result.services != 'undefined') {
                                                 let key = Object.keys(result.services);
+                                                result.services[key[0]].container_name = nickname;
                                                 result.services[key[0]].environment = request.payload.environment;
                                                 fs.mkdir(util_1.Util.dockerAnalyticsCameraPath() + nickname, (err) => {
                                                     if (err) {

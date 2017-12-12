@@ -3,7 +3,7 @@ import { Util } from '../util';
 const objectid = require('objectid');
 const Joi = require('joi')
 const crypto = require('crypto');
-
+const pathSep = require('path');
 module.exports = [
 
     { // insert  record
@@ -86,6 +86,110 @@ module.exports = [
 
         }
     },
+    { // Get analytic-record nick name 
+        method: 'GET',
+        path: '/analytics-record/get/{nickname}',
+        config: {
+            tags: ['api'],
+            description: 'Get analytics record data',
+            notes: 'Get analytics record data and',
+            validate: {
+                params: {
+                    nickname: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            db.collection('analytics-record').find().make((builder) => {
+                const payload = request.payload
+                builder.where('dockerNickname', payload.nickname)
+                builder.callback((err, res) => {
+                    if (err) {
+                        return reply({
+                            statusCode: 400,
+                            msg: "Bad Request",
+                            data: err
+                        })
+                    } else {
+                        return reply({
+                            statusCode: 200,
+                            msg: "OK",
+                            data: res
+
+                        })
+                    }
+                })
+            })
+
+        }
+    },
+    { // Get image
+        method: 'GET',
+        path: '/analytics-record/image/{id}',
+        config: {
+            tags: ['api'],
+            description: 'Get image for UI',
+            notes: 'Get image ',
+            validate: {
+                params: {
+                    id: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            db.collection('analytics-record').find().make((builder: any) => {
+                builder.where("id", request.params.id)
+                builder.callback((err: any, res: any) => {
+                    if (res.length == 0) {
+                        return reply({
+                            statusCode: 404,
+                            message: "Bad Request",
+                            data: "Data not found"
+                        })
+                    } else {
+                        // if not image
+                        res = res[0]
+                        var contentType
+                        switch (res.fileType) {
+                            case "pdf":
+                                contentType = 'application/pdf';
+                                break;
+                            case "ppt":
+                                contentType = 'application/vnd.ms-powerpoint';
+                                break;
+                            case "pptx":
+                                contentType = 'application/vnd.openxmlformats-officedocument.preplyentationml.preplyentation';
+                                break;
+                            case "xls":
+                                contentType = 'application/vnd.ms-excel';
+                                break;
+                            case "xlsx":
+                                contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                                break;
+                            case "doc":
+                                contentType = 'application/msword';
+                                break;
+                            case "docx":
+                                contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                                break;
+                            case "csv":
+                                contentType = 'application/octet-stream';
+                                break;
+                        }
+
+                        let path: any = Util.uploadImagePath() + res.refInfo + pathSep.sep + res.storeName; // path + folder + \ + filename.png
+                        console.log('Getting image . . . . . success')
+                        return reply.file(path,
+                            {
+                                filename: res.name + '.' + res.fileType,
+                                mode: 'inline',
+                                confine: false
+                            }).type(contentType)
+                    }
+                });
+            });
+        }
+    },
     { // Delete all
         method: 'POST',
         path: '/analytics-record/delete-all',
@@ -99,7 +203,7 @@ module.exports = [
                 }
             }
         },
-        handler:  (request, reply) => {
+        handler: (request, reply) => {
             if (request.payload.pass == "pass") {
                 db.collection('analytics-record').remove().make((builder) => {
                     builder.callback((err, res) => {
@@ -116,7 +220,7 @@ module.exports = [
                         }
                     })
                 })
-            }else{
+            } else {
                 return reply({
                     statusCode: 400,
                     msg: "Bad request"

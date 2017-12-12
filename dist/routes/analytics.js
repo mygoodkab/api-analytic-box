@@ -244,7 +244,7 @@ module.exports = [
                                                     typeof analyticsProfile.proccessingUnit == "undefined" ||
                                                     typeof analyticsProfile.language == "undefined" ||
                                                     typeof analyticsProfile.logo == "undefined" ||
-                                                    typeof analyticsProfile.screenshort == "undefined") {
+                                                    typeof analyticsProfile.screenshot == "undefined") {
                                                     badRequest("Invaild data please check your file JOSN");
                                                 }
                                                 else {
