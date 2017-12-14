@@ -58,7 +58,7 @@ module.exports = [
             })
         }
     },
-    {
+    {  // Command to docker
         method: 'POST',
         path: '/docker/command',
         config: {
@@ -74,7 +74,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             let payload = request.payload
-            if (payload) {
+            if (payload && (payload._command == "stop" || payload._command == "start")) {
                 db.collection('assignAnalytics').find().make((builder) => {
                     builder.where('_id', payload._assignAnayticsId)
                     builder.first()
@@ -84,17 +84,31 @@ module.exports = [
                         } else {
                             console.log(res)
                             const nickname = res.nickname
-                            const cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && ls"
+
+                            let cmd;
+                            if (payload._command == "start") {
+                                cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d"
+                            } else  {
+                                cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down "
+                            }
                             exec(cmd, (error, stdout, stderr) => {
                                 if (error) {
                                     console.error(`exec error: ${error}`);
                                     badRequest("Error : " + error)
 
                                 } else if (stdout) {
-                                    return reply({
-                                        statusCode: 200,
-                                        msg: "OK",
-                                        data: stdout
+                                    db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
+                                        builder.where('_id', payload._assignAnayticsId)
+                                        builder.callback((err: any, res: any) => {
+                                            if (err) {
+                                                badRequest("Can't up status")
+                                            }
+                                            return reply({
+                                                statusCode: 200,
+                                                message: "OK",
+                                                data: stdout
+                                            })
+                                        });
                                     });
                                 } else {
                                     badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr)
@@ -104,7 +118,7 @@ module.exports = [
                     })
                 })
             } else {
-                badRequest("No data ion payload")
+                badRequest("Please check your command")
             }
             function badRequest(msg) {
                 return reply({
@@ -118,7 +132,7 @@ module.exports = [
 ]
 //
 //   var environment = [ 
-//  "VAM_PRIVATE_TEXT_ANALYTICSNICKNAME =darknet-cropping-33245",
+//  "VAM_PRIVATE_TEXT_ANALYTICSNICKNAME=darknet-cropping-33245",
 //   "VAM_PUBLIC_TEXT_INPUTSRC=doggo.jpg",
 //   "VAM_PRIVATE_TEXT_OUTPUTDEST=output",
 //   "VAM_PRIVATE_TEXT_OUTPUT_FREQ=HIGH",

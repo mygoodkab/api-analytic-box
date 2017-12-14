@@ -24,7 +24,7 @@ module.exports = [
                 builder.callback((err, res) => {
                     if (res.length == 0) {
                         return reply({
-                            statusCode: 200,
+                            statusCode: 400,
                             message: "Invaild username or password",
                         });
                     }

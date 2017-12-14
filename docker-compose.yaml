@@ -7,15 +7,30 @@ services:
   ports:
     - 8000:8000
   labels:
-      - traefik.backend=webconfig-api
-      - traefik.frontend.rule=PathPrefixStrip:/api/
-      - traefik.port=8000
+      - "traefik.backend=webconfig-api"
+      - "traefik.frontend.rule=PathPrefixStrip:/api/"
+      - "traefik.port=8000"
   networks:
       - net_analytics
   volumes:
    - ${HOME}/vam-data/:/vam-data/
    - /var/run/docker.sock:/var/run/docker.sock
   restart: always
+
+#  vam_webconfig-api-swaggerui:
+#   # build: .
+#   image: embedded-performance-server.local:5000/eslab/webconfig-api:latest
+#   container_name: webconfig-api-swaggerui
+#   labels:
+#       - "traefik.backend=webconfig-api"
+#       - "traefik.frontend.rule=PathPrefix:/swaggerui/"
+#       - "traefik.port=8000"
+#   networks:
+#       - net_analytics
+#   volumes:
+#    - ${HOME}/vam-data/:/vam-data/
+#    - /var/run/docker.sock:/var/run/docker.sock
+#   restart: always
 
 networks:
   net_analytics:

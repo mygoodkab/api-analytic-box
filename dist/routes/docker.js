@@ -71,7 +71,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             let payload = request.payload;
-            if (payload) {
+            if (payload && (payload._command == "stop" || payload._command == "start")) {
                 db.collection('assignAnalytics').find().make((builder) => {
                     builder.where('_id', payload._assignAnayticsId);
                     builder.first();
@@ -82,17 +82,31 @@ module.exports = [
                         else {
                             console.log(res);
                             const nickname = res.nickname;
-                            const cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && ls";
+                            let cmd;
+                            if (payload._command == "start") {
+                                cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d";
+                            }
+                            else {
+                                cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down ";
+                            }
                             exec(cmd, (error, stdout, stderr) => {
                                 if (error) {
                                     console.error(`exec error: ${error}`);
                                     badRequest("Error : " + error);
                                 }
                                 else if (stdout) {
-                                    return reply({
-                                        statusCode: 200,
-                                        msg: "OK",
-                                        data: stdout
+                                    db.collection('assignAnalytics').modify({ status: payload._command }).make((builder) => {
+                                        builder.where('_id', payload._assignAnayticsId);
+                                        builder.callback((err, res) => {
+                                            if (err) {
+                                                badRequest("Can't up status");
+                                            }
+                                            return reply({
+                                                statusCode: 200,
+                                                message: "OK",
+                                                data: stdout
+                                            });
+                                        });
                                     });
                                 }
                                 else {
@@ -104,7 +118,7 @@ module.exports = [
                 });
             }
             else {
-                badRequest("No data ion payload");
+                badRequest("Please check your command");
             }
             function badRequest(msg) {
                 return reply({

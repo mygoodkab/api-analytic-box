@@ -4,7 +4,7 @@ WORKDIR /home/root/
 
 COPY package.json .
 
-RUN npm install
+RUN npm rebuild
 
 COPY . .
 

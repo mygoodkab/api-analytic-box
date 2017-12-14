@@ -19,6 +19,7 @@ const child_process = require('child_process');
 const pathSep = require('path');
 const writeyaml = require('write-yaml');
 const fs = require('fs')
+const { exec } = require('child_process');
 module.exports = [
     { // Get all assignAnalytics
         method: 'GET',
@@ -82,9 +83,11 @@ module.exports = [
             notes: 'Insert assignAnalytics data',
             validate: {
                 payload: {
+                    nickname: Joi.string().required(),
                     _refCameraId: Joi.string().required(),
                     _refAnalyticsId: Joi.string().required(),
                     environment: Joi.array().required(),
+
                 }
             }
         },
@@ -93,7 +96,7 @@ module.exports = [
             if (payload) {
 
                 payload._id = objectid();
-                let nickname = payload._id;
+                let nickname = payload.nickname;
                 payload.status = 'stop';
                 db.collection('analytics').find().make((builder: any) => {
                     builder.where('id', payload._refAnalyticsId)
@@ -101,7 +104,6 @@ module.exports = [
                         if (res.length == 0) {
                             badRequest("Have no Analytics data ")
                         } else {
-
                             // check file docker-analytics-camera if notxist
                             const dockerAnalyticsCameraPath = Util.dockerAnalyticsCameraPath()
                             fs.stat(dockerAnalyticsCameraPath, function (err, stats) {
@@ -110,11 +112,9 @@ module.exports = [
                                         if (err) {
                                             serverError("can't create folder docker-analytics-camera \n" + err)
                                         }
-
                                         existFile()
                                     })
                                 } else { // if file docker-analytics-camera exist
-
                                     existFile()
                                 }
                                 function existFile() {
@@ -123,7 +123,7 @@ module.exports = [
                                     // read file yaml 
                                     YAML.load(ReadYamlPath + 'docker-compose.yaml', (result) => {
                                         if (result != null) {
-                                            console.log("Read YAML file from " + ReadYamlPath)
+                                            console.log("Read YAML file from " + result)
                                             if (typeof result.services != 'undefined') {
                                                 let key = Object.keys(result.services) // json docker-compose  result.services
                                                 // change environment 
@@ -149,10 +149,10 @@ module.exports = [
                                                                         if (res.length == 0) {
                                                                             badRequest("Have no camera data")
                                                                         } else {
-                                                                            payload.nickname = nickname
+
                                                                             let cameraInfo = res[0];
                                                                             //let command = "nvidia-docker run --rm -td --name \"" + payload.nickname + "\" --net=host --env=\"DISPLAY\" --volume=\"$HOME/.Xauthority:/root/.Xauthority:rw\" -v ${PWD}:/home/dev/host embedded-performance-server.local:5000/dev-cuda-image:8.0-cudnn5-opencv-devel-ubuntu16.04 "
-                                                                            let command = "nvidia-docker run --rm -td --name '" + payload.nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights"
+                                                                            let command = "nvidia-docker run --rm -td --name '" + nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights"
                                                                             //payload.cmd = command + analyticsInfo.cmd + " '" + cameraInfo.rtsp + "'\"";
                                                                             payload.cmd = command + " '" + cameraInfo.rtsp + "''";
                                                                             payload.type = analyticsInfo.analyticsProfile.name;
@@ -230,8 +230,9 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('assignAnalytics').remove().make((builder: any) => {
+            db.collection('assignAnalytics').find().make((builder: any) => {
                 builder.where("_id", request.payload._id)
+                builder.first()
                 builder.callback((err: any, res: any) => {
                     if (err) {
                         return reply({
@@ -239,14 +240,41 @@ module.exports = [
                             message: "Can't delete id : " + request.payload._id,
                         })
                     } else {
-                        return reply({
-                            statusCode: 200,
-                            message: "OK",
-                        })
+                        const cmd = "cd ../.." + Util.dockerAnalyticsCameraPath() + " &&  rm -rf " + res.nickname + " && echo eslab";
+                        //const test = "cd ../.." + Util.analyticsPath() + " && ls"
+                        exec(cmd, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log("Error " + error)
+                                badRequest("Error " + error)
+                            } else if (stdout) {
+                                db.collection('assignAnalytics').remove().make((builder: any) => {
+                                    builder.where("_id", request.payload._id)
+                                    builder.callback((err: any, res: any) => {
+                                        if (err) {
+                                            badRequest("Can't Delete data")
+                                        } else {
+                                            return reply({
+                                                statusCode: 200,
+                                                message: "OK",
+                                            })
+                                        }
+                                    });
+                                });
+                            } else {
+                                console.log("Stderr " + stderr)
+                                badRequest("Stderr" + stderr)
+                            }
+                        });
                     }
-
                 });
             });
+            function badRequest(msg) {
+                return reply({
+                    statusCode: 400,
+                    message: "OK",
+                    data: msg
+                })
+            }
         }
     },
     { // Get assignAnalytics by Camera id

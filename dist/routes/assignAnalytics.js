@@ -10,6 +10,7 @@ const child_process = require('child_process');
 const pathSep = require('path');
 const writeyaml = require('write-yaml');
 const fs = require('fs');
+const { exec } = require('child_process');
 module.exports = [
     {
         method: 'GET',
@@ -73,6 +74,7 @@ module.exports = [
             notes: 'Insert assignAnalytics data',
             validate: {
                 payload: {
+                    nickname: Joi.string().required(),
                     _refCameraId: Joi.string().required(),
                     _refAnalyticsId: Joi.string().required(),
                     environment: Joi.array().required(),
@@ -83,7 +85,7 @@ module.exports = [
             let payload = request.payload;
             if (payload) {
                 payload._id = objectid();
-                let nickname = payload._id;
+                let nickname = payload.nickname;
                 payload.status = 'stop';
                 db.collection('analytics').find().make((builder) => {
                     builder.where('id', payload._refAnalyticsId);
@@ -109,7 +111,7 @@ module.exports = [
                                     const ReadYamlPath = util_1.Util.analyticsPath() + res[0].analyticsFileInfo.name + pathSep.sep;
                                     YAML.load(ReadYamlPath + 'docker-compose.yaml', (result) => {
                                         if (result != null) {
-                                            console.log("Read YAML file from " + ReadYamlPath);
+                                            console.log("Read YAML file from " + result);
                                             if (typeof result.services != 'undefined') {
                                                 let key = Object.keys(result.services);
                                                 result.services[key[0]].container_name = nickname;
@@ -135,9 +137,8 @@ module.exports = [
                                                                             badRequest("Have no camera data");
                                                                         }
                                                                         else {
-                                                                            payload.nickname = nickname;
                                                                             let cameraInfo = res[0];
-                                                                            let command = "nvidia-docker run --rm -td --name '" + payload.nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights";
+                                                                            let command = "nvidia-docker run --rm -td --name '" + nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights";
                                                                             payload.cmd = command + " '" + cameraInfo.rtsp + "''";
                                                                             payload.type = analyticsInfo.analyticsProfile.name;
                                                                             payload.analyticsInfo = analyticsInfo;
@@ -213,8 +214,9 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('assignAnalytics').remove().make((builder) => {
+            db.collection('assignAnalytics').find().make((builder) => {
                 builder.where("_id", request.payload._id);
+                builder.first();
                 builder.callback((err, res) => {
                     if (err) {
                         return reply({
@@ -223,13 +225,43 @@ module.exports = [
                         });
                     }
                     else {
-                        return reply({
-                            statusCode: 200,
-                            message: "OK",
+                        const cmd = "cd ../.." + util_1.Util.dockerAnalyticsCameraPath() + " &&  rm -rf " + res.nickname + " && echo eslab";
+                        exec(cmd, (error, stdout, stderr) => {
+                            if (error) {
+                                console.log("Error " + error);
+                                badRequest("Error " + error);
+                            }
+                            else if (stdout) {
+                                db.collection('assignAnalytics').remove().make((builder) => {
+                                    builder.where("_id", request.payload._id);
+                                    builder.callback((err, res) => {
+                                        if (err) {
+                                            badRequest("Can't Delete data");
+                                        }
+                                        else {
+                                            return reply({
+                                                statusCode: 200,
+                                                message: "OK",
+                                            });
+                                        }
+                                    });
+                                });
+                            }
+                            else {
+                                console.log("Stderr " + stderr);
+                                badRequest("Stderr" + stderr);
+                            }
                         });
                     }
                 });
             });
+            function badRequest(msg) {
+                return reply({
+                    statusCode: 400,
+                    message: "OK",
+                    data: msg
+                });
+            }
         }
     },
     {

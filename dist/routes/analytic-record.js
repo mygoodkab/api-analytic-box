@@ -19,6 +19,7 @@ module.exports = [
                     ts: Joi.string().required(),
                     dockerNickname: Joi.string().required(),
                     outputType: Joi.string().required(),
+                    fileType: Joi.string().required(),
                     metadata: Joi.any()
                 }
             }
@@ -26,10 +27,11 @@ module.exports = [
         handler: (request, reply) => {
             const id = objectid();
             const payload = request.payload;
+            payload.ts = Date.now();
             payload.id = id;
-            if (payload) {
-                const hash = crypto.createHmac('sha256', JSON.stringify(payload))
-                    .digest('hex');
+            payload.fileType = payload.fileType.toLowerCase();
+            if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detecting' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
+                const hash = crypto.createHmac('sha256', JSON.stringify(payload)).digest('base64');
                 db.collection('analytics-record').insert(payload).callback((err) => {
                     if (err) {
                         return reply({
@@ -51,7 +53,7 @@ module.exports = [
                 return reply({
                     statusCode: 400,
                     msg: "Bad Request",
-                    data: "No data in payload"
+                    data: "Please check 'outputType'"
                 });
             }
         }
@@ -66,6 +68,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             db.collection('analytics-record').find().make((builder) => {
+                builder.sort('ts', true);
                 builder.callback((err, res) => {
                     if (err) {
                         return reply({
@@ -87,21 +90,22 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/analytics-record/get/{nickname}',
+        path: '/analytics-record/get/{_nickname}',
         config: {
             tags: ['api'],
             description: 'Get analytics record data',
             notes: 'Get analytics record data and',
             validate: {
                 params: {
-                    nickname: Joi.string().required()
+                    _nickname: Joi.string().required()
                 }
             }
         },
         handler: (request, reply) => {
             db.collection('analytics-record').find().make((builder) => {
-                const payload = request.payload;
-                builder.where('dockerNickname', payload.nickname);
+                const params = request.params;
+                builder.where('dockerNickname', params._nickname);
+                builder.sort('ts', true);
                 builder.callback((err, res) => {
                     if (err) {
                         return reply({
@@ -122,21 +126,99 @@ module.exports = [
         }
     },
     {
+        method: 'POST',
+        path: '/analytics-record/get/nickname-limit/',
+        config: {
+            tags: ['api'],
+            description: 'Get analytics record data limit by num',
+            notes: 'Get analytics record data and limit by num',
+            validate: {
+                payload: {
+                    _nickname: Joi.string().required(),
+                    _num: Joi.number().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            db.collection('analytics-record').find().make((builder) => {
+                const payload = request.payload;
+                builder.where('dockerNickname', payload._nickname);
+                builder.limit(payload._num);
+                builder.sort('ts', true);
+                builder.callback((err, res) => {
+                    if (err) {
+                        return reply({
+                            statusCode: 400,
+                            msg: "Bad Request",
+                            data: err
+                        });
+                    }
+                    else {
+                        return reply({
+                            statusCode: 200,
+                            msg: "OK",
+                            data: res
+                        });
+                    }
+                });
+            });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/analytics-record/get/time',
+        config: {
+            tags: ['api'],
+            description: 'Get analytics record data',
+            notes: 'Get analytics record data and',
+            validate: {
+                payload: {
+                    _time: Joi.any(),
+                    _nickname: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            const payload = request.payload;
+            db.collection('analytics-record').find().make((builder) => {
+                builder.where('dockerNickname', payload._nickname);
+                builder.between('ts', 1513146685761, 1513146764330);
+                builder.callback((err, res) => {
+                    if (err) {
+                        return reply({
+                            statusCode: 400,
+                            msg: "Bad Request",
+                            data: err
+                        });
+                    }
+                    else {
+                        return reply({
+                            statusCode: 200,
+                            msg: "OK",
+                            data: res,
+                        });
+                    }
+                });
+            });
+        }
+    },
+    {
         method: 'GET',
-        path: '/analytics-record/image/{id}',
+        path: '/analytics-record/image/{_id}',
         config: {
             tags: ['api'],
             description: 'Get image for UI',
             notes: 'Get image ',
             validate: {
                 params: {
-                    id: Joi.string().required()
+                    _id: Joi.string().required()
                 }
             }
         },
         handler: (request, reply) => {
             db.collection('analytics-record').find().make((builder) => {
-                builder.where("id", request.params.id);
+                builder.where("id", request.params._id);
+                builder.first();
                 builder.callback((err, res) => {
                     if (res.length == 0) {
                         return reply({
@@ -145,42 +227,22 @@ module.exports = [
                             data: "Data not found"
                         });
                     }
+                    else if (res.fileType != "png" || res.fileType != "jpg" || res.fileType != "jpeg") {
+                        return reply({
+                            statusCode: 404,
+                            message: "Bad Request",
+                            data: "Invail file type"
+                        });
+                    }
                     else {
-                        res = res[0];
-                        var contentType;
-                        switch (res.fileType) {
-                            case "pdf":
-                                contentType = 'application/pdf';
-                                break;
-                            case "ppt":
-                                contentType = 'application/vnd.ms-powerpoint';
-                                break;
-                            case "pptx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.preplyentationml.preplyentation';
-                                break;
-                            case "xls":
-                                contentType = 'application/vnd.ms-excel';
-                                break;
-                            case "xlsx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                                break;
-                            case "doc":
-                                contentType = 'application/msword';
-                                break;
-                            case "docx":
-                                contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-                                break;
-                            case "csv":
-                                contentType = 'application/octet-stream';
-                                break;
-                        }
-                        let path = util_1.Util.uploadImagePath() + res.refInfo + pathSep.sep + res.storeName;
-                        console.log('Getting image . . . . . success');
+                        const hash = crypto.createHmac('sha256', JSON.stringify(res)).digest('base64');
+                        let path = util_1.Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + hash + "." + res.fileType;
+                        reply("test : " + hash);
                         return reply.file(path, {
                             filename: res.name + '.' + res.fileType,
                             mode: 'inline',
                             confine: false
-                        }).type(contentType);
+                        });
                     }
                 });
             });
