@@ -11,7 +11,8 @@ services:
       - "traefik.frontend.rule=PathPrefixStrip:/api/"
       - "traefik.port=8000"
   networks:
-      - net_analytics
+      - net_webgateway
+      - net_vam-internals
   volumes:
    - ${HOME}/vam-data/:/vam-data/
    - /var/run/docker.sock:/var/run/docker.sock
@@ -33,6 +34,9 @@ services:
 #   restart: always
 
 networks:
-  net_analytics:
+  net_webgateway:
     external:
       name: router_webgateway
+  net_vam-internals:
+    external:
+      name: router_vam-internals

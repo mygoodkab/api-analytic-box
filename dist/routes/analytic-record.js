@@ -27,11 +27,13 @@ module.exports = [
         handler: (request, reply) => {
             const id = objectid();
             const payload = request.payload;
-            payload.ts = Date.now();
+            payload.ts = parseInt(payload.ts, 10);
             payload.id = id;
             payload.fileType = payload.fileType.toLowerCase();
-            if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detecting' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
-                const hash = crypto.createHmac('sha256', JSON.stringify(payload)).digest('base64');
+            if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
+                let str = payload.ts + payload.dockerNickname + payload.outputType + payload.fileType + JSON.stringify(payload.metadata);
+                let hash = crypto.createHmac('sha256', str).digest('base64');
+                hash = hash.replace(/[^a-zA-Z ]/g, "");
                 db.collection('analytics-record').insert(payload).callback((err) => {
                     if (err) {
                         return reply({
@@ -126,24 +128,24 @@ module.exports = [
         }
     },
     {
-        method: 'POST',
-        path: '/analytics-record/get/nickname-limit/',
+        method: 'GET',
+        path: '/analytics-record/get/{_nickname}/{_num}',
         config: {
             tags: ['api'],
             description: 'Get analytics record data limit by num',
             notes: 'Get analytics record data and limit by num',
             validate: {
-                payload: {
+                params: {
                     _nickname: Joi.string().required(),
-                    _num: Joi.number().required()
+                    _num: Joi.string().required()
                 }
             }
         },
         handler: (request, reply) => {
             db.collection('analytics-record').find().make((builder) => {
-                const payload = request.payload;
-                builder.where('dockerNickname', payload._nickname);
-                builder.limit(payload._num);
+                const params = request.params;
+                builder.where('dockerNickname', params._nickname);
+                builder.limit(params._num);
                 builder.sort('ts', true);
                 builder.callback((err, res) => {
                     if (err) {
@@ -211,7 +213,7 @@ module.exports = [
             notes: 'Get image ',
             validate: {
                 params: {
-                    _id: Joi.string().required()
+                    _id: Joi.string().required().description("id anaytics-redord")
                 }
             }
         },
@@ -220,28 +222,32 @@ module.exports = [
                 builder.where("id", request.params._id);
                 builder.first();
                 builder.callback((err, res) => {
-                    if (res.length == 0) {
+                    if (!res) {
                         return reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Data not found"
                         });
                     }
-                    else if (res.fileType != "png" || res.fileType != "jpg" || res.fileType != "jpeg") {
-                        return reply({
-                            statusCode: 404,
-                            message: "Bad Request",
-                            data: "Invail file type"
-                        });
-                    }
-                    else {
-                        const hash = crypto.createHmac('sha256', JSON.stringify(res)).digest('base64');
+                    else if (res.fileType == "png" || res.fileType == "jpg" || res.fileType == "jpeg") {
+                        let str = res.ts + res.dockerNickname + res.outputType + res.fileType + JSON.stringify(res.metadata);
+                        let hash = crypto.createHmac('sha256', str).digest('base64');
+                        hash = hash.replace(/[^a-zA-Z ]/g, "");
                         let path = util_1.Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + hash + "." + res.fileType;
-                        reply("test : " + hash);
+                        console.log(str);
+                        console.log("test : " + hash);
+                        console.log("hash : " + res.hash);
                         return reply.file(path, {
                             filename: res.name + '.' + res.fileType,
                             mode: 'inline',
                             confine: false
+                        });
+                    }
+                    else {
+                        return reply({
+                            statusCode: 404,
+                            message: "Bad Request",
+                            data: "Invail file type"
                         });
                     }
                 });

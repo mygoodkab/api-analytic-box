@@ -22,21 +22,26 @@ module.exports = [
                     if (res) {
                         let i = 1;
                         let analytic: any = [];
-                        for (let data of res) {
-                            let arrData = {
-                                //id: data._id,
-                                //idCamera: data._refCameraId,
-                                // idAnalytics: data._refAnalyticsId,
-                                status: data.status,
-                                dockerNickname: data.nickname,
-                                //cmd: data.cmd
+                        if (res.length == 0) {
+                            badrequest("NO data in assignAnalytics")
+                        } else {
+                            for (let data of res) {
+                                let arrData = {
+                                    //id: data._id,
+                                    //idCamera: data._refCameraId,
+                                    // idAnalytics: data._refAnalyticsId,
+                                    status: data.status,
+                                    dockerNickname: data.nickname,
+                                    //cmd: data.cmd
+                                }
+                                analytic.push(arrData)
+                                if (i == res.length) {
+                                    success(analytic)
+                                }
+                                i++;
                             }
-                            analytic.push(arrData)
-                            if (i == res.length) {
-                                success(analytic)
-                            }
-                            i++;
                         }
+
 
                     } else {
                         badrequest("no Data in payload")

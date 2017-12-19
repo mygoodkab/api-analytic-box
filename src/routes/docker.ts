@@ -26,7 +26,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            request.payload._nickname = "webconfig-dist"
+            // request.payload._nickname = "webconfig-dist"
             // request.payload._nickname = "optimistic_clarke"
             const options = {
                 socketPath: '/var/run/docker.sock',
@@ -82,21 +82,66 @@ module.exports = [
                         if (typeof res == 'undefined') {
                             badRequest("Can't query data in assignAnaytics by " + payload._assignAnayticsId)
                         } else {
-                            console.log(res)
+                            // console.log(res)
                             const nickname = res.nickname
 
-                            let cmd;
-                            if (payload._command == "start") {
-                                cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d"
-                            } else  {
-                                cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down "
-                            }
-                            exec(cmd, (error, stdout, stderr) => {
-                                if (error) {
-                                    console.error(`exec error: ${error}`);
-                                    badRequest("Error : " + error)
+                            // let cmd;
+                            // if (payload._command == "start") {
 
-                                } else if (stdout) {
+                            //     cmd = "curl http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/up"
+                            //     // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d"
+                            // } else  {
+                            //     cmd = "curl http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/down"
+                            //     // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down "
+                            // }
+                            // exec(cmd, (error, stdout, stderr) => {
+                            //     if (error) {
+                            //         console.error(`exec error: ${error}`);
+                            //         badRequest("Error : " + error)
+
+                            //     } else if (stdout) {
+                            //         console.log("respone cmd curl=>",stdout)
+                            //         db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
+                            //             builder.where('_id', payload._assignAnayticsId)
+                            //             builder.callback((err: any, res: any) => {
+                            //                 if (err) {
+                            //                     badRequest("Can't up status")
+                            //                 }
+                            //                 return reply({
+                            //                     statusCode: 200,
+                            //                     message: "OK",
+                            //                     data: stdout
+                            //                 })  
+                            //             });
+                            //         });
+                            //     } else {
+                            //         badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr)
+                            //     }
+                            // });
+                            
+                            let dockerCmdUrl;
+                            if(payload._command == 'start') {
+                                // dockerCmdUrl = "http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/up"
+                                dockerCmdUrl = "http://10.0.0.56:4180/relay/execute/analytics/status/"+nickname+"/up"
+                                console.log("dockerCmdUrl=>",dockerCmdUrl)
+                            } else {
+                                // dockerCmdUrl = "http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/down"
+                                dockerCmdUrl = "http://10.0.0.56:4180/relay/execute/analytics/status/"+nickname+"/down"
+                                console.log("dockerCmdUrl=>",dockerCmdUrl)
+                            }
+                            
+                            requestPath.get(dockerCmdUrl, (err,res,body) => {
+                                if(err) {
+                                    console.log("err=>",err)
+                                    return reply({
+                                        statusCode: 500,
+                                        message: "Internal Error",
+                                        data: err
+                                    })  
+                                }
+
+                                if(body) {
+                                    console.log("res body=>",body)
                                     db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
                                         builder.where('_id', payload._assignAnayticsId)
                                         builder.callback((err: any, res: any) => {
@@ -106,14 +151,13 @@ module.exports = [
                                             return reply({
                                                 statusCode: 200,
                                                 message: "OK",
-                                                data: stdout
-                                            })
+                                                data: body
+                                            })  
                                         });
                                     });
-                                } else {
-                                    badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr)
                                 }
-                            });
+                            })
+                            
                         }
                     })
                 })

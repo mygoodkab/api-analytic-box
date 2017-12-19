@@ -24,7 +24,6 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            request.payload._nickname = "webconfig-dist";
             const options = {
                 socketPath: '/var/run/docker.sock',
                 path: '/v1.24/containers/' + request.payload._nickname + '/logs?stdout=1',
@@ -80,21 +79,27 @@ module.exports = [
                             badRequest("Can't query data in assignAnaytics by " + payload._assignAnayticsId);
                         }
                         else {
-                            console.log(res);
                             const nickname = res.nickname;
-                            let cmd;
-                            if (payload._command == "start") {
-                                cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d";
+                            let dockerCmdUrl;
+                            if (payload._command == 'start') {
+                                dockerCmdUrl = "http://10.0.0.56:4180/relay/execute/analytics/status/" + nickname + "/up";
+                                console.log("dockerCmdUrl=>", dockerCmdUrl);
                             }
                             else {
-                                cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down ";
+                                dockerCmdUrl = "http://10.0.0.56:4180/relay/execute/analytics/status/" + nickname + "/down";
+                                console.log("dockerCmdUrl=>", dockerCmdUrl);
                             }
-                            exec(cmd, (error, stdout, stderr) => {
-                                if (error) {
-                                    console.error(`exec error: ${error}`);
-                                    badRequest("Error : " + error);
+                            requestPath.get(dockerCmdUrl, (err, res, body) => {
+                                if (err) {
+                                    console.log("err=>", err);
+                                    return reply({
+                                        statusCode: 500,
+                                        message: "Internal Error",
+                                        data: err
+                                    });
                                 }
-                                else if (stdout) {
+                                if (body) {
+                                    console.log("res body=>", body);
                                     db.collection('assignAnalytics').modify({ status: payload._command }).make((builder) => {
                                         builder.where('_id', payload._assignAnayticsId);
                                         builder.callback((err, res) => {
@@ -104,13 +109,10 @@ module.exports = [
                                             return reply({
                                                 statusCode: 200,
                                                 message: "OK",
-                                                data: stdout
+                                                data: body
                                             });
                                         });
                                     });
-                                }
-                                else {
-                                    badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr);
                                 }
                             });
                         }

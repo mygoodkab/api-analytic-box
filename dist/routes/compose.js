@@ -18,16 +18,21 @@ module.exports = [
                     if (res) {
                         let i = 1;
                         let analytic = [];
-                        for (let data of res) {
-                            let arrData = {
-                                status: data.status,
-                                dockerNickname: data.nickname,
-                            };
-                            analytic.push(arrData);
-                            if (i == res.length) {
-                                success(analytic);
+                        if (res.length == 0) {
+                            badrequest("NO data in assignAnalytics");
+                        }
+                        else {
+                            for (let data of res) {
+                                let arrData = {
+                                    status: data.status,
+                                    dockerNickname: data.nickname,
+                                };
+                                analytic.push(arrData);
+                                if (i == res.length) {
+                                    success(analytic);
+                                }
+                                i++;
                             }
-                            i++;
                         }
                     }
                     else {

@@ -7,6 +7,7 @@ const Joi = require('joi');
 const fs = require('fs');
 const pathSep = require('path');
 var csv = require('csvtojson');
+const { exec } = require('child_process');
 module.exports = [
     {
         method: 'GET',
@@ -236,10 +237,12 @@ module.exports = [
                                     let i = 1;
                                     if (csvtojson.length == 0) {
                                         badRequest("No data in file.csv");
+                                        removeFile(filename + "." + fileType);
                                     }
                                     else {
-                                        if (typeof csvtojson[0].Camera_Brand == 'undefined' || typeof csvtojson[0].RTSP == 'undefined') {
-                                            badRequest("Format data not match");
+                                        if (typeof csvtojson[0].model == 'undefined' || typeof csvtojson[0].format == 'undefined') {
+                                            badRequest("Format data not match please check 'model' or 'format' ");
+                                            removeFile(filename + "." + fileType);
                                         }
                                         else {
                                             for (let data of csvtojson) {
@@ -291,6 +294,18 @@ module.exports = [
                     statusCode: 500,
                     msg: 'Server Error',
                     data: msg
+                });
+            }
+            function removeFile(file) {
+                let cmd = "cd ../.." + util_1.Util.csvPath() + " &&  rm -rf " + file + " && echo eslab";
+                console.log(cmd);
+                exec(cmd, (error, stdout, stderr) => {
+                    if (stdout) {
+                        console.log("Remove file success Analytics : " + file);
+                    }
+                    else {
+                        console.log("Can't Remove");
+                    }
                 });
             }
         }

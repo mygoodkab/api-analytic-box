@@ -134,32 +134,44 @@ module.exports = [
                         badRequest("Error can't data in analytics");
                     }
                     else {
-                        const cmd = "cd ../.." + util_1.Util.analyticsPath() + " &&  rm -rf " + res.analyticsFileInfo.name + " && echo eslab";
-                        exec(cmd, (error, stdout, stderr) => {
-                            if (error) {
-                                console.log("Error " + error);
-                                badRequest("Error " + error);
-                            }
-                            else if (stdout) {
-                                db.collection('analytics').remove().make((builder) => {
-                                    builder.where("id", request.payload._id);
-                                    builder.callback((err, res) => {
-                                        if (err) {
-                                            badRequest("Can't Delete data");
+                        let analyticsFileInfo = res.analyticsFileInfo;
+                        db.collection("assignAnalytics").find().make((builder) => {
+                            builder.where('_refAnalyticsId', payload._id);
+                            builder.first();
+                            builder.callback((err, res) => {
+                                if (res) {
+                                    badRequest("Can't delete because data is used");
+                                }
+                                else {
+                                    const cmd = "cd ../.." + util_1.Util.analyticsPath() + " &&  rm -rf " + analyticsFileInfo.name + " && echo eslab";
+                                    exec(cmd, (error, stdout, stderr) => {
+                                        if (error) {
+                                            console.log("Error " + error);
+                                            badRequest("Error " + error);
                                         }
-                                        else {
-                                            return reply({
-                                                statusCode: 200,
-                                                message: "OK",
+                                        else if (stdout) {
+                                            db.collection('analytics').remove().make((builder) => {
+                                                builder.where("id", request.payload._id);
+                                                builder.callback((err, res) => {
+                                                    if (err) {
+                                                        badRequest("Can't Delete data");
+                                                    }
+                                                    else {
+                                                        return reply({
+                                                            statusCode: 200,
+                                                            message: "OK",
+                                                        });
+                                                    }
+                                                });
                                             });
                                         }
+                                        else {
+                                            console.log("Stderr " + stderr);
+                                            badRequest("Stderr" + stderr);
+                                        }
                                     });
-                                });
-                            }
-                            else {
-                                console.log("Stderr " + stderr);
-                                badRequest("Stderr" + stderr);
-                            }
+                                }
+                            });
                         });
                     }
                 });
@@ -223,125 +235,139 @@ module.exports = [
                             refInfo: payload.refInfo
                         };
                         let path = util_1.Util.analyticsPath() + filename + pathSep.sep;
-                        mkdirp(path, function (err) {
-                            if (err) {
-                                console.log("can't crate folder : " + err);
-                                return reply({
-                                    statusCode: 500,
-                                    msg: 'Server error',
-                                    data: 'can\'t crate folder'
-                                });
-                            }
-                            else {
-                                let fileUploadName = path + analyticsFileInfo.name + "." + fileType;
-                                let file = fs.createWriteStream(fileUploadName);
-                                console.log("Upload Analytics Profile ... path /analytics/upload-profile : " + path);
-                                file.on('error', (err) => {
-                                    console.log("can't upload analytics profile : " + err);
+                        console.log("Upload Analytics Profile ... path /analytics/upload-profile : " + path);
+                        if (fs.existsSync(util_1.Util.analyticsPath() + filename)) {
+                            badRequest("file name's exist ");
+                        }
+                        else {
+                            mkdirp(path, function (err) {
+                                if (err) {
+                                    console.log("can't crate folder : " + err);
                                     return reply({
                                         statusCode: 500,
                                         msg: 'Server error',
-                                        data: 'can\'t upload profile'
+                                        data: 'can\'t crate folder'
                                     });
-                                });
-                                payload.file.pipe(file);
-                                payload.file.on('end', (err) => {
-                                    var filestat = fs.statSync(fileUploadName);
-                                    var analytics;
-                                    analyticsFileInfo.fileSize = filestat.size;
-                                    analyticsFileInfo.createdata = new Date();
-                                    console.log("upload profile successful");
-                                    extract(fileUploadName, { dir: path }, function (err) {
-                                        if (err) {
-                                            console.log(err);
-                                            removeFile(filename);
-                                            badRequest("Can't extract file");
-                                        }
-                                        else {
-                                            console.log("extract success  path : " + path);
-                                            try {
-                                                jsonfile.readFile(path + '/profile.json', function (err, result) {
-                                                    var analyticsProfile = result.analytics;
-                                                    if (err || !result) {
-                                                        removeFile(filename);
-                                                        badRequest("Can't read or find JSON file");
-                                                    }
-                                                    else {
-                                                        if (typeof analyticsProfile.name == "undefined" ||
-                                                            typeof analyticsProfile.cmd == "undefined" ||
-                                                            typeof analyticsProfile.price == "undefined" ||
-                                                            typeof analyticsProfile.shortDetail == "undefined" ||
-                                                            typeof analyticsProfile.fullDetail == "undefined" ||
-                                                            typeof analyticsProfile.level == "undefined" ||
-                                                            typeof analyticsProfile.framework == "undefined" ||
-                                                            typeof analyticsProfile.proccessingUnit == "undefined" ||
-                                                            typeof analyticsProfile.language == "undefined" ||
-                                                            typeof analyticsProfile.logo == "undefined" ||
-                                                            typeof analyticsProfile.screenshot == "undefined") {
+                                }
+                                else {
+                                    let fileUploadName = path + analyticsFileInfo.name + "." + fileType;
+                                    let file = fs.createWriteStream(fileUploadName);
+                                    file.on('error', (err) => {
+                                        console.log("can't upload analytics profile : " + err);
+                                        return reply({
+                                            statusCode: 500,
+                                            msg: 'Server error',
+                                            data: 'can\'t upload profile'
+                                        });
+                                    });
+                                    payload.file.pipe(file);
+                                    payload.file.on('end', (err) => {
+                                        var filestat = fs.statSync(fileUploadName);
+                                        var analytics;
+                                        analyticsFileInfo.fileSize = filestat.size;
+                                        analyticsFileInfo.createdata = new Date();
+                                        console.log("upload profile successful");
+                                        extract(fileUploadName, { dir: path }, function (err) {
+                                            if (err) {
+                                                console.log(err);
+                                                removeFile(filename);
+                                                badRequest("Can't extract file");
+                                            }
+                                            else {
+                                                console.log("extract success  path : " + path);
+                                                try {
+                                                    YAML.load(path + 'docker-compose.yaml', (result) => {
+                                                        if (!result) {
+                                                            console.log("can't find 'docker-compose.yaml'");
                                                             removeFile(filename);
-                                                            badRequest("Invaild data please check your file JOSN");
+                                                            badRequest("can't find 'docker-compose.yaml'");
                                                         }
                                                         else {
-                                                            var fileimages = true;
-                                                            if (!fs.existsSync(path + analyticsProfile.logo)) {
-                                                                fileimages = false;
-                                                            }
-                                                            else {
-                                                                if (analyticsProfile.screenshot) {
-                                                                    for (var screenchot of analyticsProfile.screenshot) {
-                                                                        if (!fs.existsSync(path + screenchot)) {
+                                                            jsonfile.readFile(path + '/profile.json', function (err, result) {
+                                                                var analyticsProfile = result.analytics;
+                                                                if (err || !result) {
+                                                                    removeFile(filename);
+                                                                    badRequest("Can't read or find JSON file");
+                                                                }
+                                                                else {
+                                                                    if (typeof analyticsProfile.name == "undefined" ||
+                                                                        typeof analyticsProfile.cmd == "undefined" ||
+                                                                        typeof analyticsProfile.price == "undefined" ||
+                                                                        typeof analyticsProfile.shortDetail == "undefined" ||
+                                                                        typeof analyticsProfile.fullDetail == "undefined" ||
+                                                                        typeof analyticsProfile.level == "undefined" ||
+                                                                        typeof analyticsProfile.framework == "undefined" ||
+                                                                        typeof analyticsProfile.proccessingUnit == "undefined" ||
+                                                                        typeof analyticsProfile.language == "undefined" ||
+                                                                        typeof analyticsProfile.logo == "undefined" ||
+                                                                        typeof analyticsProfile.screenshot == "undefined") {
+                                                                        removeFile(filename);
+                                                                        badRequest("Invaild data please check your file JSON");
+                                                                    }
+                                                                    else {
+                                                                        var fileimages = true;
+                                                                        if (!fs.existsSync(path + analyticsProfile.logo)) {
                                                                             fileimages = false;
-                                                                            console.log("JSON analytics.screenchot not match folder");
+                                                                        }
+                                                                        else {
+                                                                            if (analyticsProfile.screenshot) {
+                                                                                for (var screenchot of analyticsProfile.screenshot) {
+                                                                                    if (!fs.existsSync(path + screenchot)) {
+                                                                                        fileimages = false;
+                                                                                        console.log("JSON analytics.screenchot not match folder");
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            else {
+                                                                                removeFile(filename);
+                                                                                badRequest("JSON analytics.screenchot not match folder");
+                                                                            }
+                                                                        }
+                                                                        if (fileimages) {
+                                                                            analytics = {
+                                                                                id: id,
+                                                                                refInfo: payload.refInfo,
+                                                                                analyticsProfile: result.analytics,
+                                                                                analyticsFileInfo: analyticsFileInfo,
+                                                                            };
+                                                                            db.collection('analytics').insert(analytics).callback(function (err) {
+                                                                                if (err) {
+                                                                                    removeFile(filename);
+                                                                                    return reply({
+                                                                                        statusCode: 500,
+                                                                                        message: "Can't insert analytics profile ",
+                                                                                    });
+                                                                                }
+                                                                                else {
+                                                                                    return reply({
+                                                                                        statusCode: 200,
+                                                                                        message: "OK",
+                                                                                        data: "Upload Analytics Successful"
+                                                                                    });
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                        else {
+                                                                            removeFile(filename);
+                                                                            badRequest("Please check your screenshot/logo images");
                                                                         }
                                                                     }
                                                                 }
-                                                                else {
-                                                                    removeFile(filename);
-                                                                    badRequest("JSON analytics.screenchot not match folder");
-                                                                }
-                                                            }
-                                                            if (fileimages) {
-                                                                analytics = {
-                                                                    id: id,
-                                                                    refInfo: payload.refInfo,
-                                                                    analyticsProfile: result.analytics,
-                                                                    analyticsFileInfo: analyticsFileInfo,
-                                                                };
-                                                                db.collection('analytics').insert(analytics).callback(function (err) {
-                                                                    if (err) {
-                                                                        removeFile(filename);
-                                                                        return reply({
-                                                                            statusCode: 500,
-                                                                            message: "Can't insert analytics profile ",
-                                                                        });
-                                                                    }
-                                                                    else {
-                                                                        return reply({
-                                                                            statusCode: 200,
-                                                                            message: "OK",
-                                                                            data: "Upload Analytics Successful"
-                                                                        });
-                                                                    }
-                                                                });
-                                                            }
-                                                            else {
-                                                                removeFile(filename);
-                                                                badRequest("Please check your screenshot/logo images");
-                                                            }
+                                                            });
                                                         }
-                                                    }
-                                                });
+                                                    });
+                                                }
+                                                catch (err) {
+                                                    console.log(err);
+                                                    removeFile(filename);
+                                                    badRequest("Can't read or find JSON file");
+                                                }
                                             }
-                                            catch (err) {
-                                                console.log(err);
-                                                removeFile(filename);
-                                                badRequest("Can't read or find JSON file");
-                                            }
-                                        }
+                                        });
                                     });
-                                });
-                            }
-                        });
+                                }
+                            });
+                        }
                     }
                 });
             }
@@ -365,6 +391,12 @@ module.exports = [
             function removeFile(analytics) {
                 let cmd = "cd ../.." + util_1.Util.analyticsPath() + " &&  rm -rf " + analytics + " && echo eslab";
                 exec(cmd, (error, stdout, stderr) => {
+                    if (stdout) {
+                        console.log("Remove file success Analytics : " + analytics);
+                    }
+                    else {
+                        console.log("Can't  Remove");
+                    }
                 });
             }
         }
