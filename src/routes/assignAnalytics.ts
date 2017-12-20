@@ -123,7 +123,7 @@ module.exports = [
                                     // read file yaml 
                                     YAML.load(ReadYamlPath + 'docker-compose.yaml', (result) => {
                                         if (result != null) {
-                                            console.log("Read YAML file from " + result)
+                                            //console.log("Read YAML file from " + result)
                                             if (typeof result.services != 'undefined') {
                                                 let key = Object.keys(result.services) // json docker-compose  result.services
                                                 // change environment 
@@ -347,8 +347,8 @@ module.exports = [
         },
         handler: (request, reply) => {
             let status = ""
-            if (request.payload.command == "1") {
-                status = "stop"
+            if (request.payload.command == "start" || request.payload.command == "stop" ) {
+                status = ""
             } else if (request.payload.command == "2") {
                 status = "start"
             } else {

@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const db = require("../nosql-util");
+const { Util } = require('../util');
 const Joi = require('joi');
+const JWT = require('jsonwebtoken');
 module.exports = [
     {
         method: 'POST',
@@ -21,8 +23,10 @@ module.exports = [
             db.collection('users').find().make((builder) => {
                 builder.where("username", request.payload.username);
                 builder.where("password", request.payload.password);
+                builder.first();
                 builder.callback((err, res) => {
-                    if (res.length == 0) {
+                    var userInfo = encodeURIComponent(JSON.stringify(res));
+                    if (!res) {
                         return reply({
                             statusCode: 400,
                             message: "Invaild username or password",

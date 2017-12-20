@@ -111,7 +111,6 @@ module.exports = [
                                     const ReadYamlPath = util_1.Util.analyticsPath() + res[0].analyticsFileInfo.name + pathSep.sep;
                                     YAML.load(ReadYamlPath + 'docker-compose.yaml', (result) => {
                                         if (result != null) {
-                                            console.log("Read YAML file from " + result);
                                             if (typeof result.services != 'undefined') {
                                                 let key = Object.keys(result.services);
                                                 result.services[key[0]].container_name = nickname;
@@ -334,8 +333,8 @@ module.exports = [
         },
         handler: (request, reply) => {
             let status = "";
-            if (request.payload.command == "1") {
-                status = "stop";
+            if (request.payload.command == "start" || request.payload.command == "stop") {
+                status = "";
             }
             else if (request.payload.command == "2") {
                 status = "start";

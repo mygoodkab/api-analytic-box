@@ -144,31 +144,42 @@ module.exports = [
                                 if (res) {
                                     badRequest("Can't delete because data is used")
                                 } else {
-                                    const cmd = "cd ../.." + Util.analyticsPath() + " &&  rm -rf " + analyticsFileInfo.name + " && echo eslab";
-                                    //const test = "cd ../.." + Util.analyticsPath() + " && ls"
-                                    exec(cmd, (error, stdout, stderr) => {
-                                        if (error) {
-                                            console.log("Error " + error)
-                                            badRequest("Error " + error)
-                                        } else if (stdout) {
-                                            db.collection('analytics').remove().make((builder: any) => {
-                                                builder.where("id", request.payload._id)
-                                                builder.callback((err: any, res: any) => {
-                                                    if (err) {
-                                                        badRequest("Can't Delete data")
+                                    // update assignAnalytics status to stop before delete container
+                                    db.collection('assignAnalytics').modify({ status: 'stop' }).make((builder: any) => {
+                                        builder.where('_id', payload._assignAnayticsId)
+                                        builder.callback((err: any, res: any) => {
+                                            if (err) {
+                                                badRequest("Can't up status")
+                                            } else {
+                                                const cmd = "cd ../.." + Util.analyticsPath() + " &&  rm -rf " + analyticsFileInfo.name + " && echo eslab";
+                                                //const test = "cd ../.." + Util.analyticsPath() + " && ls"
+                                                exec(cmd, (error, stdout, stderr) => {
+                                                    if (error) {
+                                                        console.log("Error " + error)
+                                                        badRequest("Error " + error)
+                                                    } else if (stdout) {
+                                                        db.collection('analytics').remove().make((builder: any) => {
+                                                            builder.where("id", request.payload._id)
+                                                            builder.callback((err: any, res: any) => {
+                                                                if (err) {
+                                                                    badRequest("Can't Delete data")
+                                                                } else {
+                                                                    return reply({
+                                                                        statusCode: 200,
+                                                                        message: "OK",
+                                                                    })
+                                                                }
+                                                            });
+                                                        });
                                                     } else {
-                                                        return reply({
-                                                            statusCode: 200,
-                                                            message: "OK",
-                                                        })
+                                                        console.log("Stderr " + stderr)
+                                                        badRequest("Stderr" + stderr)
                                                     }
                                                 });
-                                            });
-                                        } else {
-                                            console.log("Stderr " + stderr)
-                                            badRequest("Stderr" + stderr)
-                                        }
+                                            }
+                                        });
                                     });
+
                                 }
                             })
                         })

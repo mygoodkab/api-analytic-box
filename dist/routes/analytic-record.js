@@ -6,6 +6,8 @@ const objectid = require('objectid');
 const Joi = require('joi');
 const crypto = require('crypto');
 const pathSep = require('path');
+const httprequest = require('request');
+const fs = require('fs');
 module.exports = [
     {
         method: 'POST',
@@ -27,35 +29,29 @@ module.exports = [
         handler: (request, reply) => {
             const id = objectid();
             const payload = request.payload;
-            payload.ts = parseInt(payload.ts, 10);
             payload.id = id;
             payload.fileType = payload.fileType.toLowerCase();
             if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
-                let str = payload.ts + payload.dockerNickname + payload.outputType + payload.fileType + JSON.stringify(payload.metadata);
-                let hash = crypto.createHmac('sha256', str).digest('base64');
-                hash = hash.replace(/[^a-zA-Z ]/g, "");
                 db.collection('analytics-record').insert(payload).callback((err) => {
                     if (err) {
-                        return reply({
-                            statusCode: 400,
-                            msg: "Bad Request",
-                            data: err
-                        });
+                        badrequest(err);
                     }
                     else {
                         return reply({
                             statusCode: 200,
                             msg: "OK Insert success",
-                            data: hash
                         });
                     }
                 });
             }
             else {
+                badrequest("Please check 'outputType'");
+            }
+            function badrequest(msg) {
                 return reply({
                     statusCode: 400,
                     msg: "Bad Request",
-                    data: "Please check 'outputType'"
+                    data: msg
                 });
             }
         }
@@ -230,13 +226,18 @@ module.exports = [
                         });
                     }
                     else if (res.fileType == "png" || res.fileType == "jpg" || res.fileType == "jpeg") {
-                        let str = res.ts + res.dockerNickname + res.outputType + res.fileType + JSON.stringify(res.metadata);
-                        let hash = crypto.createHmac('sha256', str).digest('base64');
-                        hash = hash.replace(/[^a-zA-Z ]/g, "");
-                        let path = util_1.Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + hash + "." + res.fileType;
-                        console.log(str);
-                        console.log("test : " + hash);
-                        console.log("hash : " + res.hash);
+                        let str = {
+                            ts: res.ts,
+                            dockerNickname: res.dockerNickname,
+                            outputType: res.outputType,
+                            fileType: res.fileType,
+                            metadata: res.metadata
+                        };
+                        let hash = crypto.createHash('sha256');
+                        hash.update(JSON.stringify(str));
+                        let hashId = hash.digest('hex');
+                        console.log(hashId);
+                        let path = util_1.Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + hashId + "." + res.fileType;
                         return reply.file(path, {
                             filename: res.name + '.' + res.fileType,
                             mode: 'inline',
@@ -292,6 +293,34 @@ module.exports = [
                     msg: "Bad request"
                 });
             }
+        }
+    },
+    {
+        method: 'GET',
+        path: '/analytics-record/test',
+        config: {
+            tags: ['api'],
+            description: 'Get analytics record data',
+            notes: 'Get analytics record data and',
+        },
+        handler: (request, reply) => {
+            var formData = {
+                file: fs.createReadStream("./test.csv")
+            };
+            httprequest.post({ url: 'https://api.thailand-smartliving.com/v1/device/camera/detection', formData: formData }, (err, httpResponse, body) => {
+                if (err) {
+                    return reply({
+                        statusCode: 400,
+                        data: err
+                    });
+                }
+                else {
+                    return reply({
+                        statusCode: 200,
+                        data: httpResponse
+                    });
+                }
+            });
         }
     }
 ];

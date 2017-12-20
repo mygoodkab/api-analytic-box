@@ -1,5 +1,6 @@
 const pathSep = require('path');
 //pathSep.sep is check os that use / or \
+exports.SECRET_KEY = "2CD1DF62C76F2122599E17B894A92"
 export class Util {
 	static getDb(request: any): any {
 		return request.mongo.db;
@@ -148,32 +149,32 @@ export class Util {
 	}
 
 
-	static csvPath(){
+	static csvPath() {
 		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "cctv" 
+		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "cctv"
 		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			 path = '/vam-data/uploads/cctv/';
-           // path = '/vam_env/webconfig-api/analytics/';			
+			path = '/vam-data/uploads/cctv/';
+			// path = '/vam_env/webconfig-api/analytics/';			
 		}
 		return path
 	}
 
-	static dockerAnalyticsCameraPath(){
+	static dockerAnalyticsCameraPath() {
 		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "docker-analytics-camera" 
+		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "docker-analytics-camera"
 		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			 path = '/vam-data/uploads/docker-analytics-camera/';
-           // path = '/vam_env/webconfig-api/analytics/';			
+			path = '/vam-data/uploads/docker-analytics-camera/';
+			// path = '/vam_env/webconfig-api/analytics/';			
 		}
 		return path
 	}
-  
-	static analyticsPath(){
+
+	static analyticsPath() {
 		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics" 
+		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics"
 		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			 path = '/vam-data/uploads/analytics/';
-           // path = '/vam_env/webconfig-api/analytics/';			
+			path = '/vam-data/uploads/analytics/';
+			// path = '/vam_env/webconfig-api/analytics/';			
 		}
 		return path
 	}
