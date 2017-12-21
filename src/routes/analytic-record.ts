@@ -32,26 +32,51 @@ module.exports = [
             //payload.ts = parseInt(payload.ts, 10)
             payload.id = id
             payload.fileType = payload.fileType.toLowerCase()
-
             if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
-                // let str;
-                // //check fileType is png, jpg, jpeg ?
-                // if (payload.fileType == 'png' || payload.fileType == 'jpeg' || payload.fileType == 'jpg' || payload.fileType == 'none') {
-                //     str = payload.ts + payload.dockerNickname + payload.outputType + payload.fileType + JSON.stringify(payload.metadata)
-                // } else {
-                //     badrequest("Please check fileType")
-                // }
-                // let hash = crypto.createHmac('sha256', str).digest('base64');
-                // hash = hash.replace(/[^a-zA-Z ]/g, "")
-
                 db.collection('analytics-record').insert(payload).callback((err) => {
                     if (err) {
                         badrequest(err)
                     } else {
-                        return reply({
-                            statusCode: 200,
-                            msg: "OK Insert success",
-                        })
+                        if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
+                            return reply({
+                                statusCode: 200,
+                                msg: "OK Insert success",
+                            })
+                            // let str = {
+                            //     ts: payload.ts,
+                            //     dockerNickname: payload.dockerNickname,
+                            //     outputType: payload.outputType,
+                            //     fileType: payload.fileType,
+                            //     metadata: payload.metadata
+                            // }
+                            // //get file
+                            // let path: any = Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + Util.hash(str) + "." + payload.fileType;
+                            // let formData = {
+                            //     refId: "F7BB1AD6CBA9",
+                            //     type: payload.outputType,
+                            //     file: fs.createReadStream(path),
+                            //     ts: payload.ts,
+                            //     meta: {"test":"test"}
+                            // }
+                            // // send data to smart-living 
+                            // httprequest.post({ url: 'http://10.0.0.199:3003/v1/file/upload', formData: formData }, (err, httpResponse, body) => {
+                            //     if (err) {
+                            //         badrequest(err)
+                            //     } else {
+                            //         console.log(body)
+                            //         return reply({
+                            //             statusCode: 200,
+                            //             data: body
+                            //         })
+                            //     }
+                            // })
+                        } else {
+                            return reply({
+                                statusCode: 200,
+                                msg: "OK Insert success",
+                            })
+                        }
+
                     }
                 })
             } else {
@@ -78,7 +103,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             db.collection('analytics-record').find().make((builder) => {
-                builder.sort('ts', true)
+               // builder.sort('ts', true)
                 builder.callback((err, res) => {
                     if (err) {
                         return reply({
@@ -240,9 +265,7 @@ module.exports = [
                             data: "Data not found"
                         })
                     } else if (res.fileType == "png" || res.fileType == "jpg" || res.fileType == "jpeg") {
-
                         // let test = "good"
-
                         let str = {
                             ts: res.ts,
                             dockerNickname: res.dockerNickname,
@@ -250,15 +273,9 @@ module.exports = [
                             fileType: res.fileType,
                             metadata: res.metadata
                         }
-                          
-                        let hash = crypto.createHash('sha256')
-                        hash.update(JSON.stringify(str));
-                      
-                        let hashId = hash.digest('hex')
-                          console.log(hashId)
                         //let hash = crypto.createHmac('sha256', JSON.stringify(res)).digest('base64'); 
                         //hash = hash.replace(/[^a-zA-Z ]/g, "")
-                        let path: any = Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + hashId + "." + res.fileType; // path + folder + \ + filename.png
+                        let path: any = Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + Util.hash(str) + "." + res.fileType; // path + folder + \ + filename.png
                         // console.log(str)
                         //  console.log("test : " + hash)
                         //  console.log("hash : " + res.hash)
@@ -317,35 +334,6 @@ module.exports = [
                     msg: "Bad request"
                 })
             }
-
-        }
-    },
-    {
-        method: 'GET',
-        path: '/analytics-record/test',
-        config: {
-            tags: ['api'],
-            description: 'Get analytics record data',
-            notes: 'Get analytics record data and',
-        },
-        handler: (request, reply) => {
-            var formData = {
-                file: fs.createReadStream("./test.csv")
-            }
-
-            httprequest.post({ url: 'https://api.thailand-smartliving.com/v1/device/camera/detection', formData: formData }, (err, httpResponse, body) => {
-                if (err) {
-                    return reply({
-                        statusCode: 400,
-                        data: err
-                    })
-                } else {
-                    return reply({
-                        statusCode: 200,
-                        data: httpResponse
-                    })
-                }
-            })
 
         }
     }

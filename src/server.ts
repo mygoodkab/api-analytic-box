@@ -53,6 +53,7 @@ server.register([
             throw err;
         }
         console.log('Server running at:', server.info.uri);
+        
     });
 
     function validate(decoded, request, callback) {

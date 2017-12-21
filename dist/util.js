@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const pathSep = require('path');
+const crypto = require('crypto');
 exports.SECRET_KEY = "2CD1DF62C76F2122599E17B894A92";
 class Util {
     static getDb(request) {
@@ -182,6 +183,12 @@ class Util {
         if (pageSize == -1)
             pageLimit = 0;
         return { skip: pageSkip, limit: pageLimit };
+    }
+    static hash(data) {
+        let hash = crypto.createHash('sha256');
+        hash.update(JSON.stringify(data));
+        let key = hash.digest('hex');
+        return key;
     }
 }
 exports.Util = Util;

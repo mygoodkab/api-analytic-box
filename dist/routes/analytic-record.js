@@ -37,10 +37,18 @@ module.exports = [
                         badrequest(err);
                     }
                     else {
-                        return reply({
-                            statusCode: 200,
-                            msg: "OK Insert success",
-                        });
+                        if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
+                            return reply({
+                                statusCode: 200,
+                                msg: "OK Insert success",
+                            });
+                        }
+                        else {
+                            return reply({
+                                statusCode: 200,
+                                msg: "OK Insert success",
+                            });
+                        }
                     }
                 });
             }
@@ -66,7 +74,6 @@ module.exports = [
         },
         handler: (request, reply) => {
             db.collection('analytics-record').find().make((builder) => {
-                builder.sort('ts', true);
                 builder.callback((err, res) => {
                     if (err) {
                         return reply({
@@ -233,11 +240,7 @@ module.exports = [
                             fileType: res.fileType,
                             metadata: res.metadata
                         };
-                        let hash = crypto.createHash('sha256');
-                        hash.update(JSON.stringify(str));
-                        let hashId = hash.digest('hex');
-                        console.log(hashId);
-                        let path = util_1.Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + hashId + "." + res.fileType;
+                        let path = util_1.Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + res.fileType;
                         return reply.file(path, {
                             filename: res.name + '.' + res.fileType,
                             mode: 'inline',
@@ -293,34 +296,6 @@ module.exports = [
                     msg: "Bad request"
                 });
             }
-        }
-    },
-    {
-        method: 'GET',
-        path: '/analytics-record/test',
-        config: {
-            tags: ['api'],
-            description: 'Get analytics record data',
-            notes: 'Get analytics record data and',
-        },
-        handler: (request, reply) => {
-            var formData = {
-                file: fs.createReadStream("./test.csv")
-            };
-            httprequest.post({ url: 'https://api.thailand-smartliving.com/v1/device/camera/detection', formData: formData }, (err, httpResponse, body) => {
-                if (err) {
-                    return reply({
-                        statusCode: 400,
-                        data: err
-                    });
-                }
-                else {
-                    return reply({
-                        statusCode: 200,
-                        data: httpResponse
-                    });
-                }
-            });
         }
     }
 ];

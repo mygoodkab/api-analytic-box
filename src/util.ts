@@ -1,4 +1,5 @@
 const pathSep = require('path');
+const crypto = require('crypto');
 //pathSep.sep is check os that use / or \
 exports.SECRET_KEY = "2CD1DF62C76F2122599E17B894A92"
 export class Util {
@@ -223,6 +224,11 @@ export class Util {
 		if (pageSize == -1) pageLimit = 0;
 		return { skip: pageSkip, limit: pageLimit };
 	}
-
+	static hash(data: any) {
+		let hash = crypto.createHash('sha256')
+		hash.update(JSON.stringify(data));
+		let key = hash.digest('hex');
+		return key;
+	}
 
 }
