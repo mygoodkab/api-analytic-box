@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const db = require("../nosql-util");
 const util_1 = require("../util");
+const boom_1 = require("boom");
+const FormData = require('form-data');
 const objectid = require('objectid');
 const Joi = require('joi');
 const crypto = require('crypto');
@@ -30,32 +32,79 @@ module.exports = [
             const id = objectid();
             const payload = request.payload;
             payload.id = id;
+            payload.timedb = Date.now();
             payload.fileType = payload.fileType.toLowerCase();
-            if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
-                db.collection('analytics-record').insert(payload).callback((err) => {
-                    if (err) {
-                        badrequest(err);
+            db.collection('assignAnalytics').find().make((builder) => {
+                builder.where('nickname', payload.dockerNickname);
+                builder.first();
+                builder.callback((err, res) => {
+                    if (!res) {
+                        console.log("Can't find docker contrainer");
+                        badrequest("Can't find docker contrainer");
                     }
                     else {
-                        if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
-                            return reply({
-                                statusCode: 200,
-                                msg: "OK Insert success",
+                        let camInfo = res.cameraInfo;
+                        if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
+                            db.collection('analytics-record').insert(payload).callback((err) => {
+                                console.log("insert data ");
+                                if (err) {
+                                    console.log(err);
+                                    badrequest(err);
+                                }
+                                else {
+                                    if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
+                                        let str = {
+                                            ts: payload.ts,
+                                            dockerNickname: payload.dockerNickname,
+                                            outputType: payload.outputType,
+                                            fileType: payload.fileType,
+                                            metadata: payload.metadata
+                                        };
+                                        let path = util_1.Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + payload.fileType;
+                                        if (!fs.existsSync(path)) {
+                                            console.log("Can't find image file");
+                                            boom_1.badRequest("Can't find image file");
+                                        }
+                                        else {
+                                            var formData = new FormData();
+                                            formData.append('refId', camInfo._id);
+                                            formData.append('type', payload.outputType);
+                                            formData.append('file', fs.createReadStream(path));
+                                            formData.append('ts', payload.ts);
+                                            formData.append('meta', "test");
+                                            console.log("sending data . . . .");
+                                            formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
+                                                if (err) {
+                                                    console.log(err);
+                                                    badrequest(err);
+                                                }
+                                                else {
+                                                    console.log("sent data to smart living");
+                                                    return reply({
+                                                        statusCode: 200,
+                                                        data: res
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    }
+                                    else {
+                                        return reply({
+                                            statusCode: 200,
+                                            msg: "OK Insert success",
+                                        });
+                                    }
+                                }
                             });
                         }
                         else {
-                            return reply({
-                                statusCode: 200,
-                                msg: "OK Insert success",
-                            });
+                            badrequest("Please check 'outputType'");
                         }
                     }
                 });
-            }
-            else {
-                badrequest("Please check 'outputType'");
-            }
+            });
             function badrequest(msg) {
+                console.log("Bad Request: " + msg);
                 return reply({
                     statusCode: 400,
                     msg: "Bad Request",
@@ -149,7 +198,7 @@ module.exports = [
                 const params = request.params;
                 builder.where('dockerNickname', params._nickname);
                 builder.limit(params._num);
-                builder.sort('ts', true);
+                builder.sort('timedb', true);
                 builder.callback((err, res) => {
                     if (err) {
                         return reply({

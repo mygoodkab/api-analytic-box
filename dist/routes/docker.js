@@ -82,11 +82,11 @@ module.exports = [
                             const nickname = res.nickname;
                             let dockerCmdUrl;
                             if (payload._command == 'start') {
-                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/up";
+                                dockerCmdUrl = "http://10.0.0.69:4180/relay/execute/analytics/status/" + nickname + "/up";
                                 console.log("dockerCmdUrl=>", dockerCmdUrl);
                             }
                             else {
-                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/down";
+                                dockerCmdUrl = "http://10.0.0.69:4180/relay/execute/analytics/status/" + nickname + "/down";
                                 console.log("dockerCmdUrl=>", dockerCmdUrl);
                             }
                             requestPath.get(dockerCmdUrl, (err, res, body) => {

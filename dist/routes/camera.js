@@ -83,7 +83,7 @@ module.exports = [
                 builder.first();
                 builder.callback((err, res) => {
                     let payload = request.payload;
-                    if (typeof res == 'undefined') {
+                    if (!res) {
                         payload.portffmpeg = 8081;
                         payload.portrelay = 8082;
                     }

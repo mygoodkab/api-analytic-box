@@ -80,13 +80,14 @@ module.exports = [
             }
         },
         handler: function (request, reply) {
+            
             db.collection('camera').find().make((builder: any) => {
                 builder.sort("portrelay", true);
                 builder.first();
                 builder.callback((err: any, res: any) => {
                     let payload = request.payload;
 
-                    if (typeof res == 'undefined') {
+                    if (!res) {
                         payload.portffmpeg = 8081;
                         payload.portrelay = 8082;
                     } else if (err) {
