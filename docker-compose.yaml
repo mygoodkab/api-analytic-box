@@ -16,6 +16,7 @@ services:
   volumes:
    - ${HOME}/vam-data/:/vam-data/
    - /var/run/docker.sock:/var/run/docker.sock
+   - /opt/vam/:/opt/vam/
   restart: unless-stopped
 
 #  vam_webconfig-api-swaggerui:

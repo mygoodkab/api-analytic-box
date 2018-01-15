@@ -23,6 +23,12 @@ module.exports = [
         handler: (request, reply) => {
             db.collection('assignAnalytics').find().make((builder) => {
                 builder.callback((err, res) => {
+                    if (res.length == 0) {
+                        return reply({
+                            statusCode: 404,
+                            message: "No data",
+                        });
+                    }
                     return reply({
                         statusCode: 200,
                         message: "OK",
@@ -87,6 +93,8 @@ module.exports = [
                 payload._id = objectid();
                 let nickname = payload.nickname;
                 payload.status = 'stop';
+                payload.timestamp = Date.now();
+                payload.stopTime = Date.now();
                 db.collection('analytics').find().make((builder) => {
                     builder.where('id', payload._refAnalyticsId);
                     builder.callback((err, res) => {
@@ -142,20 +150,13 @@ module.exports = [
                                                                             payload.type = analyticsInfo.analyticsProfile.name;
                                                                             payload.analyticsInfo = analyticsInfo;
                                                                             payload.cameraInfo = cameraInfo;
-                                                                            db.collection('assignAnalytics').insert(request.payload);
-                                                                            db.collection('assignAnalytics').modify({ status: 'stop' }).make((builder) => {
-                                                                                builder.where("_refCameraId", payload._refCameraId);
-                                                                                builder.where("status", "start");
-                                                                                builder.callback((err, res) => {
-                                                                                    if (err || res.length == 0) {
-                                                                                        badRequest('have no assignAnalytics data to stop docker');
-                                                                                    }
-                                                                                    else {
-                                                                                        return reply({
-                                                                                            statusCode: 200,
-                                                                                            msg: 'stop docker and updata status success',
-                                                                                        });
-                                                                                    }
+                                                                            db.collection('assignAnalytics').insert(request.payload).callback((err) => {
+                                                                                if (err) {
+                                                                                    serverError("Can't insert data in AssignAnalytics");
+                                                                                }
+                                                                                return reply({
+                                                                                    statusCode: 200,
+                                                                                    msg: 'insert data success',
                                                                                 });
                                                                             });
                                                                         }

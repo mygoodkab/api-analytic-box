@@ -45,7 +45,7 @@ module.exports = [
                     return reply({
                         statusCode: 400,
                         msg: "Can't get log ",
-                        data: body
+                        data: err
                     })
                 } else {
                     //  console.log("log docker " + body)
@@ -53,6 +53,52 @@ module.exports = [
                         statusCode: 200,
                         msg: 'Get log docker success',
                         data: body
+                    })
+                }
+            })
+        }
+    },
+    {  // GET state from docker
+        method: 'POST',
+        path: '/docker/state',
+        config: {
+            tags: ['api'],
+            description: 'Get All analytics data',
+            notes: 'Get All analytics data',
+            validate: {
+                payload: {
+                    _nickname: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            // request.payload._nickname = "webconfig-dist"
+            // request.payload._nickname = "optimistic_clarke"
+            const options = {
+                socketPath: '/var/run/docker.sock',
+                path: '/v1.32/containers/' + request.payload._nickname + '/json?size=false',
+            };
+            var url = 'http://unix:' + options.socketPath + ':' + options.path
+            var option = {
+                url: url,
+                headers: {
+                    "Host": "http",
+                }
+            }
+            requestPath.get(option, (err, res, body) => {
+                if (err) {
+                    console.log('Error : ', err)
+                    return reply({
+                        statusCode: 400,
+                        msg: "Can't get state ",
+                        data: err
+                    })
+                } else {
+                    //  console.log("log docker " + body)
+                    return reply({
+                        statusCode: 200,
+                        msg: 'Get state docker success',
+                        data: JSON.parse(body)
                     })
                 }
             })
@@ -88,10 +134,12 @@ module.exports = [
                             // let cmd;
                             // if (payload._command == "start") {
 
-                            //     cmd = "curl http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/up"
+                            //     cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/"+nickname+"/up"
+                            //     console.log("full command string=>",cmd)
                             //     // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d"
                             // } else  {
-                            //     cmd = "curl http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/down"
+                            //     cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/"+nickname+"/down"
+                            //     console.log("full command string=>",cmd)
                             //     // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down "
                             // }
                             // exec(cmd, (error, stdout, stderr) => {
@@ -118,48 +166,71 @@ module.exports = [
                             //         badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr)
                             //     }
                             // });
-                            
+
+                            /*
+                                Legacy HTTP Methods
+                            */
                             let dockerCmdUrl;
-                            if(payload._command == 'start') {
+                            if (payload._command == 'start') {
                                 // dockerCmdUrl = "http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/up"
                                 // dockerCmdUrl = "http://192.168.1.113:4180/relay/execute/analytics/status/"+nickname+"/up"
-                                dockerCmdUrl = "http://10.0.0.69:4180/relay/execute/analytics/status/"+nickname+"/up"
-                                console.log("dockerCmdUrl=>",dockerCmdUrl)
+                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/up"
+                                console.log("dockerCmdUrl=>", dockerCmdUrl)
                             } else {
                                 // dockerCmdUrl = "http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/down"
                                 // dockerCmdUrl = "http://192.168.1.113:4180/relay/execute/analytics/status/"+nickname+"/down"
-                                dockerCmdUrl = "http://10.0.0.69:4180/relay/execute/analytics/status/"+nickname+"/down"
-                                console.log("dockerCmdUrl=>",dockerCmdUrl)
+                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/down"
+                                console.log("dockerCmdUrl=>", dockerCmdUrl)
+
                             }
-                            
-                            requestPath.get(dockerCmdUrl, (err,res,body) => {
-                                if(err) {
-                                    console.log("err=>",err)
+
+
+
+                            requestPath.get(dockerCmdUrl, (err, res, body) => {
+                                if (err) {
+                                    console.log("err=>", err)
                                     return reply({
                                         statusCode: 500,
                                         message: "Internal Error",
                                         data: err
-                                    })  
+                                    })
                                 }
 
-                                if(body) {
-                                    console.log("res body=>",body)
-                                    db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
-                                        builder.where('_id', payload._assignAnayticsId)
-                                        builder.callback((err: any, res: any) => {
-                                            if (err) {
-                                                badRequest("Can't up status")
-                                            }
-                                            return reply({
-                                                statusCode: 200,
-                                                message: "OK",
-                                                data: body
-                                            })  
+                                if (body) {
+                                    console.log("res body=>", body)
+                                    if (payload._command == 'start') {
+                                        db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
+                                            builder.where('_id', payload._assignAnayticsId)
+                                            builder.callback((err: any, res: any) => {
+                                                if (err) {
+                                                    badRequest("Can't up status")
+                                                }
+                                                return reply({
+                                                    statusCode: 200,
+                                                    message: "OK",
+                                                    data: body
+                                                })
+                                            });
                                         });
-                                    });
+                                    } else {
+                                        db.collection('assignAnalytics').modify({ status: payload._command, stopTime: Date.now() }).make((builder: any) => {
+                                            builder.where('_id', payload._assignAnayticsId)
+                                            builder.callback((err: any, res: any) => {
+                                                if (err) {
+                                                    badRequest("Can't up status")
+                                                }
+                                                return reply({
+                                                    statusCode: 200,
+                                                    message: "OK",
+                                                    data: body
+                                                })
+                                            });
+                                        });
+                                    }
+
                                 }
                             })
-                            
+
                         }
                     })
                 })

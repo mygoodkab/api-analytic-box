@@ -1,5 +1,6 @@
 import * as db from '../nosql-util';
 import { Util } from '../util';
+const find = require('find-process');
 const objectid = require('objectid');
 const Joi = require('joi')
 const jsonfile = require('jsonfile')
@@ -7,6 +8,7 @@ var child_process = require('child_process');
 var fork = require('child_process').fork;
 //import { sqliteUtil } from '../sqlite-util';
 //import { dbpath } from '../server';
+const { exec } = require('child_process');
 
 module.exports = [
     {  // Get all camera profile
@@ -80,7 +82,7 @@ module.exports = [
             }
         },
         handler: function (request, reply) {
-            
+
             db.collection('camera').find().make((builder: any) => {
                 builder.sort("portrelay", true);
                 builder.first();
@@ -325,6 +327,74 @@ module.exports = [
                 })
             }
         }
+    },
+    {
+        method: 'GET',
+        path: '/camera/live',
+        config: {
+            tags: ['api'],
+            description: 'Live camera ',
+            notes: 'Live camera ',
+        },
+        handler: (request, reply) => {
+            let cmd = "../jsmpeg/live.sh"
+            exec(cmd, (error, stdout, stderr) => {
+                if (stdout) {
+                    return reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: stdout
+                    })
+                } else if (stderr) {
+                    return reply({
+                        statusCode: 500,
+                        message: "Server stdError",
+                        data: stderr
+                    })
+                } else {
+                    return reply({
+                        statusCode: 500,
+                        message: "Server Error",
+                        data: error
+                    })
+                }
+            })
+        }
+    },
+    {
+        method: 'GET',
+        path: '/camera/kill',
+        config: {
+            tags: ['api'],
+            description: 'Kill process camera live',
+            notes: 'Kill process camera live',
+        },
+        handler: (request, reply) => {
+
+
+            // exec(cmd, (error, stdout, stderr) => {
+            //     if (stdout) {
+            //         return reply({
+            //             statusCode: 200,
+            //             message: "OK",
+            //             data: stdout
+            //         })
+            //     } else if (stderr) {
+            //         return reply({
+            //             statusCode: 500,
+            //             message: "Server stdError",
+            //             data: stderr
+            //         })
+            //     } else {
+            //         return reply({
+            //             statusCode: 500,
+            //             message: "Server Error",
+            //             data: error
+            //         })
+            //     }
+            // })
+        }
     }
+
 
 ];

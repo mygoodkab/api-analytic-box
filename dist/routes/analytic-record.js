@@ -103,6 +103,8 @@ module.exports = [
                     }
                 });
             });
+            function notification(dockerNickname) {
+            }
             function badrequest(msg) {
                 console.log("Bad Request: " + msg);
                 return reply({

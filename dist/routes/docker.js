@@ -41,7 +41,7 @@ module.exports = [
                     return reply({
                         statusCode: 400,
                         msg: "Can't get log ",
-                        data: body
+                        data: err
                     });
                 }
                 else {
@@ -49,6 +49,50 @@ module.exports = [
                         statusCode: 200,
                         msg: 'Get log docker success',
                         data: body
+                    });
+                }
+            });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/docker/state',
+        config: {
+            tags: ['api'],
+            description: 'Get All analytics data',
+            notes: 'Get All analytics data',
+            validate: {
+                payload: {
+                    _nickname: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            const options = {
+                socketPath: '/var/run/docker.sock',
+                path: '/v1.32/containers/' + request.payload._nickname + '/json?size=false',
+            };
+            var url = 'http://unix:' + options.socketPath + ':' + options.path;
+            var option = {
+                url: url,
+                headers: {
+                    "Host": "http",
+                }
+            };
+            requestPath.get(option, (err, res, body) => {
+                if (err) {
+                    console.log('Error : ', err);
+                    return reply({
+                        statusCode: 400,
+                        msg: "Can't get state ",
+                        data: err
+                    });
+                }
+                else {
+                    return reply({
+                        statusCode: 200,
+                        msg: 'Get state docker success',
+                        data: JSON.parse(body)
                     });
                 }
             });
@@ -82,11 +126,11 @@ module.exports = [
                             const nickname = res.nickname;
                             let dockerCmdUrl;
                             if (payload._command == 'start') {
-                                dockerCmdUrl = "http://10.0.0.69:4180/relay/execute/analytics/status/" + nickname + "/up";
+                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/up";
                                 console.log("dockerCmdUrl=>", dockerCmdUrl);
                             }
                             else {
-                                dockerCmdUrl = "http://10.0.0.69:4180/relay/execute/analytics/status/" + nickname + "/down";
+                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/down";
                                 console.log("dockerCmdUrl=>", dockerCmdUrl);
                             }
                             requestPath.get(dockerCmdUrl, (err, res, body) => {
@@ -100,19 +144,36 @@ module.exports = [
                                 }
                                 if (body) {
                                     console.log("res body=>", body);
-                                    db.collection('assignAnalytics').modify({ status: payload._command }).make((builder) => {
-                                        builder.where('_id', payload._assignAnayticsId);
-                                        builder.callback((err, res) => {
-                                            if (err) {
-                                                badRequest("Can't up status");
-                                            }
-                                            return reply({
-                                                statusCode: 200,
-                                                message: "OK",
-                                                data: body
+                                    if (payload._command == 'start') {
+                                        db.collection('assignAnalytics').modify({ status: payload._command }).make((builder) => {
+                                            builder.where('_id', payload._assignAnayticsId);
+                                            builder.callback((err, res) => {
+                                                if (err) {
+                                                    badRequest("Can't up status");
+                                                }
+                                                return reply({
+                                                    statusCode: 200,
+                                                    message: "OK",
+                                                    data: body
+                                                });
                                             });
                                         });
-                                    });
+                                    }
+                                    else {
+                                        db.collection('assignAnalytics').modify({ status: payload._command, stopTime: Date.now() }).make((builder) => {
+                                            builder.where('_id', payload._assignAnayticsId);
+                                            builder.callback((err, res) => {
+                                                if (err) {
+                                                    badRequest("Can't up status");
+                                                }
+                                                return reply({
+                                                    statusCode: 200,
+                                                    message: "OK",
+                                                    data: body
+                                                });
+                                            });
+                                        });
+                                    }
                                 }
                             });
                         }

@@ -32,6 +32,12 @@ module.exports = [
         handler: (request, reply) => {
             db.collection('assignAnalytics').find().make((builder: any) => {
                 builder.callback((err: any, res: any) => {
+                    if (res.length == 0) {
+                        return reply({
+                            statusCode: 404,
+                            message: "No data",
+                        })
+                    }
                     return reply({
                         statusCode: 200,
                         message: "OK",
@@ -98,6 +104,8 @@ module.exports = [
                 payload._id = objectid();
                 let nickname = payload.nickname;
                 payload.status = 'stop';
+                payload.timestamp = Date.now()
+                payload.stopTime = Date.now()
                 db.collection('analytics').find().make((builder: any) => {
                     builder.where('id', payload._refAnalyticsId)
                     builder.callback((err: any, res: any) => {
@@ -158,21 +166,30 @@ module.exports = [
                                                                             payload.type = analyticsInfo.analyticsProfile.name;
                                                                             payload.analyticsInfo = analyticsInfo;
                                                                             payload.cameraInfo = cameraInfo
-                                                                            db.collection('assignAnalytics').insert(request.payload)
-                                                                            db.collection('assignAnalytics').modify({ status: 'stop' }).make((builder: any) => {
-                                                                                builder.where("_refCameraId", payload._refCameraId)
-                                                                                builder.where("status", "start")
-                                                                                builder.callback((err: any, res: any) => {
-                                                                                    if (err || res.length == 0) {
-                                                                                        badRequest('have no assignAnalytics data to stop docker')
-                                                                                    } else {
-                                                                                        return reply({
-                                                                                            statusCode: 200,
-                                                                                            msg: 'stop docker and updata status success',
-                                                                                        })
-                                                                                    }
+                                                                            db.collection('assignAnalytics').insert(request.payload).callback((err) => {
+                                                                                if (err) {
+                                                                                    serverError("Can't insert data in AssignAnalytics")
+                                                                                }
+                                                                                
+                                                                                return reply({
+                                                                                    statusCode: 200,
+                                                                                    msg: 'insert data success',
                                                                                 })
                                                                             })
+                                                                            // db.collection('assignAnalytics').modify({ status: 'stop' }).make((builder: any) => {
+                                                                            //     builder.where("_refCameraId", payload._refCameraId)
+                                                                            //     builder.where("status", "start")
+                                                                            //     builder.callback((err: any, res: any) => {
+                                                                            //         if (err || res.length == 0) {
+                                                                            //             badRequest('have no assignAnalytics data to stop docker')
+                                                                            //         } else {
+                                                                            //             return reply({
+                                                                            //                 statusCode: 200,
+                                                                            //                 msg: 'stop docker and updata status success',
+                                                                            //             })
+                                                                            //         }
+                                                                            //     })
+                                                                            // })
                                                                         }
                                                                     })
                                                                 })
@@ -347,7 +364,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             let status = ""
-            if (request.payload.command == "start" || request.payload.command == "stop" ) {
+            if (request.payload.command == "start" || request.payload.command == "stop") {
                 status = ""
             } else if (request.payload.command == "2") {
                 status = "start"

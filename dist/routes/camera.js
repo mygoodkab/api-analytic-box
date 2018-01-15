@@ -1,11 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const db = require("../nosql-util");
+const find = require('find-process');
 const objectid = require('objectid');
 const Joi = require('joi');
 const jsonfile = require('jsonfile');
 var child_process = require('child_process');
 var fork = require('child_process').fork;
+const { exec } = require('child_process');
 module.exports = [
     {
         method: 'GET',
@@ -317,6 +319,52 @@ module.exports = [
                     data: "No payload"
                 });
             }
+        }
+    },
+    {
+        method: 'GET',
+        path: '/camera/live',
+        config: {
+            tags: ['api'],
+            description: 'Live camera ',
+            notes: 'Live camera ',
+        },
+        handler: (request, reply) => {
+            let cmd = "../jsmpeg/live.sh";
+            exec(cmd, (error, stdout, stderr) => {
+                if (stdout) {
+                    return reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: stdout
+                    });
+                }
+                else if (stderr) {
+                    return reply({
+                        statusCode: 500,
+                        message: "Server stdError",
+                        data: stderr
+                    });
+                }
+                else {
+                    return reply({
+                        statusCode: 500,
+                        message: "Server Error",
+                        data: error
+                    });
+                }
+            });
+        }
+    },
+    {
+        method: 'GET',
+        path: '/camera/kill',
+        config: {
+            tags: ['api'],
+            description: 'Kill process camera live',
+            notes: 'Kill process camera live',
+        },
+        handler: (request, reply) => {
         }
     }
 ];

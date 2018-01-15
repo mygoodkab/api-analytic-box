@@ -35,23 +35,25 @@ module.exports = [
             payload.id = id
             payload.timedb = Date.now()
             payload.fileType = payload.fileType.toLowerCase()
-            db.collection('assignAnalytics').find().make((builder)=>{
-                builder.where('nickname',payload.dockerNickname)
+            db.collection('assignAnalytics').find().make((builder) => {
+                builder.where('nickname', payload.dockerNickname)
                 builder.first()
-                builder.callback((err,res)=>{
-                    if(!res){
+                builder.callback((err, res) => {
+                    if (!res) {
                         console.log("Can't find docker contrainer")
                         badrequest("Can't find docker contrainer")
-                    }else{
+                    } else {
                         let camInfo = res.cameraInfo
+                        // ถ้า outputType ต้องตรงตามเงือนไข  
                         if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
-                            
+
                             db.collection('analytics-record').insert(payload).callback((err) => {
                                 console.log("insert data ");
                                 if (err) {
                                     console.log(err)
                                     badrequest(err)
                                 } else {
+                                    // ถ้า file type เป็นแบบรูปภาพจะส่งไปยัง smart living 
                                     if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
                                         let str = {
                                             ts: payload.ts,
@@ -62,42 +64,33 @@ module.exports = [
                                         }
                                         //get file
                                         let path: any = Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + Util.hash(str) + "." + payload.fileType;
-                                        if(!fs.existsSync(path)){
+                                        if (!fs.existsSync(path)) {
                                             console.log("Can't find image file")
                                             badRequest("Can't find image file")
-                                        }else{
-                                        var formData = new FormData();
-                                        formData.append('refId', camInfo._id)
-                                        formData.append('type', payload.outputType)
-                                        formData.append('file', fs.createReadStream(path))
-                                        formData.append('ts', payload.ts)
-                                        formData.append('meta', "test")
-                                        // let formData = {
-                                        //     refId: "F7BB1AD6CBA9",
-                                        //     type: payload.outputType,
-                                        //     file: fs.createReadStream(path),
-                                        //     ts: parseInt(payload.ts),
-                                        //     meta: { "test": "test" }
-                                        // }
-                                      
-                                        // send data to smart-living 
-                                        // httprequest.post('https://api.thailand-smartliving.com/v1/file/upload').form(formData)
-                                        console.log("sending data . . . .")
-                                        formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
-                                            if (err) {
-                                                console.log(err)
-                                                badrequest(err)
-                                            } else {
-                                               // console.log(res)
-                                                console.log("sent data to smart living")
-                                                return reply({
-                                                    statusCode: 200,
-                                                    data: res
-                                                })
-                                            }
-                                        })
+                                        } else {
+                                            var formData = new FormData();
+                                            formData.append('refId', camInfo._id)
+                                            formData.append('type', payload.outputType)
+                                            formData.append('file', fs.createReadStream(path))
+                                            formData.append('ts', payload.ts)
+                                            formData.append('meta', "test")
+
+                                            console.log("sending data . . . .")
+                                            formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
+                                                if (err) {
+                                                    console.log(err)
+                                                    badrequest(err)
+                                                } else {
+                                                    // console.log(res)
+                                                    console.log("sent data to smart living")
+                                                    return reply({
+                                                        statusCode: 200,
+                                                        data: res
+                                                    })
+                                                }
+                                            })
                                         }
-                             
+
                                     } else {
                                         return reply({
                                             statusCode: 200,
@@ -112,9 +105,11 @@ module.exports = [
                     }
                 })
             })
-           
+            function notification(dockerNickname){
+
+            }
             function badrequest(msg) {
-           console.log("Bad Request: "  + msg)
+                console.log("Bad Request: " + msg)
                 return reply({
                     statusCode: 400,
                     msg: "Bad Request",
