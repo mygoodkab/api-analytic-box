@@ -124,26 +124,22 @@ module.exports = [
                         }
                         else {
                             const nickname = res.nickname;
-                            let dockerCmdUrl;
-                            if (payload._command == 'start') {
-                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/up";
-                                console.log("dockerCmdUrl=>", dockerCmdUrl);
+                            let cmd;
+                            if (payload._command == "start") {
+                                cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/" + nickname + "/up";
+                                console.log("full command string=>", cmd);
                             }
                             else {
-                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/down";
-                                console.log("dockerCmdUrl=>", dockerCmdUrl);
+                                cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/" + nickname + "/down";
+                                console.log("full command string=>", cmd);
                             }
-                            requestPath.get(dockerCmdUrl, (err, res, body) => {
-                                if (err) {
-                                    console.log("err=>", err);
-                                    return reply({
-                                        statusCode: 500,
-                                        message: "Internal Error",
-                                        data: err
-                                    });
+                            exec(cmd, (error, stdout, stderr) => {
+                                if (error) {
+                                    console.error(`exec error: ${error}`);
+                                    badRequest("Error : " + error);
                                 }
-                                if (body) {
-                                    console.log("res body=>", body);
+                                else if (stdout) {
+                                    console.log("respone cmd curl=>", stdout);
                                     if (payload._command == 'start') {
                                         db.collection('assignAnalytics').modify({ status: payload._command }).make((builder) => {
                                             builder.where('_id', payload._assignAnayticsId);
@@ -154,7 +150,7 @@ module.exports = [
                                                 return reply({
                                                     statusCode: 200,
                                                     message: "OK",
-                                                    data: body
+                                                    data: "update status success"
                                                 });
                                             });
                                         });
@@ -169,11 +165,14 @@ module.exports = [
                                                 return reply({
                                                     statusCode: 200,
                                                     message: "OK",
-                                                    data: body
+                                                    data: "update status success"
                                                 });
                                             });
                                         });
                                     }
+                                }
+                                else {
+                                    badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr);
                                 }
                             });
                         }

@@ -131,73 +131,24 @@ module.exports = [
                             // console.log(res)
                             const nickname = res.nickname
 
-                            // let cmd;
-                            // if (payload._command == "start") {
+                            let cmd;
+                            if (payload._command == "start") {
 
-                            //     cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/"+nickname+"/up"
-                            //     console.log("full command string=>",cmd)
-                            //     // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d"
-                            // } else  {
-                            //     cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/"+nickname+"/down"
-                            //     console.log("full command string=>",cmd)
-                            //     // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down "
-                            // }
-                            // exec(cmd, (error, stdout, stderr) => {
-                            //     if (error) {
-                            //         console.error(`exec error: ${error}`);
-                            //         badRequest("Error : " + error)
-
-                            //     } else if (stdout) {
-                            //         console.log("respone cmd curl=>",stdout)
-                            //         db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
-                            //             builder.where('_id', payload._assignAnayticsId)
-                            //             builder.callback((err: any, res: any) => {
-                            //                 if (err) {
-                            //                     badRequest("Can't up status")
-                            //                 }
-                            //                 return reply({
-                            //                     statusCode: 200,
-                            //                     message: "OK",
-                            //                     data: stdout
-                            //                 })  
-                            //             });
-                            //         });
-                            //     } else {
-                            //         badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr)
-                            //     }
-                            // });
-
-                            /*
-                                Legacy HTTP Methods
-                            */
-                            let dockerCmdUrl;
-                            if (payload._command == 'start') {
-                                // dockerCmdUrl = "http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/up"
-                                // dockerCmdUrl = "http://192.168.1.113:4180/relay/execute/analytics/status/"+nickname+"/up"
-                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/up"
-                                console.log("dockerCmdUrl=>", dockerCmdUrl)
+                                cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/" + nickname + "/up"
+                                console.log("full command string=>", cmd)
+                                // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d"
                             } else {
-                                // dockerCmdUrl = "http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/down"
-                                // dockerCmdUrl = "http://192.168.1.113:4180/relay/execute/analytics/status/"+nickname+"/down"
-                                dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/down"
-                                console.log("dockerCmdUrl=>", dockerCmdUrl)
-
+                                cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/" + nickname + "/down"
+                                console.log("full command string=>", cmd)
+                                // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down "
                             }
+                            exec(cmd, (error, stdout, stderr) => {
+                                if (error) {
+                                    console.error(`exec error: ${error}`);
+                                    badRequest("Error : " + error)
 
-
-
-                            requestPath.get(dockerCmdUrl, (err, res, body) => {
-                                if (err) {
-                                    console.log("err=>", err)
-                                    return reply({
-                                        statusCode: 500,
-                                        message: "Internal Error",
-                                        data: err
-                                    })
-                                }
-
-                                if (body) {
-                                    console.log("res body=>", body)
+                                } else if (stdout) {
+                                    console.log("respone cmd curl=>", stdout)
                                     if (payload._command == 'start') {
                                         db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
                                             builder.where('_id', payload._assignAnayticsId)
@@ -208,7 +159,7 @@ module.exports = [
                                                 return reply({
                                                     statusCode: 200,
                                                     message: "OK",
-                                                    data: body
+                                                    data: "update status success"
                                                 })
                                             });
                                         });
@@ -222,14 +173,87 @@ module.exports = [
                                                 return reply({
                                                     statusCode: 200,
                                                     message: "OK",
-                                                    data: body
+                                                    data: "update status success"
                                                 })
                                             });
                                         });
                                     }
-
+                                    // db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
+                                    //     builder.where('_id', payload._assignAnayticsId)
+                                    //     builder.callback((err: any, res: any) => {
+                                    //         if (err) {
+                                    //             badRequest("Can't up status")
+                                    //         }
+                                    //         return reply({
+                                    //             statusCode: 200,
+                                    //             message: "OK",
+                                    //             data: stdout
+                                    //         })  
+                                    //     });
+                                    // });
+                                } else {
+                                    badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr)
                                 }
-                            })
+                            });
+
+                            /*
+                                Legacy HTTP Methods
+                            */
+                            // let dockerCmdUrl;
+                            // if (payload._command == 'start') {
+                            //     // dockerCmdUrl = "http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/up"
+                            //     // dockerCmdUrl = "http://192.168.1.113:4180/relay/execute/analytics/status/"+nickname+"/up"
+                            //     dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/up"
+                            //     console.log("dockerCmdUrl=>", dockerCmdUrl)
+                            // } else {
+                            //     // dockerCmdUrl = "http://embedded-performance-server.local:4180/relay/execute/analytics/status/"+nickname+"/down"
+                            //     // dockerCmdUrl = "http://192.168.1.113:4180/relay/execute/analytics/status/"+nickname+"/down"
+                            //     dockerCmdUrl = "http://10.0.0.71:4180/relay/execute/analytics/status/" + nickname + "/down"
+                            //     console.log("dockerCmdUrl=>", dockerCmdUrl)
+                            // }
+                            // requestPath.get(dockerCmdUrl, (err, res, body) => {
+                            //     if (err) {
+                            //         console.log("err=>", err)
+                            //         return reply({
+                            //             statusCode: 500,
+                            //             message: "Internal Error",
+                            //             data: err
+                            //         })
+                            //     }
+                            //     if (body) {
+                            //         console.log("res body=>", body)
+                            // if (payload._command == 'start') {
+                            //     db.collection('assignAnalytics').modify({ status: payload._command }).make((builder: any) => {
+                            //         builder.where('_id', payload._assignAnayticsId)
+                            //         builder.callback((err: any, res: any) => {
+                            //             if (err) {
+                            //                 badRequest("Can't up status")
+                            //             }
+                            //             return reply({
+                            //                 statusCode: 200,
+                            //                 message: "OK",
+                            //                 data: body
+                            //             })
+                            //         });
+                            //     });
+                            // } else {
+                            //     db.collection('assignAnalytics').modify({ status: payload._command, stopTime: Date.now() }).make((builder: any) => {
+                            //         builder.where('_id', payload._assignAnayticsId)
+                            //         builder.callback((err: any, res: any) => {
+                            //             if (err) {
+                            //                 badRequest("Can't up status")
+                            //             }
+                            //             return reply({
+                            //                 statusCode: 200,
+                            //                 message: "OK",
+                            //                 data: body
+                            //             })
+                            //         });
+                            //     });
+                            // }
+
+                            //     }
+                            // })
 
                         }
                     })

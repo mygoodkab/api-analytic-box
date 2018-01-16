@@ -2,6 +2,8 @@ import * as db from '../nosql-util';
 import { Util } from '../util';
 import { date } from 'joi';
 import { badRequest } from 'boom';
+const dateFormat = require('dateformat');
+const differenceInMinutes = require('date-fns/difference_in_minutes')
 const FormData = require('form-data');
 const objectid = require('objectid');
 const Joi = require('joi')
@@ -9,6 +11,7 @@ const crypto = require('crypto');
 const pathSep = require('path');
 const httprequest = require('request');
 const fs = require('fs')
+
 module.exports = [
 
     { // insert  record 
@@ -29,6 +32,8 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
+            let now = new Date();
+            let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
             const id = objectid()
             const payload = request.payload;
             //payload.ts = parseInt(payload.ts, 10)
@@ -53,7 +58,10 @@ module.exports = [
                                     console.log(err)
                                     badrequest(err)
                                 } else {
+                                    
                                     // ถ้า file type เป็นแบบรูปภาพจะส่งไปยัง smart living 
+
+
                                     if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
                                         let str = {
                                             ts: payload.ts,
@@ -105,8 +113,62 @@ module.exports = [
                     }
                 })
             })
-            function notification(dockerNickname){
+            function diffdate(data) {
+                let isToday = false;
 
+                var year = parseInt(dateFormat(now, "yyy"))
+                var month = parseInt(dateFormat(now, "m"))
+                var day = parseInt(dateFormat(now, "d"))
+                var hour = parseInt(dateFormat(now, "HH"))
+                var min = parseInt(dateFormat(now, "MM"))
+
+                var tomorrowYear = parseInt(dateFormat(tomorrow, "yyy"))
+                var tomorrowMonth = parseInt(dateFormat(tomorrow, "m"))
+                var tomorrowDay = parseInt(dateFormat(tomorrow, "d"))
+                if (data.day == dateFormat(now, "ddd").toLowerCase()) {
+                    isToday = true
+                }
+
+                if (isToday) {
+                    let timeEndH = parseInt(data.timeEnd.split(':')[0])
+                    let timeStartH = parseInt(data.timeStart.split(':')[0])
+                    let timeEndM = parseInt(data.timeEnd.split(':')[1])
+                    let timeStartM = parseInt(data.timeStart.split(':')[1])
+
+                    if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) {//ถ้าเวลาเริ่มมากกว่าเวลาจบ เช่น 5.30-22.30 , 23.30-23.31 , 14.00-14.00
+                        var start = differenceInMinutes( // diff กันแล้วผลลัพธ์  - คือยังไม่ถึงเวลา แต่ถ้าเป็น + คือผ่านมาแล้ว
+                            new Date(year, month, day, hour, min, 0), //เวลาปัจจุบัน
+                            new Date(year, month, day, timeStartH, timeStartM, 0) //เวลาเทียบ
+                        )
+                        var end = differenceInMinutes(
+                            new Date(year, month, day, hour, min, 0),
+                            new Date(year, month, day, timeEndH, timeEndM, 0)
+                        )
+                        console.log(start + " " + end)
+
+                        if (start >= 0 && end <= 0) {
+                            return true
+                        }
+                    }
+
+                    else if (timeStartH > timeEndH || (timeStartH == timeEndH) && (timeStartM >= timeEndM)) { //ถ้าเวลาเริ่มมากกว่าเวลาจบ เช่น 23.30-5.30 , 23.31-23.30
+                        var start = differenceInMinutes( // diff กันแล้วผลลัพธ์  - คือยังไม่ถึงเวลา แต่ถ้าเป็น + คือผ่านมาแล้ว
+                            new Date(year, month, day, hour, min, 0), //เวลาปัจจุบัน
+                            new Date(year, month, day, timeStartH, timeStartM, 0) //เวลาเทียบ
+                        )
+                        var end = differenceInMinutes(
+                            new Date(year, month, day, hour, min, 0),
+                            new Date(tomorrowYear, tomorrowMonth, tomorrowDay, timeEndH, timeEndM, 0)
+                        )
+                        console.log(start + " " + end)
+
+                        if (start >= 0 && end <= 0) {
+                            return true
+                        }
+
+                    }
+                }
+                return false
             }
             function badrequest(msg) {
                 console.log("Bad Request: " + msg)

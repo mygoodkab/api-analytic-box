@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const db = require("../nosql-util");
 const util_1 = require("../util");
 const boom_1 = require("boom");
+const dateFormat = require('dateformat');
+const differenceInMinutes = require('date-fns/difference_in_minutes');
 const FormData = require('form-data');
 const objectid = require('objectid');
 const Joi = require('joi');
@@ -29,6 +31,8 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
+            let now = new Date();
+            let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
             const id = objectid();
             const payload = request.payload;
             payload.id = id;
@@ -103,7 +107,42 @@ module.exports = [
                     }
                 });
             });
-            function notification(dockerNickname) {
+            function diffdate(data) {
+                let isToday = false;
+                var year = parseInt(dateFormat(now, "yyy"));
+                var month = parseInt(dateFormat(now, "m"));
+                var day = parseInt(dateFormat(now, "d"));
+                var hour = parseInt(dateFormat(now, "HH"));
+                var min = parseInt(dateFormat(now, "MM"));
+                var tomorrowYear = parseInt(dateFormat(tomorrow, "yyy"));
+                var tomorrowMonth = parseInt(dateFormat(tomorrow, "m"));
+                var tomorrowDay = parseInt(dateFormat(tomorrow, "d"));
+                if (data.day == dateFormat(now, "ddd").toLowerCase()) {
+                    isToday = true;
+                }
+                if (isToday) {
+                    let timeEndH = parseInt(data.timeEnd.split(':')[0]);
+                    let timeStartH = parseInt(data.timeStart.split(':')[0]);
+                    let timeEndM = parseInt(data.timeEnd.split(':')[1]);
+                    let timeStartM = parseInt(data.timeStart.split(':')[1]);
+                    if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) {
+                        var start = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeStartH, timeStartM, 0));
+                        var end = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeEndH, timeEndM, 0));
+                        console.log(start + " " + end);
+                        if (start >= 0 && end <= 0) {
+                            return true;
+                        }
+                    }
+                    else if (timeStartH > timeEndH || (timeStartH == timeEndH) && (timeStartM >= timeEndM)) {
+                        var start = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeStartH, timeStartM, 0));
+                        var end = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(tomorrowYear, tomorrowMonth, tomorrowDay, timeEndH, timeEndM, 0));
+                        console.log(start + " " + end);
+                        if (start >= 0 && end <= 0) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
             }
             function badrequest(msg) {
                 console.log("Bad Request: " + msg);
