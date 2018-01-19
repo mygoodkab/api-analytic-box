@@ -218,6 +218,7 @@ module.exports = [
                 builder.where("_id", request.payload._id);
                 builder.first();
                 builder.callback((err, res) => {
+                    let dockerNickname = res.nickname;
                     if (err) {
                         return reply({
                             statusCode: 500,
@@ -239,9 +240,19 @@ module.exports = [
                                             badRequest("Can't Delete data");
                                         }
                                         else {
-                                            return reply({
-                                                statusCode: 200,
-                                                message: "OK",
+                                            db.collection('rules').remove().make((builder) => {
+                                                builder.where("dockerNickname", dockerNickname);
+                                                builder.callback((err, res) => {
+                                                    if (err) {
+                                                        badRequest("Can't Delete data");
+                                                    }
+                                                    else {
+                                                        return reply({
+                                                            statusCode: 200,
+                                                            message: "OK",
+                                                        });
+                                                    }
+                                                });
                                             });
                                         }
                                     });

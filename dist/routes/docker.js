@@ -26,8 +26,9 @@ module.exports = [
         handler: (request, reply) => {
             const options = {
                 socketPath: '/var/run/docker.sock',
-                path: '/v1.24/containers/' + request.payload._nickname + '/logs?stdout=1',
+                path: '/v1.24/containers/' + request.payload._nickname + '/logs?follow=false&stdout=true&stderr=true&since=0&timestamps=false&tail=50',
             };
+            console.log('Path get logs=>', options);
             var url = 'http://unix:' + options.socketPath + ':' + options.path;
             var option = {
                 url: url,

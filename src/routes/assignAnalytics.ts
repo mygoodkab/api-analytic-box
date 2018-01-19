@@ -170,7 +170,7 @@ module.exports = [
                                                                                 if (err) {
                                                                                     serverError("Can't insert data in AssignAnalytics")
                                                                                 }
-                                                                                
+
                                                                                 return reply({
                                                                                     statusCode: 200,
                                                                                     msg: 'insert data success',
@@ -251,6 +251,7 @@ module.exports = [
                 builder.where("_id", request.payload._id)
                 builder.first()
                 builder.callback((err: any, res: any) => {
+                    let dockerNickname = res.nickname 
                     if (err) {
                         return reply({
                             statusCode: 500,
@@ -270,10 +271,21 @@ module.exports = [
                                         if (err) {
                                             badRequest("Can't Delete data")
                                         } else {
-                                            return reply({
-                                                statusCode: 200,
-                                                message: "OK",
+                                            // delete rules
+                                            db.collection('rules').remove().make((builder: any) => {
+                                                builder.where("dockerNickname", dockerNickname )
+                                                builder.callback((err: any, res: any) => {
+                                                    if (err) {
+                                                        badRequest("Can't Delete data")
+                                                    } else {
+                                                        return reply({
+                                                            statusCode: 200,
+                                                            message: "OK",
+                                                        })
+                                                    }
+                                                })
                                             })
+
                                         }
                                     });
                                 });

@@ -2,7 +2,7 @@ version: '3'
 services:
  vam_webconfig-api:
   build: .
-  image: embedded-performance-server.local:5000/eslab/webconfig-api:latest
+  image: embedded-performance-server.local:5000/eslab/webconfig-api:BACKEND-RFC01-V0.1
   container_name: vam-webconfig-api
   ports:
     - 8000:8000

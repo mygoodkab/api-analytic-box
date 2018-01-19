@@ -17,6 +17,7 @@
     "csvtojson": "^1.1.9",
     "curl": "^0.1.4",
     "curlrequest": "^1.0.1",
+    "date-fns": "^1.29.0",
     "dateformat": "^3.0.2",
     "del": "^3.0.0",
     "exec-sh": "^0.2.1",

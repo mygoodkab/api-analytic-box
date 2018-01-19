@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const pathSep = require('path');
 const httprequest = require('request');
 const fs = require('fs');
+let previousRequestData = [];
 module.exports = [
     {
         method: 'POST',
@@ -31,8 +32,9 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            let now = new Date();
-            let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+            let timezone = (5) * 60 * 60 * 1000;
+            let now = new Date(new Date().getTime() + timezone);
+            let tomorrow = new Date(new Date().getTime() + (24 + 5) * 60 * 60 * 1000);
             const id = objectid();
             const payload = request.payload;
             payload.id = id;
@@ -43,12 +45,12 @@ module.exports = [
                 builder.first();
                 builder.callback((err, res) => {
                     if (!res) {
-                        console.log("Can't find docker contrainer");
-                        badrequest("Can't find docker contrainer");
+                        console.log("Can't find docker contrainer" + payload.dockerNickname);
+                        badrequest("Can't find docker contrainer" + payload.dockerNickname);
                     }
                     else {
                         let camInfo = res.cameraInfo;
-                        if (payload && (payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
+                        if (payload && (payload.outputType == 'cropping-counting' || payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
                             db.collection('analytics-record').insert(payload).callback((err) => {
                                 console.log("insert data ");
                                 if (err) {
@@ -56,47 +58,124 @@ module.exports = [
                                     badrequest(err);
                                 }
                                 else {
-                                    if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
-                                        let str = {
-                                            ts: payload.ts,
-                                            dockerNickname: payload.dockerNickname,
-                                            outputType: payload.outputType,
-                                            fileType: payload.fileType,
-                                            metadata: payload.metadata
-                                        };
-                                        let path = util_1.Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + payload.fileType;
-                                        if (!fs.existsSync(path)) {
-                                            console.log("Can't find image file");
-                                            boom_1.badRequest("Can't find image file");
-                                        }
-                                        else {
-                                            var formData = new FormData();
-                                            formData.append('refId', camInfo._id);
-                                            formData.append('type', payload.outputType);
-                                            formData.append('file', fs.createReadStream(path));
-                                            formData.append('ts', payload.ts);
-                                            formData.append('meta', "test");
-                                            console.log("sending data . . . .");
-                                            formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
-                                                if (err) {
-                                                    console.log(err);
-                                                    badrequest(err);
-                                                }
-                                                else {
-                                                    console.log("sent data to smart living");
-                                                    return reply({
-                                                        statusCode: 200,
-                                                        data: res
-                                                    });
-                                                }
-                                            });
-                                        }
+                                    if (typeof previousRequestData[payload.dockerNickname] == "undefined") {
+                                        console.log("first notification");
+                                        previousRequestData[payload.dockerNickname] = payload;
+                                        notification();
                                     }
                                     else {
-                                        return reply({
-                                            statusCode: 200,
-                                            msg: "OK Insert success",
+                                        let limitTime = 5;
+                                        let analyticsDataTime = new Date(parseInt(previousRequestData[payload.dockerNickname].ts + "000") + timezone);
+                                        let diffTime = (now - analyticsDataTime) / (1000 * 60);
+                                        console.log("difftime : " + diffTime);
+                                        if (diffTime > limitTime) {
+                                            previousRequestData[payload.dockerNickname] = payload;
+                                            console.log("Notification more 5 minute");
+                                            notification();
+                                        }
+                                        else {
+                                            console.log("Notification less 5 minute");
+                                            sentDataToSmartliving();
+                                        }
+                                    }
+                                    function notification() {
+                                        db.collection('rules').find().make((builder) => {
+                                            builder.where('dockerNickname', payload.dockerNickname);
+                                            builder.first();
+                                            builder.callback((err, res) => {
+                                                console.log("read rule :  " + payload.dockerNickname);
+                                                if (!res) {
+                                                    console.log("No rule");
+                                                    sentDataToSmartliving();
+                                                }
+                                                else {
+                                                    try {
+                                                        for (let rule of res.rule) {
+                                                            if (diffdate(rule)) {
+                                                                let notificationData = payload;
+                                                                notificationData.id = objectid();
+                                                                notificationData.statusRead = false;
+                                                                let isNotification = false;
+                                                                if (rule.type == "cropping") {
+                                                                    isNotification = true;
+                                                                }
+                                                                else if (rule.type == "counting") {
+                                                                    if (rule.condition == "more") {
+                                                                        if (rule.value >= payload.metadata.n)
+                                                                            isNotification = true;
+                                                                    }
+                                                                    else if (rule.condition == "less") {
+                                                                        if (rule.value <= payload.metadata.n)
+                                                                            isNotification = true;
+                                                                    }
+                                                                    else
+                                                                        badrequest("Invaild condition");
+                                                                }
+                                                                if (isNotification) {
+                                                                    db.collection('notification').insert(notificationData).callback((err, res) => {
+                                                                        if (err) {
+                                                                            console.log("can't insert notification ");
+                                                                        }
+                                                                        console.log("insert notification  " + payload.dockerNickname);
+                                                                    });
+                                                                }
+                                                            }
+                                                        }
+                                                        sentDataToSmartliving();
+                                                    }
+                                                    catch (e) {
+                                                        console.log("Error Notification");
+                                                        console.log(e);
+                                                        badrequest(e);
+                                                    }
+                                                }
+                                            });
                                         });
+                                    }
+                                    function sentDataToSmartliving() {
+                                        if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
+                                            let str = {
+                                                ts: payload.ts,
+                                                dockerNickname: payload.dockerNickname,
+                                                outputType: payload.outputType,
+                                                fileType: payload.fileType,
+                                                metadata: payload.metadata
+                                            };
+                                            let path = util_1.Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + payload.fileType;
+                                            if (!fs.existsSync(path)) {
+                                                console.log("Can't find image file");
+                                                boom_1.badRequest("Can't find image file");
+                                            }
+                                            else {
+                                                var formData = new FormData();
+                                                formData.append('refId', camInfo._id);
+                                                formData.append('type', payload.outputType);
+                                                formData.append('file', fs.createReadStream(path));
+                                                formData.append('ts', payload.ts);
+                                                formData.append('meta', "test");
+                                                console.log("sending data . . . .");
+                                                formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
+                                                    if (err) {
+                                                        console.log(err);
+                                                        badrequest(err);
+                                                    }
+                                                    else {
+                                                        console.log("-----------------sent data to smart living--------------------");
+                                                        return reply({
+                                                            statusCode: 200,
+                                                            data: res
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        }
+                                        else {
+                                            console.log("-----------------------Reord data-------------------");
+                                            return reply({
+                                                statusCode: 200,
+                                                msg: "OK Insert success",
+                                            });
+                                        }
                                     }
                                 }
                             });
@@ -109,12 +188,12 @@ module.exports = [
             });
             function diffdate(data) {
                 let isToday = false;
-                var year = parseInt(dateFormat(now, "yyy"));
+                var year = parseInt(dateFormat(now, "yy"));
                 var month = parseInt(dateFormat(now, "m"));
                 var day = parseInt(dateFormat(now, "d"));
                 var hour = parseInt(dateFormat(now, "HH"));
                 var min = parseInt(dateFormat(now, "MM"));
-                var tomorrowYear = parseInt(dateFormat(tomorrow, "yyy"));
+                var tomorrowYear = parseInt(dateFormat(tomorrow, "yy"));
                 var tomorrowMonth = parseInt(dateFormat(tomorrow, "m"));
                 var tomorrowDay = parseInt(dateFormat(tomorrow, "d"));
                 if (data.day == dateFormat(now, "ddd").toLowerCase()) {
@@ -128,7 +207,6 @@ module.exports = [
                     if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) {
                         var start = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeStartH, timeStartM, 0));
                         var end = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeEndH, timeEndM, 0));
-                        console.log(start + " " + end);
                         if (start >= 0 && end <= 0) {
                             return true;
                         }
@@ -136,7 +214,6 @@ module.exports = [
                     else if (timeStartH > timeEndH || (timeStartH == timeEndH) && (timeStartM >= timeEndM)) {
                         var start = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeStartH, timeStartM, 0));
                         var end = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(tomorrowYear, tomorrowMonth, tomorrowDay, timeEndH, timeEndM, 0));
-                        console.log(start + " " + end);
                         if (start >= 0 && end <= 0) {
                             return true;
                         }
@@ -331,11 +408,7 @@ module.exports = [
                             metadata: res.metadata
                         };
                         let path = util_1.Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + res.fileType;
-                        return reply.file(path, {
-                            filename: res.name + '.' + res.fileType,
-                            mode: 'inline',
-                            confine: false
-                        });
+                        return reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + res.dockerNickname + '/output' + pathSep.sep + util_1.Util.hash(str) + "." + res.fileType);
                     }
                     else {
                         return reply({

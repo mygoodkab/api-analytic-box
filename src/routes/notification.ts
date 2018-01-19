@@ -4,14 +4,14 @@ const Joi = require('joi')
 module.exports = [
     {  // select all rule
         method: 'GET',
-        path: '/rules',
+        path: '/notification',
         config: {
             tags: ['api'],
-            description: 'Select all rules ',
-            notes: 'Select all rules '
+            description: 'Select all notification  ',
+            notes: 'Select all notification '
         },
         handler: function (request, reply) {
-            db.collection('rules').find().make((builder: any) => {
+            db.collection('notification').find().make((builder: any) => {
                 builder.callback((err: any, res: any) => {
                     if (res.length == 0) {
                         return reply({
@@ -33,23 +33,22 @@ module.exports = [
     },
     {  // select rule by rule id
         method: 'GET',
-        path: '/rules/{id}',
+        path: '/notification/{dockerNickname}',
         config: {
             tags: ['api'],
-            description: 'Get id rules data',
-            notes: 'Get id rules data',
+            description: 'Get id notification data',
+            notes: 'Get id notification data',
             validate: {
                 params: {
-                    id: Joi.string()
+                    dockerNickname: Joi.string()
                         .required()
-                        .description('id feature'),
                 }
             }
         },
         handler: (request, reply) => {
-            db.collection('rules').find().make((builder: any) => {
-                builder.where('id', request.params.id)
-                builder.first()
+            db.collection('notification').find().make((builder: any) => {
+                builder.where('dockerNickname', request.params.dockerNickname)
+                builder.sort('timedb', true)
                 builder.callback((err: any, res: any) => {
                     if (!res) {
                         return reply({
@@ -69,23 +68,61 @@ module.exports = [
             });
         }
     },
-    {  // select rule by assignAnalytics id
+    {  // select rule by dockerNickname and statusRead is false 
         method: 'GET',
-        path: '/rules/dockerNickname/{id}',
+        path: '/notification/new/{dockerNickname}',
         config: {
             tags: ['api'],
-            description: 'Get id rules data',
-            notes: 'Get id rules data',
+            description: 'Get id notification data',
+            notes: 'Get id notification data',
             validate: {
                 params: {
-                    id: Joi.string()
+                    dockerNickname: Joi.string()
                         .required()
                 }
             }
         },
         handler: (request, reply) => {
-            db.collection('rules').find().make((builder: any) => {
-                builder.where('dockerNickname', request.params.id)
+            db.collection('notification').find().make((builder: any) => {
+                builder.where('dockerNickname', request.params.dockerNickname)
+                builder.where('statusRead', false)
+                builder.sort('timedb', true)
+                builder.callback((err: any, res: any) => {
+                    if (!res) {
+                        return reply({
+                            statusCode: 500,
+                            message: "No data",
+                            data: "-"
+                        })
+                    } else {
+                        return reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: res
+                        })
+                    }
+
+                });
+            });
+        }
+    },
+    {  // select lastest rule by rule id
+        method: 'GET',
+        path: '/notification/lastest/{dockerNickname}',
+        config: {
+            tags: ['api'],
+            description: 'Get lastest dockerNickname notification data ',
+            notes: 'Get  lastest dockerNickname notification data',
+            validate: {
+                params: {
+                    dockerNickname: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            db.collection('notification').find().make((builder: any) => {
+                builder.where('dockerNickname', request.params.dockerNickname)
+                builder.sort('timedb', true)
                 builder.first()
                 builder.callback((err: any, res: any) => {
                     if (!res) {
@@ -106,57 +143,9 @@ module.exports = [
             });
         }
     },
-    {  // insert rule
+    { // Delete all
         method: 'POST',
-        path: '/rules/insert',
-        config: {
-            tags: ['api'],
-            description: 'Insert rules data',
-            notes: 'Insert rules data',
-            validate: {
-                payload: {
-                    dockerNickname: Joi.string().required(),
-                    rule: Joi.array().required(),
-                }
-            }
-        },
-        handler: (request, reply) => {
-            let payload = request.payload
-            if (payload) {
-                payload.id = objectid();
-                console.log(payload)
-                let validate = payload.rule[0];
-                if (typeof validate.type == "undefined" && typeof validate.day == "undefined" && typeof validate.timeStart == "undefined" && typeof validate.timeEnd == "undefined" && typeof validate.condition == "undefined") {
-                    badRequest("Invaid  Payload")
-                } else {
-                    db.collection('rules').insert(request.payload).callback((err, res) => {
-                        if (err) {
-                            badRequest("can't insert")
-                        } else {
-                            return reply({
-                                statusCode: 200,
-                                message: "OK",
-                                data: "Create rule Succeed"
-                            })
-                        }
-                    })
-                }
-            } else {
-                badRequest("no payload")
-            }
-
-            function badRequest(msg) {
-                return reply({
-                    statusCode: 400,
-                    message: "Bad Request",
-                    data: msg
-                })
-            }
-        }
-    },
-    {  // delete rules
-        method: 'POST',
-        path: '/rules/delete-all',
+        path: '/notification/delete-all',
         config: {
             tags: ['api'],
             description: 'delete all',
@@ -169,7 +158,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             if (request.payload.pass == "pass") {
-                db.collection('rules').remove().make((builder) => {
+                db.collection('notification').remove().make((builder) => {
                     builder.callback((err, res) => {
                         if (err) {
                             return reply({
