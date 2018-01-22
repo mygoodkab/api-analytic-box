@@ -19,4 +19,21 @@ function collection(name) {
     return noSQL.load(path);
 }
 exports.collection = collection;
+function collectionServer(name) {
+    let pathdb = '/vam-data/db-server';
+    if (!fs.existsSync(pathdb)) {
+        fs.mkdir("/vam-data/db-server", (err) => {
+            if (err) {
+                console.log("Error create folder DB-Server");
+                return "Error create folder DB";
+            }
+            else {
+                console.log("Create folder DB-Server success");
+            }
+        });
+    }
+    let path = '/vam-data/db-server/' + name + '.nosql';
+    return noSQL.load(path);
+}
+exports.collectionServer = collectionServer;
 //# sourceMappingURL=nosql-util.js.map

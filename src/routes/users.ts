@@ -1,10 +1,12 @@
-
 import * as db from '../nosql-util';
+const debug = require('debug');
 const objectid = require('objectid');
 const Joi = require('joi')
+var a = require('debug')('worker:a')
+var error = debug('app:error');
 
 module.exports = [
-    {  // select all user
+    {  // Select all user
         method: 'GET',
         path: '/users',
         config: {
@@ -13,7 +15,7 @@ module.exports = [
             notes: 'Select all user '
         },
         handler: function (request, reply) {
-            db.collection('users').find().make((builder: any) => {
+            db.collectionServer('users').find().make((builder: any) => {
                 builder.callback((err: any, res: any) => {
                     return reply({
                         statusCode: 200,
@@ -24,7 +26,7 @@ module.exports = [
             })
         }
     },
-    {   // select id user
+    {  // Select id user
         method: 'GET',
         path: '/users/{id}',
         config: {
@@ -38,7 +40,7 @@ module.exports = [
             }
         },
         handler: function (request, reply) {
-            db.collection('users').find().make((builder: any) => {
+            db.collectionServer('users').find().make((builder: any) => {
                 builder.where('_id', request.params.id)
                 builder.callback((err: any, res: any) => {
                     return reply({
@@ -50,8 +52,7 @@ module.exports = [
             })
         }
     },
-    {
-        //insert user profile
+    {  // Insert user profile
         method: 'POST',
         path: '/users/insert',
         config: {
@@ -67,23 +68,39 @@ module.exports = [
             }
         },
         handler: function (request, reply) {
+
+            // error('goes to stderr!');
+            // var log = debug('worker:a');
+            // log.log = console.log.bind(console); 
+            // log('goes to stdout');
+            // error('still goes to stderr!');
+            // debug.log = console.info.bind(console);
+            // error('now goes to stdout via console.info');
+            // log('still goes to stdout, but via console.info now');
+            // log('start....')
+
             if (request.payload) {
+              //  log('before query')
                 request.payload._id = objectid();
-                db.collection('users').find().make((builder: any) => {
+                db.collectionServer('users').find().make((builder: any) => {
                     builder.where('username', request.payload.username);
                     builder.callback((err, res) => {
+                     //   log('after query')
                         if (res.length != 0) { // duplicate username 
+                        //    log('condition nodata')
                             return reply({
                                 statusCode: 400,
                                 message: "username's duplicate",
 
                             })
                         } else {
-                            db.collection('users').insert(request.payload)
+                         //   log('condition data')
+                            db.collectionServer('users').insert(request.payload)
+                        //    log('insert data')
                             return reply({
                                 statusCode: 200,
                                 message: "OK",
-                                data:res
+                                data: res
                             })
                         }
                     })
@@ -94,8 +111,9 @@ module.exports = [
                 data: "No payload"
             })
         }
+
     },
-    { // Change password
+    {  // Change password
         method: 'POST',
         path: '/users/update',
         config: {
@@ -111,7 +129,7 @@ module.exports = [
         },
         handler: function (request, reply) {
             if (request.payload) {
-                db.collection('users').modify(request.payload).make(function (builder) {
+                db.collectionServer('users').modify(request.payload).make(function (builder) {
                     builder.where("_id", request.payload._id);
                     builder.callback(function (err, res) {
                         return reply({
@@ -130,8 +148,7 @@ module.exports = [
             }
         }
     },
-    ,
-    {
+    {  // Delete 
         method: 'POST',
         path: '/users/delete',
         config: {
@@ -145,7 +162,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('users').remove().make((builder: any) => {
+            db.collectionServer('users').remove().make((builder: any) => {
                 builder.where("_id", request.payload._id)
                 builder.callback((err: any, res: any) => {
                     if (err) {

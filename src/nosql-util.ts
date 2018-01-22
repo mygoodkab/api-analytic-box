@@ -16,13 +16,9 @@ export function collection(name: any) {
             }
         })
     }
-    
-    
         let path = '/vam-data/db/' + name + '.nosql';
         // console.log(path);
         return noSQL.load(path);
-
-    
 
     // function existFile() {
     //     console.log("6")
@@ -30,5 +26,25 @@ export function collection(name: any) {
     //     // console.log(path);
     //     return noSQL.load(path);
     // }
+
+}
+
+export function collectionServer(name: any) {
+    let pathdb = '/vam-data/db-server'
+    // check path file doesn't exist or something.
+    if (!fs.existsSync(pathdb)) {
+        fs.mkdir("/vam-data/db-server", (err) => {
+            if (err) {
+                console.log("Error create folder DB-Server")
+                return "Error create folder DB"
+            }else{
+                console.log("Create folder DB-Server success")
+            }
+        })
+    }
+    
+        let path = '/vam-data/db-server/' + name + '.nosql';
+        // console.log(path);
+        return noSQL.load(path);
 
 }

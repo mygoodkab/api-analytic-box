@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const db = require("../nosql-util");
+const debug = require('debug');
 const objectid = require('objectid');
 const Joi = require('joi');
+var a = require('debug')('worker:a');
+var error = debug('app:error');
 module.exports = [
     {
         method: 'GET',
@@ -13,7 +16,7 @@ module.exports = [
             notes: 'Select all user '
         },
         handler: function (request, reply) {
-            db.collection('users').find().make((builder) => {
+            db.collectionServer('users').find().make((builder) => {
                 builder.callback((err, res) => {
                     return reply({
                         statusCode: 200,
@@ -38,7 +41,7 @@ module.exports = [
             }
         },
         handler: function (request, reply) {
-            db.collection('users').find().make((builder) => {
+            db.collectionServer('users').find().make((builder) => {
                 builder.where('_id', request.params.id);
                 builder.callback((err, res) => {
                     return reply({
@@ -68,7 +71,7 @@ module.exports = [
         handler: function (request, reply) {
             if (request.payload) {
                 request.payload._id = objectid();
-                db.collection('users').find().make((builder) => {
+                db.collectionServer('users').find().make((builder) => {
                     builder.where('username', request.payload.username);
                     builder.callback((err, res) => {
                         if (res.length != 0) {
@@ -78,7 +81,7 @@ module.exports = [
                             });
                         }
                         else {
-                            db.collection('users').insert(request.payload);
+                            db.collectionServer('users').insert(request.payload);
                             return reply({
                                 statusCode: 200,
                                 message: "OK",
@@ -112,7 +115,7 @@ module.exports = [
         },
         handler: function (request, reply) {
             if (request.payload) {
-                db.collection('users').modify(request.payload).make(function (builder) {
+                db.collectionServer('users').modify(request.payload).make(function (builder) {
                     builder.where("_id", request.payload._id);
                     builder.callback(function (err, res) {
                         return reply({
@@ -132,7 +135,6 @@ module.exports = [
             }
         }
     },
-    ,
     {
         method: 'POST',
         path: '/users/delete',
@@ -147,7 +149,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('users').remove().make((builder) => {
+            db.collectionServer('users').remove().make((builder) => {
                 builder.where("_id", request.payload._id);
                 builder.callback((err, res) => {
                     if (err) {

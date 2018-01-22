@@ -20,7 +20,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('users').find().make((builder) => {
+            db.collectionServer('users').find().make((builder) => {
                 builder.where("username", request.payload.username);
                 builder.where("password", request.payload.password);
                 builder.first();

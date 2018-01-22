@@ -23,7 +23,7 @@ module.exports = [
             notes: 'Get All analytics data'
         },
         handler: (request, reply) => {
-            db.collection('analytics').find().make((builder: any) => {
+            db.collectionServer('analytics').find().make((builder: any) => {
                 builder.callback((err: any, res: any) => {
                     return reply({
                         statusCode: 200,
@@ -50,7 +50,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('analytics').find().make((builder: any) => {
+            db.collectionServer('analytics').find().make((builder: any) => {
                 builder.where("id", request.params._id)
                 builder.callback((err: any, res: any) => {
                     return reply({
@@ -79,10 +79,10 @@ module.exports = [
         handler: function (request, reply) {
             if (request.payload) {
                 request.payload.updateDate = new Date();
-                db.collection('analytics').modify(request.payload).make((builder) => {
+                db.collectionServer('analytics').modify(request.payload).make((builder) => {
                     builder.where("id", request.payload.id);
                     builder.callback(function (err, res) {
-                        db.collection('analytics').find().make((builder) => {
+                        db.collectionServer('analytics').find().make((builder) => {
                             builder.where("id", request.payload.id);
                             builder.first()
                             builder.callback(function (err, res) {
@@ -128,7 +128,7 @@ module.exports = [
         handler: (request, reply) => {
             let payload = request.payload;
             // check ก่อนว่าข้อมูลนี้ถูก  assignAnalytics ใช้อยู่หรือไม่ 
-            db.collection('analytics').find().make((builder) => {
+            db.collectionServer('analytics').find().make((builder) => {
                 builder.where('id', payload._id)
                 builder.first()
                 builder.callback((err, res) => {
@@ -158,7 +158,7 @@ module.exports = [
                                                         console.log("Error " + error)
                                                         badRequest("Error " + error)
                                                     } else if (stdout) {
-                                                        db.collection('analytics').remove().make((builder: any) => {
+                                                        db.collectionServer('analytics').remove().make((builder: any) => {
                                                             builder.where("id", request.payload._id)
                                                             builder.callback((err: any, res: any) => {
                                                                 if (err) {
@@ -193,7 +193,7 @@ module.exports = [
             //     builder.first()
             //     builder.callback((err: any, res: any) => {
             //         if (typeof res == 'undefined') {
-            //             db.collection('analytics').remove().make((builder: any) => {
+            //             db.collectionServer('analytics').remove().make((builder: any) => {
             //                 builder.where("id", request.payload._id)
             //                 builder.callback((err: any, res: any) => {
             //                     if (err) {
@@ -388,7 +388,7 @@ module.exports = [
                                                                                 analyticsFileInfo: analyticsFileInfo,
                                                                             };
                                                                             // insert  analytics profile to db
-                                                                            db.collection('analytics').insert(analytics).callback(function (err) {
+                                                                            db.collectionServer('analytics').insert(analytics).callback(function (err) {
                                                                                 if (err) {
                                                                                     removeFile(filename)
                                                                                     return reply({ // can't insert data
@@ -473,7 +473,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('analytics').find().make((builder: any) => {
+            db.collectionServer('analytics').find().make((builder: any) => {
                 builder.where("id", request.params.id)
                 builder.callback((err: any, res: any) => {
                     if (res.length == 0) {
@@ -541,7 +541,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('analytics').find().make((builder: any) => {
+            db.collectionServer('analytics').find().make((builder: any) => {
                 builder.where("id", request.params.id)
                 builder.callback((err: any, res: any) => {
                     if (res.length == 0) {
@@ -609,7 +609,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             const payload = request.payload
-            db.collection('analytics').find().make((builder: any) => {
+            db.collectionServer('analytics').find().make((builder: any) => {
                 builder.where('id', payload._analyticsId)
                 builder.first()
                 builder.callback((err: any, res: any) => {
@@ -676,289 +676,5 @@ module.exports = [
             }
         }
     }
-    // {  // Insert analytics  
-    //         method: 'POST',
-    //         path: '/analytics/insert',
-    //         config: {
-    //             tags: ['api'],
-    //             description: 'Insert analytics data',
-    //             notes: 'Insert analytics data <br><b> example command </b> <br> nvidia-docker exec --env=\"DISPLAY\" darknet /bin/sh -c \"cd /home/dev/host/darknet && ./darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights <br><b> PS. last don\'t close \" </b>',
-    //             validate: {
-    //                 payload: {
-    //                     name: Joi.string().required(),
-    //                     parameter: Joi.array(),
-    //                     cmd: Joi.string(), //ตอนบันทึก command ไม่ต้องพิมพ์ปิด " เพราะว่าจะต้องดึงไปต่อ string กับ rtsp ก่อน 
-    //                     price: Joi.string(),
-    //                     shortDetail: Joi.string(),
-    //                     fullDetail: Joi.string(),
-    //                     level: Joi.string(),
-    //                     architecture: Joi.string(),
-    //                     proccessingUnit: Joi.string(),
-    //                     language: Joi.string(),
-    //                     refInfo: Joi.string(),
-    //                 }
-    //             }
-    //         },
-    //         handler: (request, reply) => {
-    //             if (request.payload) {
-    //                 request.payload.updateDate = new Date();
-    //                 request.payload._id = objectid();
-    //                 request.payload.idImages = "";
-    //                 request.payload.idImagesScreenShot = [];
-    //                 let path = Util.rootlogoImagePath() + request.payload.refInfo;
-    //                 mkdirp(path, function (err) {
-    //                     if (err) {
-    //                         return reply({
-    //                             statusCode: 500,
-    //                             msg: 'Server error',
-    //                             data: 'can\'t crate folder'
-    //                         })
-    //                     }
-    //                     else console.log('create folder!' + path)
-    //                 });
-    //                 db.collection('analytics').insert(request.payload)
-    //                 return reply({
-    //                     statusCode: 200,
-    //                     message: "OK",
-    //                     data: "analytics Successd"
-    //                 })
-    //             } else return reply({
-    //                 statusCode: 400,
-    //                 message: "Bad Request",
-    //                 data: "No payload"
-    //             })
-    //         }
-    //     },
-    //  {  // Upload logo file
-    //         method: 'POST',
-    //         path: '/analytics/upload-images',
-    //         config: {
-    //             tags: ['api'],
-    //             description: 'Upload images',
-    //             notes: 'Upload images',
-    //             validate: {
-    //                 payload: {
-    //                     file: Joi.any().meta({ swaggerType: 'file' }).description('file upload'),
-    //                     refInfo: Joi.string().required()
-    //                 }
-    //             },
-    //             payload: {
-    //                 maxBytes: 5000000,
-    //                 parse: true,
-    //                 output: 'stream'
-    //             },
-    //         },
-    //         handler: (request, reply) => {
-    //             let req: any = request;
-    //             let payload = req.payload;
 
-    //             if (payload.file) {
-    //                 //  console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-    //                 // separate filename, fileType from fullname
-    //                 let path = Util.logoImagePath() + payload.refInfo + pathSep.sep
-    //                 let filename = payload.file.hapi.filename.split('.');
-    //                 let fileType = filename.splice(filename.length - 1, 1)[0];
-    //                 filename = filename.join('.')
-    //                 let storeName = Util.uniqid() + "." + fileType.toLowerCase()
-    //                 // create imageInfo for insert info db
-    //                 let id = objectid()
-    //                 let imageInfo: any = {
-    //                     _id: id,
-    //                     name: filename,
-    //                     storeName: storeName,
-    //                     fileType: fileType,
-    //                     ts: new Date(),
-    //                     refInfo: payload.refInfo
-    //                 }
-    //                 // create file Stream
-    //                 let file = fs.createWriteStream(path + imageInfo.storeName);
-    //                 console.log("Upload logo image ... path /analytics/upload-images : " + path)
-    //                 file.on('error', (err: any) => {
-    //                     return reply({
-    //                         statusCode: 500,
-    //                         msg: 'Server error',
-    //                         data: 'can\'t upload image'
-    //                     })
-    //                 })
-    //                 // pass payload file to file stream for write info directory
-    //                 payload.file.pipe(file);
-    //                 payload.file.on('end', (err: any) => {
-    //                     var filestat = fs.statSync(path + imageInfo.storeName);
-    //                     imageInfo.fileSize = filestat.size;
-    //                     imageInfo.createdata = new Date();
-    //                     // update image id to analytics 
-    //                     db.collection('analytics').modify({ idImages: id }).make((builder: any) => {
-    //                         builder.where('refInfo', payload.refInfo)
-    //                         builder.callback((err: any, res: any) => {
-    //                             // insert image Info to db
-    //                             db.collection('analytics-images').insert(imageInfo);
-    //                             return reply({
-    //                                 statusCode: 200,
-    //                                 msg: 'updata status success',
-    //                             })
-    //                         })
-    //                     })
-    //                 })
-    //             } else return reply({
-    //                 statusCode: 400,
-    //                 msg: 'Bad Request',
-    //                 data: 'No file in payload'
-    //             })
-    //         }
-    //     },
-    // {  // Upload image ScreenShot   
-    //     method: 'POST',
-    //     path: '/analytics/upload-images-screenshot',
-    //     config: {
-    //         tags: ['api'],
-    //         description: 'Upload images',
-    //         notes: 'Upload images',
-    //         validate: {
-    //             payload: {
-    //                 file: Joi.any().meta({ swaggerType: 'file' }).description('file upload'),
-    //                 refInfo: Joi.string().required()
-    //             }
-    //         },
-    //         payload: {
-    //             maxBytes: 5000000,
-    //             parse: true,
-    //             output: 'stream'
-    //         },
-    //     },
-    //     handler: (request, reply) => {
-    //         let req: any = request;
-    //         let payload = req.payload;
-
-    //         if (payload.file) {
-    //             // separate filename, fileType from fullname
-    //             let path = Util.logoImagePath() + payload.refInfo + pathSep.sep
-    //             let filename = payload.file.hapi.filename.split('.');
-    //             let fileType = filename.splice(filename.length - 1, 1)[0];
-    //             filename = filename.join('.')
-    //             let storeName = Util.uniqid() + "." + fileType.toLowerCase()
-    //             // create imageInfo for insert info db
-    //             let id = objectid()
-    //             let imageInfo: any = {
-    //                 _id: id,
-    //                 name: filename,
-    //                 storeName: storeName,
-    //                 fileType: fileType,
-    //                 ts: new Date(),
-    //                 refInfo: payload.refInfo
-    //             }
-    //             // create file Stream
-    //             let file = fs.createWriteStream(path + imageInfo.storeName);
-    //             console.log("Upload Screenshot path '/analytics/upload-images-screenshot'" + path)
-    //             file.on('error', (err: any) => {
-    //                 return reply({
-    //                     statusCode: 500,
-    //                     msg: 'Server error',
-    //                     data: 'can\'t upload image'
-    //                 })
-    //             })
-    //             // pass payload file to file stream for write info directory
-    //             payload.file.pipe(file);
-    //             payload.file.on('end', (err: any) => {
-    //                 var filestat = fs.statSync(path + imageInfo.storeName);
-    //                 imageInfo.fileSize = filestat.size;
-    //                 imageInfo.createdata = new Date();
-    //                 db.collection('analytics').find().make((builder: any) => {
-    //                     builder.where('refInfo', payload.refInfo)
-    //                     builder.first()
-    //                     builder.callback((err: any, res: any) => {
-    //                         let arr;
-    //                         if (typeof res.idImagesScreenShot == 'undefined') {
-    //                             res.idImagesScreenShot = []
-    //                             console.log('undified')
-    //                         } else {
-    //                             arr = res.idImagesScreenShot
-    //                             arr.push(id);
-    //                         }
-
-    //                         // update image id to analytics 
-    //                         db.collection('analytics').modify({ idImagesScreenShot: arr }).make((builder: any) => {
-    //                             builder.where('refInfo', payload.refInfo)
-    //                             builder.callback((err: any, res: any) => {
-    //                                 // insert image Info to db
-    //                                 db.collection('analytics-images').insert(imageInfo);
-    //                                 return reply({
-    //                                     statusCode: 200,
-    //                                     msg: 'updata status success',
-    //                                 })
-    //                             })
-    //                         })
-    //                     })
-    //                 })
-    //             })
-    //         } else return reply({
-    //             statusCode: 400,
-    //             msg: 'Bad Request',
-    //             data: 'No file in payload'
-    //         })
-    //     }
-    // },
-    // {  // GET image file 
-    //     method: 'GET',
-    //     path: '/analytics/get-images/{id}',
-    //     config: {
-    //         tags: ['api'],
-    //         description: 'Get image for UI',
-    //         notes: 'Get image ',
-    //         validate: {
-    //             params: {
-    //                 id: Joi.string().required()
-    //             }
-    //         }
-    //     },
-    //     handler: (request, reply) => {
-    //         db.collection('analytics-images').find().make((builder: any) => {
-    //             builder.where("_id", request.params.id)
-    //             builder.callback((err: any, res: any) => {
-    //                 if (res.length == 0) {
-    //                     return reply({
-    //                         statusCode: 404,
-    //                         message: "Bad Request",
-    //                         data: "Data not found"
-    //                     })
-    //                 } else {
-    //                     // if not image
-    //                     res = res[0]
-    //                     var contentType
-    //                     switch (res.fileType) {
-    //                         case "pdf":
-    //                             contentType = 'application/pdf';
-    //                             break;
-    //                         case "ppt":
-    //                             contentType = 'application/vnd.ms-powerpoint';
-    //                             break;
-    //                         case "pptx":
-    //                             contentType = 'application/vnd.openxmlformats-officedocument.preplyentationml.preplyentation';
-    //                             break;
-    //                         case "xls":
-    //                             contentType = 'application/vnd.ms-excel';
-    //                             break;
-    //                         case "xlsx":
-    //                             contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    //                             break;
-    //                         case "doc":
-    //                             contentType = 'application/msword';
-    //                             break;
-    //                         case "docx":
-    //                             contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    //                             break;
-    //                         case "csv":
-    //                             contentType = 'application/octet-stream';
-    //                             break;
-    //                     }
-    //                     let path: any = Util.rootlogoImagePath() + res.refInfo + pathSep.sep + res.storeName; // path + folder + \ + filename.png
-    //                     return reply.file(path,
-    //                         {
-    //                             filename: res.name + '.' + res.fileType,
-    //                             mode: 'inline'
-    //                         }).type(contentType)
-    //                 }
-    //             });
-    //         });
-    //     }
-    // },
 ];

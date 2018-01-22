@@ -35,17 +35,9 @@ server.register([
         register: require('hapi-swagger'),
         options: options
     },
-    {
-        register: require('hapi-auth-jwt2')
-    },
 ], (error) => {
     if (error)
         throw error;
-    server.auth.strategy('jwt', 'jwt', {
-        key: util.SECRET_KEY,
-        validateFunc: validate,
-        verifyOptions: { algorithms: ['HS256'] }
-    });
     server.start((err) => {
         if (err) {
             throw err;

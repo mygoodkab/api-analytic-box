@@ -1,0 +1,748 @@
+Statistical profiling result from isolate-0x55af5fde7000-v8.log, (395389 ticks, 21866 unaccounted, 0 excluded).
+
+ [Shared libraries]:
+   ticks  total  nonlib   name
+  272146   68.8%          /usr/local/bin/node
+  22405    5.7%          /lib/ld-musl-x86_64.so.1
+   1532    0.4%          /usr/lib/libstdc++.so.6.0.21
+     31    0.0%          [vdso]
+
+ [JavaScript]:
+   ticks  total  nonlib   name
+  12156    3.1%   12.2%  KeyedLoadIC: A keyed load IC from the snapshot
+   5948    1.5%    6.0%  LazyCompile: *InternalizeJSONProperty native json.js:32:33
+   4767    1.2%    4.8%  LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:611:26
+   3635    0.9%    3.7%  LazyCompile: *_shellInsertionSort /home/root/node_modules/nosql/utils.js:768:29
+   3605    0.9%    3.6%  LazyCompile: *CreateDataProperty native json.js:28:28
+   2975    0.8%    3.0%  LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+   2648    0.7%    2.7%  LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   2624    0.7%    2.6%  Stub: LoadFieldStub {3}
+   2456    0.6%    2.5%  Builtin: CallFunction_ReceiverIsNotNullOrUndefined
+   2104    0.5%    2.1%  Stub: CEntryStub
+   1788    0.5%    1.8%  Stub: ToObjectStub
+   1739    0.4%    1.8%  KeyedLoadIC: A keyed load IC from the snapshot {1}
+   1550    0.4%    1.6%  LazyCompile: ~DatabaseBuilder.compare /home/root/node_modules/nosql/index.js:1437:45
+   1512    0.4%    1.5%  LazyCompile: *String.isJSONDate /home/root/node_modules/nosql/utils.js:487:39
+   1437    0.4%    1.4%  LazyCompile: ~<anonymous> /home/root/node_modules/nosql/utils.js:611:26
+   1424    0.4%    1.4%  LazyCompile: *jsonparser /home/root/node_modules/nosql/index.js:2708:20
+   1346    0.3%    1.4%  LazyCompile: *bidirectionalIndexOf buffer.js:579:30
+   1140    0.3%    1.1%  Builtin: CallFunction_ReceiverIsNullOrUndefined
+   1116    0.3%    1.1%  LazyCompile: *Uint8ArrayConstructByArrayBuffer native typedarray.js:144:42
+   1039    0.3%    1.0%  Builtin: Construct
+   1012    0.3%    1.0%  Handler: newListener
+   1011    0.3%    1.0%  Builtin: CallFunction_ReceiverIsAny
+    965    0.2%    1.0%  Stub: LoadICStub
+    811    0.2%    0.8%  Builtin: Call_ReceiverIsAny
+    798    0.2%    0.8%  LazyCompile: *slowToString buffer.js:420:22
+    666    0.2%    0.7%  Builtin: Call_ReceiverIsNotNullOrUndefined
+    656    0.2%    0.7%  Builtin: Call_ReceiverIsNullOrUndefined
+    640    0.2%    0.6%  Builtin: JSConstructStubGeneric
+    636    0.2%    0.6%  Handler: An IC handler from the snapshot {11}
+    621    0.2%    0.6%  Stub: CallApiCallbackStub {1}
+    584    0.1%    0.6%  Stub: VectorStoreICStub
+    417    0.1%    0.4%  Handler: An IC handler from the snapshot {5}
+    395    0.1%    0.4%  Handler: An IC handler from the snapshot
+    387    0.1%    0.4%  LazyCompile: *Uint8Array native typedarray.js:241:31
+    384    0.1%    0.4%  Builtin: ReflectDefineProperty
+    380    0.1%    0.4%  LazyCompile: *parse native json.js:61:19
+    375    0.1%    0.4%  Handler: JSON
+    343    0.1%    0.3%  Stub: CompareICStub {10}
+    337    0.1%    0.3%  Stub: CompareICStub {9}
+    321    0.1%    0.3%  Stub: NonNumberToNumberStub
+    318    0.1%    0.3%  Stub: ToBooleanICStub(String)
+    314    0.1%    0.3%  Handler: An IC handler from the snapshot {10}
+    310    0.1%    0.3%  Handler: An IC handler from the snapshot {7}
+    305    0.1%    0.3%  Stub: CallApiCallbackStub {2}
+    295    0.1%    0.3%  Handler: An IC handler from the snapshot {4}
+    287    0.1%    0.3%  Builtin: ArrayIsArray
+    261    0.1%    0.3%  Stub: StringEqualStub
+    251    0.1%    0.3%  Stub: LoadConstantStub {1}
+    249    0.1%    0.3%  Stub: LoadFieldStub {1}
+    246    0.1%    0.2%  Builtin: JSBuiltinsConstructStubForDerived
+    210    0.1%    0.2%  Stub: ToNumberStub
+    208    0.1%    0.2%  Stub: CompareICStub {5}
+    201    0.1%    0.2%  Stub: FastNewObjectStub
+    200    0.1%    0.2%  LazyCompile: *compare_eq /home/root/node_modules/nosql/index.js:2492:20
+    190    0.0%    0.2%  Builtin: ConstructFunction
+    174    0.0%    0.2%  Handler: An IC handler from the snapshot {1}
+    172    0.0%    0.2%  Stub: StrictEqualStub
+    156    0.0%    0.2%  LazyCompile: *ToPositiveInteger native runtime.js:27:27
+    154    0.0%    0.2%  LazyCompile: ~ReadStream._read fs.js:1975:38
+    153    0.0%    0.2%  Stub: ToBooleanICStub(Undefined,SpecObject)
+    136    0.0%    0.1%  Stub: ToBooleanICStub {1}
+    127    0.0%    0.1%  Stub: InstanceOfStub
+    120    0.0%    0.1%  Handler: trim
+    115    0.0%    0.1%  LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+    112    0.0%    0.1%  Stub: StringLengthStub
+    108    0.0%    0.1%  LazyCompile: *FastBuffer buffer.js:10:14
+    104    0.0%    0.1%  Stub: RecordWriteStub {9}
+     99    0.0%    0.1%  LazyCompile: *trim native string.js:364:22
+     91    0.0%    0.1%  Stub: CompareICStub {11}
+     88    0.0%    0.1%  Builtin: ObjectKeys
+     74    0.0%    0.1%  Stub: ToBooleanICStub(Smi)
+     70    0.0%    0.1%  Stub: ToStringStub
+     69    0.0%    0.1%  Stub: FastArrayPushStub
+     67    0.0%    0.1%  LazyCompile: ~onread fs.js:2013:18
+     61    0.0%    0.1%  LazyCompile: *readableAddChunk _stream_readable.js:147:26
+     59    0.0%    0.1%  Stub: StoreFieldStub {2}
+     58    0.0%    0.1%  Stub: CompareICStub {3}
+     56    0.0%    0.1%  LazyCompile: *Buffer.concat buffer.js:293:25
+     55    0.0%    0.1%  LazyCompile: *Readable.read _stream_readable.js:271:35
+     54    0.0%    0.1%  Stub: RecordWriteStub {12}
+     51    0.0%    0.1%  Handler: An IC handler from the snapshot {13}
+     49    0.0%    0.0%  KeyedStoreIC: A keyed store IC from the snapshot {1}
+     48    0.0%    0.0%  Stub: SubStringStub
+     47    0.0%    0.0%  Stub: FastNewClosureStub
+     46    0.0%    0.0%  Builtin: MathTrunc
+     42    0.0%    0.0%  Stub: JSEntryStub
+     42    0.0%    0.0%  Handler: An IC handler from the snapshot {2}
+     41    0.0%    0.0%  LazyCompile: *slice buffer.js:820:40
+     41    0.0%    0.0%  LazyCompile: *StringReplaceGlobalRegExpWithFunction native regexp.js:460:47
+     41    0.0%    0.0%  Handler: length {1}
+     41    0.0%    0.0%  Handler: An IC handler from the snapshot {6}
+     40    0.0%    0.0%  Handler: Math
+     39    0.0%    0.0%  LazyCompile: *DatabaseBuilder.compare /home/root/node_modules/nosql/index.js:1437:45
+     37    0.0%    0.0%  Stub: LoadConstantStub
+     37    0.0%    0.0%  LazyCompile: *[Symbol.replace] native regexp.js:659:31
+     35    0.0%    0.0%  Stub: FastNewClosureStub {3}
+     35    0.0%    0.0%  LazyCompile: *substring native string.js:298:25
+     35    0.0%    0.0%  LazyCompile: *fs.read fs.js:646:19
+     32    0.0%    0.0%  LazyCompile: *Uint8ArrayConstructByLength native typedarray.js:184:37
+     32    0.0%    0.0%  Builtin: ArgumentsAdaptorTrampoline
+     28    0.0%    0.0%  Stub: CallConstructStub
+     28    0.0%    0.0%  LazyCompile: *set domain.js:25:16
+     27    0.0%    0.0%  Builtin: FunctionHasInstance
+     26    0.0%    0.0%  LazyCompile: *toString native string.js:30:24
+     26    0.0%    0.0%  Handler: An IC handler from the snapshot {12}
+     24    0.0%    0.0%  RegExp: [^\\u0000-\\u007e]
+     23    0.0%    0.0%  Stub: FastNewStrictArgumentsStub
+     22    0.0%    0.0%  Stub: FastNewContextStub {2}
+     22    0.0%    0.0%  Handler: push {3}
+     21    0.0%    0.0%  Handler: compare {16}
+     20    0.0%    0.0%  LazyCompile: ~emitPendingUnhandledRejections internal/process/promises.js:58:42
+     20    0.0%    0.0%  Builtin: JSEntryTrampoline
+     20    0.0%    0.0%  Builtin: InterruptCheck
+     19    0.0%    0.0%  Stub: StoreFastElementStub
+     18    0.0%    0.0%  Stub: TypeofStub
+     18    0.0%    0.0%  Stub: LoadConstantStub {3}
+     18    0.0%    0.0%  LazyCompile: *[Symbol.replace] native regexp.js:540:23
+     16    0.0%    0.0%  Stub: ArraySingleArgumentConstructorStub
+     16    0.0%    0.0%  LazyCompile: *ReadStream._read fs.js:1975:38
+     15    0.0%    0.0%  Stub: RecordWriteStub {13}
+     15    0.0%    0.0%  LazyCompile: *replace native string.js:132:23
+     14    0.0%    0.0%  Stub: RecordWriteStub {11}
+     14    0.0%    0.0%  Stub: LoadConstantStub {4}
+     14    0.0%    0.0%  Handler: compare {8}
+     13    0.0%    0.0%  Stub: RecordWriteStub {4}
+     13    0.0%    0.0%  LazyCompile: *allocNewPool fs.js:1886:22
+     13    0.0%    0.0%  Handler: slice
+     12    0.0%    0.0%  Stub: LoadConstantStub {5}
+     12    0.0%    0.0%  LazyCompile: ~_base /home/root/node_modules/hapi/node_modules/joi/lib/types/object/index.js:29:10
+     11    0.0%    0.0%  Stub: CompareICStub {6}
+     11    0.0%    0.0%  Stub: AllocateInNewSpaceStub
+     11    0.0%    0.0%  LazyCompile: *localeCompare native i18n.js:1222:39
+     11    0.0%    0.0%  LazyCompile: *cachedOrNewService native i18n.js:1212:28
+     11    0.0%    0.0%  LazyCompile: *String.removeDiacritics /home/root/node_modules/nosql/utils.js:653:45
+     10    0.0%    0.0%  Stub: StoreFieldStub {3}
+     10    0.0%    0.0%  Stub: RecordWriteStub {10}
+     10    0.0%    0.0%  Stub: LoadFieldStub {10}
+     10    0.0%    0.0%  LazyCompile: ~[Symbol.replace] native regexp.js:659:31
+     10    0.0%    0.0%  LazyCompile: *emitPendingUnhandledRejections internal/process/promises.js:58:42
+     10    0.0%    0.0%  LazyCompile: *Readable.push _stream_readable.js:123:35
+     10    0.0%    0.0%  Handler: push {4}
+     10    0.0%    0.0%  Handler: on
+     10    0.0%    0.0%  Builtin: JSConstructStubApi
+      9    0.0%    0.0%  Stub: ToIntegerStub
+      9    0.0%    0.0%  Stub: KeyedLoadICStub
+      9    0.0%    0.0%  LazyCompile: *normalizeStringPosix path.js:85:30
+      9    0.0%    0.0%  LazyCompile: *maybeReadMore_ _stream_readable.js:450:24
+      9    0.0%    0.0%  LazyCompile: *get length native typedarray.js:1518:29
+      9    0.0%    0.0%  LazyCompile: *compare native i18n.js:637:17
+      9    0.0%    0.0%  KeyedStoreIC: A keyed store IC from the snapshot
+      8    0.0%    0.0%  Stub: ToBooleanICStub(Null)
+      8    0.0%    0.0%  Stub: StoreFieldStub {6}
+      8    0.0%    0.0%  LazyCompile: ~dirname path.js:1344:28
+      8    0.0%    0.0%  LazyCompile: *needMoreData _stream_readable.js:208:22
+      8    0.0%    0.0%  Handler: localeCompare
+      7    0.0%    0.0%  Stub: ToBooleanICStub {2}
+      7    0.0%    0.0%  Stub: StoreTransitionStub {1}
+      7    0.0%    0.0%  Stub: CompareICStub {7}
+      7    0.0%    0.0%  Stub: CEntryStub {1}
+      7    0.0%    0.0%  Stub: BinaryOpICStub {4}
+      7    0.0%    0.0%  LazyCompile: ~slowToString buffer.js:420:22
+      7    0.0%    0.0%  LazyCompile: ~finish /home/root/node_modules/hapi/node_modules/joi/lib/types/any/index.js:487:24
+      7    0.0%    0.0%  LazyCompile: ~Module._resolveLookupPaths module.js:314:38
+      7    0.0%    0.0%  LazyCompile: *parseInt native v8natives.js:36:24
+      7    0.0%    0.0%  LazyCompile: *howMuchToRead _stream_readable.js:245:23
+      7    0.0%    0.0%  LazyCompile: *get native collection.js:239:16
+      7    0.0%    0.0%  Handler: symbol("nonexistent_symbol" hash 1db7469) {7}
+      7    0.0%    0.0%  Handler: substring
+      6    0.0%    0.0%  Stub: ToBooleanStub
+      6    0.0%    0.0%  Stub: ToBooleanICStub
+      6    0.0%    0.0%  Stub: StoreTransitionStub {2}
+      6    0.0%    0.0%  Stub: CallICStub(args(6), NOT_NULL_OR_UNDEFINED, 
+      6    0.0%    0.0%  LazyCompile: ~readableAddChunk _stream_readable.js:147:26
+      6    0.0%    0.0%  LazyCompile: ~exports.clone /home/root/node_modules/hoek/lib/index.js:18:26
+      6    0.0%    0.0%  LazyCompile: ~_validate /home/root/node_modules/hapi/node_modules/joi/lib/types/any/index.js:474:14
+      6    0.0%    0.0%  LazyCompile: ~Socket._writeGeneric net.js:661:42
+      6    0.0%    0.0%  LazyCompile: ~Readable.read _stream_readable.js:271:35
+      6    0.0%    0.0%  LazyCompile: ~OutgoingMessage.write _http_outgoing.js:438:43
+      6    0.0%    0.0%  LazyCompile: createUnsafeBuffer buffer.js:35:28
+      6    0.0%    0.0%  Handler: read {1}
+      6    0.0%    0.0%  Handler: compare {15}
+      6    0.0%    0.0%  Function: ~<anonymous> /home/root/node_modules/request/index.js:1:11
+      5    0.0%    0.0%  Stub: StoreFieldStub {7}
+      5    0.0%    0.0%  Stub: LoadFieldStub {6}
+      5    0.0%    0.0%  Stub: LoadConstantStub {6}
+      5    0.0%    0.0%  LazyCompile: *get domain.js:22:16
+      5    0.0%    0.0%  Handler: removeDiacritics
+      5    0.0%    0.0%  Handler: compare {6}
+      5    0.0%    0.0%  Builtin: StringConstructor
+      5    0.0%    0.0%  Builtin: HandleApiCall
+      4    0.0%    0.0%  Stub: LoadFieldStub {7}
+      4    0.0%    0.0%  Handler: symbol("nonexistent_symbol" hash 1db7469) {11}
+      4    0.0%    0.0%  Handler: symbol("hash_code_symbol" hash 3782fd79)
+      4    0.0%    0.0%  Handler: read {11}
+      4    0.0%    0.0%  Builtin: MathMin
+      3    0.0%    0.0%  Stub: StringAddStub_CheckNone_NotTenured
+      3    0.0%    0.0%  Stub: StoreFieldStub {5}
+      3    0.0%    0.0%  Stub: StoreFieldStub
+      3    0.0%    0.0%  Stub: RegExpExecStub
+      3    0.0%    0.0%  Stub: RecordWriteStub {21}
+      3    0.0%    0.0%  Stub: LoadFieldStub {2}
+      3    0.0%    0.0%  Stub: LoadConstantStub {2}
+      3    0.0%    0.0%  Stub: FastNewContextStub
+      3    0.0%    0.0%  Stub: CompareICStub {4}
+      3    0.0%    0.0%  LazyCompile: ~once events.js:299:44
+      3    0.0%    0.0%  LazyCompile: ~internals.Route.rebuild /home/root/node_modules/hapi/lib/route.js:201:46
+      3    0.0%    0.0%  LazyCompile: ~extname path.js:1451:28
+      3    0.0%    0.0%  LazyCompile: ~exports.applyToDefaultsWithShallow /home/root/node_modules/hoek/lib/index.js:231:47
+      3    0.0%    0.0%  LazyCompile: ~emit events.js:136:44
+      3    0.0%    0.0%  LazyCompile: ~clearBuffer _stream_writable.js:402:21
+      3    0.0%    0.0%  LazyCompile: ~Module._findPath module.js:151:28
+      3    0.0%    0.0%  LazyCompile: ~Buffer.concat buffer.js:293:25
+      3    0.0%    0.0%  LazyCompile: *slice native string.js:246:21
+      3    0.0%    0.0%  LazyCompile: *set native collection.js:252:16
+      3    0.0%    0.0%  LazyCompile: *realpathSync fs.js:1614:40
+      3    0.0%    0.0%  Handler: unicode
+      3    0.0%    0.0%  Handler: requireds
+      3    0.0%    0.0%  Handler: read {4}
+      3    0.0%    0.0%  Handler: read {2}
+      3    0.0%    0.0%  Handler: emit {6}
+      3    0.0%    0.0%  Handler: call
+      3    0.0%    0.0%  Handler: An IC handler from the snapshot {3}
+      3    0.0%    0.0%  Handler: An IC handler from the snapshot {14}
+      3    0.0%    0.0%  Builtin: FunctionPrototypeCall
+      3    0.0%    0.0%  Builtin: ArraySplice
+      2    0.0%    0.0%  Stub: ToBooleanICStub(Null,SpecObject)
+      2    0.0%    0.0%  Stub: StoreTransitionStub
+      2    0.0%    0.0%  Stub: StoreFieldStub {1}
+      2    0.0%    0.0%  Stub: RecordWriteStub {2}
+      2    0.0%    0.0%  Stub: RecordWriteStub {17}
+      2    0.0%    0.0%  Stub: RecordWriteStub {15}
+      2    0.0%    0.0%  Stub: RecordWriteStub {14}
+      2    0.0%    0.0%  Stub: LoadFieldStub
+      2    0.0%    0.0%  Stub: FastNewContextStub {1}
+      2    0.0%    0.0%  Stub: FastNewClosureStub {2}
+      2    0.0%    0.0%  Stub: FastCloneShallowObjectStub
+      2    0.0%    0.0%  Stub: FastCloneShallowArrayStub
+      2    0.0%    0.0%  Stub: CallICTrampolineStub
+      2    0.0%    0.0%  Stub: CallApiCallbackStub {3}
+      2    0.0%    0.0%  Stub: BinaryOpWithAllocationSiteStub
+      2    0.0%    0.0%  LazyCompile: ~wrapped /home/root/node_modules/hoek/lib/index.js:871:30
+      2    0.0%    0.0%  LazyCompile: ~resume_ _stream_readable.js:734:17
+      2    0.0%    0.0%  LazyCompile: ~resolve path.js:1152:28
+      2    0.0%    0.0%  LazyCompile: ~removeListener events.js:316:28
+      2    0.0%    0.0%  LazyCompile: ~nextTick internal/process/next_tick.js:140:20
+      2    0.0%    0.0%  LazyCompile: ~module.exports.internals.Route /home/root/node_modules/hapi/lib/route.js:24:55
+      2    0.0%    0.0%  LazyCompile: ~internals.transmit /home/root/node_modules/hapi/lib/transmit.js:141:31
+      2    0.0%    0.0%  LazyCompile: ~internals.itemCallback /home/root/node_modules/podium/lib/index.js:295:35
+      2    0.0%    0.0%  LazyCompile: ~internals.Topo._sort /home/root/node_modules/topo/lib/index.js:92:43
+      2    0.0%    0.0%  LazyCompile: ~clone /home/root/node_modules/hapi/node_modules/joi/lib/types/any/index.js:99:10
+      2    0.0%    0.0%  LazyCompile: ~clone /home/root/node_modules/hapi-auto-route/node_modules/joi/lib/types/any/index.js:93:10
+      2    0.0%    0.0%  LazyCompile: ~_unrefTimer net.js:201:52
+      2    0.0%    0.0%  LazyCompile: ~ReadableState _stream_readable.js:35:23
+      2    0.0%    0.0%  LazyCompile: ~NativeModule.wrap bootstrap_node.js:463:31
+      2    0.0%    0.0%  LazyCompile: *maybeReadMore _stream_readable.js:443:23
+      2    0.0%    0.0%  LazyCompile: *finishMaybe _stream_writable.js:508:21
+      2    0.0%    0.0%  LazyCompile: *checkInvalidHeaderChar _http_common.js:303:32
+      2    0.0%    0.0%  LazyCompile: *_validate /home/root/node_modules/hapi/node_modules/joi/lib/types/any/index.js:474:14
+      2    0.0%    0.0%  LazyCompile: *_addListener events.js:210:22
+      2    0.0%    0.0%  LazyCompile: *Module.require module.js:494:36
+      2    0.0%    0.0%  LazyCompile: *Module._load module.js:412:24
+      2    0.0%    0.0%  LazyCompile: *Domain.exit domain.js:152:33
+      2    0.0%    0.0%  Handler: used
+      2    0.0%    0.0%  Handler: symbol("nonexistent_symbol" hash 1db7469) {9}
+      2    0.0%    0.0%  Handler: symbol("Symbol.replace" hash 13635fc) {2}
+      2    0.0%    0.0%  Handler: read {9}
+      2    0.0%    0.0%  Handler: read {3}
+      2    0.0%    0.0%  Handler: read {10}
+      2    0.0%    0.0%  Handler: read
+      2    0.0%    0.0%  Handler: push
+      2    0.0%    0.0%  Handler: path
+      2    0.0%    0.0%  Handler: oncomplete
+      2    0.0%    0.0%  Handler: compare {9}
+      2    0.0%    0.0%  Handler: compare {5}
+      2    0.0%    0.0%  Handler: compare {2}
+      2    0.0%    0.0%  Handler: compare {1}
+      2    0.0%    0.0%  Handler: compare {12}
+      2    0.0%    0.0%  Handler: call {3}
+      2    0.0%    0.0%  Handler: _read
+      2    0.0%    0.0%  Handler: An IC handler from the snapshot {15}
+      1    0.0%    0.0%  Stub: VectorKeyedStoreICStub
+      1    0.0%    0.0%  Stub: ToNameStub
+      1    0.0%    0.0%  Stub: ToBooleanICStub(Bool,Smi,SpecObject,String)
+      1    0.0%    0.0%  Stub: StringAddStub_ConvertRight_NotTenured
+      1    0.0%    0.0%  Stub: StoreTransitionStub {5}
+      1    0.0%    0.0%  Stub: StoreTransitionStub {4}
+      1    0.0%    0.0%  Stub: StoreTransitionStub {3}
+      1    0.0%    0.0%  Stub: StoreFieldStub {9}
+      1    0.0%    0.0%  Stub: StoreFieldStub {8}
+      1    0.0%    0.0%  Stub: StoreFieldStub {10}
+      1    0.0%    0.0%  Stub: RecordWriteStub {8}
+      1    0.0%    0.0%  Stub: RecordWriteStub {7}
+      1    0.0%    0.0%  Stub: RecordWriteStub {6}
+      1    0.0%    0.0%  Stub: RecordWriteStub {5}
+      1    0.0%    0.0%  Stub: RecordWriteStub {3}
+      1    0.0%    0.0%  Stub: RecordWriteStub {25}
+      1    0.0%    0.0%  Stub: RecordWriteStub {24}
+      1    0.0%    0.0%  Stub: RecordWriteStub {23}
+      1    0.0%    0.0%  Stub: RecordWriteStub {22}
+      1    0.0%    0.0%  Stub: RecordWriteStub {20}
+      1    0.0%    0.0%  Stub: RecordWriteStub {1}
+      1    0.0%    0.0%  Stub: RecordWriteStub {19}
+      1    0.0%    0.0%  Stub: RecordWriteStub {18}
+      1    0.0%    0.0%  Stub: RecordWriteStub {16}
+      1    0.0%    0.0%  Stub: RecordWriteStub
+      1    0.0%    0.0%  Stub: LoadFieldStub {9}
+      1    0.0%    0.0%  Stub: LoadFieldStub {8}
+      1    0.0%    0.0%  Stub: LoadFieldStub {5}
+      1    0.0%    0.0%  Stub: LoadFieldStub {4}
+      1    0.0%    0.0%  Stub: LoadFieldStub {13}
+      1    0.0%    0.0%  Stub: LoadFieldStub {12}
+      1    0.0%    0.0%  Stub: LoadFieldStub {11}
+      1    0.0%    0.0%  Stub: LoadFastElementStub {2}
+      1    0.0%    0.0%  Stub: LoadFastElementStub {1}
+      1    0.0%    0.0%  Stub: LoadFastElementStub
+      1    0.0%    0.0%  Stub: InternalArrayConstructorStub
+      1    0.0%    0.0%  Stub: FastNewClosureStub {1}
+      1    0.0%    0.0%  Stub: CompareICStub {8}
+      1    0.0%    0.0%  Stub: CompareICStub {2}
+      1    0.0%    0.0%  Stub: CompareICStub {1}
+      1    0.0%    0.0%  Stub: CompareICStub {12}
+      1    0.0%    0.0%  Stub: CompareICStub
+      1    0.0%    0.0%  Stub: CallApiCallbackStub
+      1    0.0%    0.0%  Stub: BinaryOpICStub {3}
+      1    0.0%    0.0%  Stub: BinaryOpICStub {2}
+      1    0.0%    0.0%  Stub: BinaryOpICStub
+      1    0.0%    0.0%  Stub: ArrayConstructorStub
+      1    0.0%    0.0%  RegExp: ^([a-z0-9.+-]+:)
+      1    0.0%    0.0%  LazyCompile: ~without /home/root/node_modules/hapi/node_modules/joi/lib/types/object/index.js:467:12
+      1    0.0%    0.0%  LazyCompile: ~type /home/root/node_modules/mimos/lib/index.js:66:9
+      1    0.0%    0.0%  LazyCompile: ~tryPackage module.js:101:20
+      1    0.0%    0.0%  LazyCompile: ~toString native string.js:30:24
+      1    0.0%    0.0%  LazyCompile: ~shellsort /home/root/node_modules/nosql/utils.js:781:19
+      1    0.0%    0.0%  LazyCompile: ~root.validate /home/root/node_modules/hapi/node_modules/joi/lib/index.js:126:30
+      1    0.0%    0.0%  LazyCompile: ~remove internal/linkedlist.js:35:16
+      1    0.0%    0.0%  LazyCompile: ~readBits /home/root/node_modules/bson/lib/bson/binary_parser.js:354:59
+      1    0.0%    0.0%  LazyCompile: ~onwrite _stream_writable.js:355:17
+      1    0.0%    0.0%  LazyCompile: ~ondata _stream_readable.js:552:18
+      1    0.0%    0.0%  LazyCompile: ~onParserExecuteCommon _http_server.js:380:33
+      1    0.0%    0.0%  LazyCompile: ~normalizeEncoding internal/util.js:141:55
+      1    0.0%    0.0%  LazyCompile: ~isAbsolute path.js:1220:34
+      1    0.0%    0.0%  LazyCompile: ~internals.root /home/root/node_modules/podium/node_modules/joi/lib/index.js:27:27
+      1    0.0%    0.0%  LazyCompile: ~internals.map /home/root/node_modules/accept/lib/encoding.js:122:26
+      1    0.0%    0.0%  LazyCompile: ~internals.handler /home/root/node_modules/hapi/lib/handler.js:73:30
+      1    0.0%    0.0%  LazyCompile: ~internals.generate /home/root/node_modules/hapi/node_modules/joi/lib/types/string/rfc3986.js:13:31
+      1    0.0%    0.0%  LazyCompile: ~internals.concatSettings /home/root/node_modules/hapi/node_modules/joi/lib/types/any/index.js:884:37
+      1    0.0%    0.0%  LazyCompile: ~internals.Topo.add /home/root/node_modules/topo/lib/index.js:20:41
+      1    0.0%    0.0%  LazyCompile: ~internals.Router.route /home/root/node_modules/call/lib/index.js:88:45
+      1    0.0%    0.0%  LazyCompile: ~internals.Request._match /home/root/node_modules/hapi/lib/request.js:345:47
+      1    0.0%    0.0%  LazyCompile: ~internals.Request /home/root/node_modules/hapi/lib/request.js:61:30
+      1    0.0%    0.0%  LazyCompile: ~internals.Podium._emit /home/root/node_modules/podium/lib/index.js:133:45
+      1    0.0%    0.0%  LazyCompile: ~internals.Compression.accept /home/root/node_modules/hapi/lib/compression.js:48:51
+      1    0.0%    0.0%  LazyCompile: ~hrtime internal/process.js:86:35
+      1    0.0%    0.0%  LazyCompile: ~hasOwnProperty module.js:18:24
+      1    0.0%    0.0%  LazyCompile: ~g events.js:288:13
+      1    0.0%    0.0%  LazyCompile: ~fs.readFileSync fs.js:496:27
+      1    0.0%    0.0%  LazyCompile: ~fs.openSync fs.js:639:23
+      1    0.0%    0.0%  LazyCompile: ~fs.lstatSync fs.js:1001:24
+      1    0.0%    0.0%  LazyCompile: ~fromString buffer.js:186:20
+      1    0.0%    0.0%  LazyCompile: ~forEach native array.js:954:22
+      1    0.0%    0.0%  LazyCompile: ~forEach /home/root/node_modules/hapi/lib/route.js:114:55
+      1    0.0%    0.0%  LazyCompile: ~flow _stream_readable.js:758:14
+      1    0.0%    0.0%  LazyCompile: ~finalize /home/root/node_modules/hapi/lib/handler.js:76:22
+      1    0.0%    0.0%  LazyCompile: ~filter native array.js:927:21
+      1    0.0%    0.0%  LazyCompile: ~exports.setImmediate timers.js:697:32
+      1    0.0%    0.0%  LazyCompile: ~exports.serial /home/root/node_modules/items/lib/index.js:11:27
+      1    0.0%    0.0%  LazyCompile: ~exports.schema /home/root/node_modules/hapi/node_modules/joi/lib/cast.js:16:27
+      1    0.0%    0.0%  LazyCompile: ~exports.inherits util.js:952:28
+      1    0.0%    0.0%  LazyCompile: ~exports.apply /home/root/node_modules/hapi/lib/schema.js:14:26
+      1    0.0%    0.0%  LazyCompile: ~exports._unrefActive timers.js:109:32
+      1    0.0%    0.0%  LazyCompile: ~exports._extend util.js:970:27
+      1    0.0%    0.0%  LazyCompile: ~exec native regexp.js:116:30
+      1    0.0%    0.0%  LazyCompile: ~each /home/root/node_modules/podium/lib/index.js:205:18
+      1    0.0%    0.0%  LazyCompile: ~each /home/root/node_modules/podium/lib/index.js:197:22
+      1    0.0%    0.0%  LazyCompile: ~clone /home/root/node_modules/statehood/node_modules/joi/lib/types/any/index.js:93:10
+      1    0.0%    0.0%  LazyCompile: ~clone /home/root/node_modules/podium/node_modules/joi/lib/types/any/index.js:93:10
+      1    0.0%    0.0%  LazyCompile: ~clone /home/root/node_modules/hapi-swagger/node_modules/joi/lib/types/any/index.js:98:10
+      1    0.0%    0.0%  LazyCompile: ~checkIsHttpToken _http_common.js:267:26
+      1    0.0%    0.0%  LazyCompile: ~checkInvalidHeaderChar _http_common.js:303:32
+      1    0.0%    0.0%  LazyCompile: ~charCodeAt native string.js:50:28
+      1    0.0%    0.0%  LazyCompile: ~byteLength buffer.js:343:20
+      1    0.0%    0.0%  LazyCompile: ~basename path.js:1373:30
+      1    0.0%    0.0%  LazyCompile: ~assertPath path.js:5:20
+      1    0.0%    0.0%  LazyCompile: ~_shellInsertionSort /home/root/node_modules/nosql/utils.js:768:29
+      1    0.0%    0.0%  LazyCompile: ~_checkItems /home/root/node_modules/hapi/node_modules/joi/lib/types/array/index.js:98:16
+      1    0.0%    0.0%  LazyCompile: ~_base /home/root/node_modules/vision/node_modules/joi/lib/types/object/index.js:30:10
+      1    0.0%    0.0%  LazyCompile: ~_base /home/root/node_modules/podium/node_modules/joi/lib/types/object/index.js:30:10
+      1    0.0%    0.0%  LazyCompile: ~_base /home/root/node_modules/hapi/node_modules/joi/lib/types/alternatives/index.js:26:10
+      1    0.0%    0.0%  LazyCompile: ~_addListener events.js:210:22
+      1    0.0%    0.0%  LazyCompile: ~Zlib._processChunk zlib.js:531:40
+      1    0.0%    0.0%  LazyCompile: ~Zlib zlib.js:300:14
+      1    0.0%    0.0%  LazyCompile: ~Writable.cork _stream_writable.js:251:35
+      1    0.0%    0.0%  LazyCompile: ~Url url.js:13:13
+      1    0.0%    0.0%  LazyCompile: ~TransformState _stream_transform.js:52:24
+      1    0.0%    0.0%  LazyCompile: ~Transform._write _stream_transform.js:145:38
+      1    0.0%    0.0%  LazyCompile: ~StackHas native array.js:120:18
+      1    0.0%    0.0%  LazyCompile: ~SimpleMove native array.js:277:20
+      1    0.0%    0.0%  LazyCompile: ~ServerResponse.writeHead _http_server.js:160:46
+      1    0.0%    0.0%  LazyCompile: ~Readable.pipe _stream_readable.js:473:35
+      1    0.0%    0.0%  LazyCompile: ~ReadStream.open fs.js:1957:37
+      1    0.0%    0.0%  LazyCompile: ~Pattern /home/root/node_modules/yamljs/lib/Pattern.js:13:19
+      1    0.0%    0.0%  LazyCompile: ~OutgoingMessage._storeHeader _http_outgoing.js:192:50
+      1    0.0%    0.0%  LazyCompile: ~OutgoingMessage._send _http_outgoing.js:125:43
+      1    0.0%    0.0%  LazyCompile: ~OutgoingMessage._finish _http_outgoing.js:623:45
+      1    0.0%    0.0%  LazyCompile: ~Module._load module.js:412:24
+      1    0.0%    0.0%  LazyCompile: ~Module._extensions..js module.js:577:37
+      1    0.0%    0.0%  LazyCompile: ~Module._compile module.js:510:37
+      1    0.0%    0.0%  LazyCompile: ~Items.serial /home/root/node_modules/hapi/lib/request.js:404:51
+      1    0.0%    0.0%  LazyCompile: ~InnerArrayReduce native array.js:1107:26
+      1    0.0%    0.0%  LazyCompile: ~InnerArrayLastIndexOf native array.js:1059:31
+      1    0.0%    0.0%  LazyCompile: ~InnerArrayForEach native array.js:935:27
+      1    0.0%    0.0%  LazyCompile: ~IncomingMessage _http_incoming.js:20:25
+      1    0.0%    0.0%  LazyCompile: ~ImmediateList.append timers.js:558:42
+      1    0.0%    0.0%  LazyCompile: ~Hoek.once /home/root/node_modules/hapi/lib/transmit.js:252:27
+      1    0.0%    0.0%  LazyCompile: ~FormData.getLength /home/root/node_modules/form-data/lib/form_data.js:363:40
+      1    0.0%    0.0%  LazyCompile: ~Buffer.alloc buffer.js:121:24
+      1    0.0%    0.0%  LazyCompile: ~<anonymous> /home/root/node_modules/hapi/lib/connection.js:243:12
+      1    0.0%    0.0%  LazyCompile: ~<anonymous> /home/root/node_modules/graceful-fs/graceful-fs.js:38:41
+      1    0.0%    0.0%  LazyCompile: ~<anonymous> /home/root/node_modules/graceful-fs/graceful-fs.js:37:51
+      1    0.0%    0.0%  LazyCompile: require internal/module.js:17:19
+      1    0.0%    0.0%  LazyCompile: fs.existsSync fs.js:263:25
+      1    0.0%    0.0%  LazyCompile: *resolve path.js:1152:28
+      1    0.0%    0.0%  LazyCompile: *onwrite _stream_writable.js:355:17
+      1    0.0%    0.0%  LazyCompile: *ondrain _http_common.js:213:17
+      1    0.0%    0.0%  LazyCompile: *ok assert.js:96:12
+      1    0.0%    0.0%  LazyCompile: *makeRequireFunction internal/module.js:13:29
+      1    0.0%    0.0%  LazyCompile: *join native array.js:347:19
+      1    0.0%    0.0%  LazyCompile: *indexOf native string.js:68:23
+      1    0.0%    0.0%  LazyCompile: *has /home/root/node_modules/joi/lib/set.js:46:8
+      1    0.0%    0.0%  LazyCompile: *has /home/root/node_modules/hapi/node_modules/joi/lib/set.js:46:8
+      1    0.0%    0.0%  LazyCompile: *getStderr internal/process/stdio.js:21:21
+      1    0.0%    0.0%  LazyCompile: *get global native regexp.js:808:25
+      1    0.0%    0.0%  LazyCompile: *fs.lstatSync fs.js:1001:24
+      1    0.0%    0.0%  LazyCompile: *fs.fstatSync fs.js:996:24
+      1    0.0%    0.0%  LazyCompile: *exports.isRef /home/root/node_modules/hapi/node_modules/joi/lib/ref.js:40:26
+      1    0.0%    0.0%  LazyCompile: *exports._unrefActive timers.js:109:32
+      1    0.0%    0.0%  LazyCompile: *collection /home/root/dist/nosql-util.js:5:20
+      1    0.0%    0.0%  LazyCompile: *charCodeAt native string.js:50:28
+      1    0.0%    0.0%  LazyCompile: *_checkItems /home/root/node_modules/hapi/node_modules/joi/lib/types/array/index.js:98:16
+      1    0.0%    0.0%  LazyCompile: *Stream internal/streams/legacy.js:6:16
+      1    0.0%    0.0%  LazyCompile: *SimpleMove native array.js:277:20
+      1    0.0%    0.0%  LazyCompile: *OutgoingMessage._writeRaw _http_outgoing.js:147:47
+      1    0.0%    0.0%  LazyCompile: *Module.load module.js:478:33
+      1    0.0%    0.0%  LazyCompile: *Module._nodeModulePaths module.js:273:37
+      1    0.0%    0.0%  LazyCompile: *Buffer.toString buffer.js:487:37
+      1    0.0%    0.0%  Handler: vary {1}
+      1    0.0%    0.0%  Handler: vary
+      1    0.0%    0.0%  Handler: unpipe {1}
+      1    0.0%    0.0%  Handler: toString {NaN}
+      1    0.0%    0.0%  Handler: symbol("nonexistent_symbol" hash 1db7469) {8}
+      1    0.0%    0.0%  Handler: symbol("nonexistent_symbol" hash 1db7469) {6}
+      1    0.0%    0.0%  Handler: symbol("nonexistent_symbol" hash 1db7469) {5}
+      1    0.0%    0.0%  Handler: symbol("nonexistent_symbol" hash 1db7469) {3}
+      1    0.0%    0.0%  Handler: symbol("nonexistent_symbol" hash 1db7469)
+      1    0.0%    0.0%  Handler: symbol("Symbol.replace" hash 13635fc) {1}
+      1    0.0%    0.0%  Handler: symbol("Symbol.replace" hash 13635fc)
+      1    0.0%    0.0%  Handler: symbol("Symbol.hasInstance" hash 1cb9da9b) {2}
+      1    0.0%    0.0%  Handler: symbol("Symbol.hasInstance" hash 1cb9da9b)
+      1    0.0%    0.0%  Handler: statusCode
+      1    0.0%    0.0%  Handler: split
+      1    0.0%    0.0%  Handler: read {8}
+      1    0.0%    0.0%  Handler: read {7}
+      1    0.0%    0.0%  Handler: read {6}
+      1    0.0%    0.0%  Handler: read {5}
+      1    0.0%    0.0%  Handler: read {12}
+      1    0.0%    0.0%  Handler: push {2}
+      1    0.0%    0.0%  Handler: push {1}
+      1    0.0%    0.0%  Handler: process {1}
+      1    0.0%    0.0%  Handler: process
+      1    0.0%    0.0%  Handler: prefinish
+      1    0.0%    0.0%  Handler: parseInt
+      1    0.0%    0.0%  Handler: on {2}
+      1    0.0%    0.0%  Handler: isFinite
+      1    0.0%    0.0%  Handler: handle
+      1    0.0%    0.0%  Handler: get
+      1    0.0%    0.0%  Handler: exit
+      1    0.0%    0.0%  Handler: emit {9}
+      1    0.0%    0.0%  Handler: emit {8}
+      1    0.0%    0.0%  Handler: emit {5}
+      1    0.0%    0.0%  Handler: emit {4}
+      1    0.0%    0.0%  Handler: emit {2}
+      1    0.0%    0.0%  Handler: emit {1}
+      1    0.0%    0.0%  Handler: emit {11}
+      1    0.0%    0.0%  Handler: emit
+      1    0.0%    0.0%  Handler: decodeURIComponent
+      1    0.0%    0.0%  Handler: copy
+      1    0.0%    0.0%  Handler: concat
+      1    0.0%    0.0%  Handler: compare {7}
+      1    0.0%    0.0%  Handler: compare {4}
+      1    0.0%    0.0%  Handler: compare {3}
+      1    0.0%    0.0%  Handler: compare {14}
+      1    0.0%    0.0%  Handler: compare {13}
+      1    0.0%    0.0%  Handler: compare {11}
+      1    0.0%    0.0%  Handler: compare {10}
+      1    0.0%    0.0%  Handler: compare
+      1    0.0%    0.0%  Handler: chunk
+      1    0.0%    0.0%  Handler: charCodeAt {1}
+      1    0.0%    0.0%  Handler: charCodeAt
+      1    0.0%    0.0%  Handler: callback {2}
+      1    0.0%    0.0%  Handler: call {5}
+      1    0.0%    0.0%  Handler: call {4}
+      1    0.0%    0.0%  Handler: call {2}
+      1    0.0%    0.0%  Handler: call {1}
+      1    0.0%    0.0%  Handler: bufferedRequest
+      1    0.0%    0.0%  Handler: _set
+      1    0.0%    0.0%  Handler: _readableState {1}
+      1    0.0%    0.0%  Handler: _read {1}
+      1    0.0%    0.0%  Handler: _onAbort
+      1    0.0%    0.0%  Handler: _flush
+      1    0.0%    0.0%  Handler: _events {2}
+      1    0.0%    0.0%  Handler: _emit
+      1    0.0%    0.0%  Handler: _dumped
+      1    0.0%    0.0%  Handler: _data
+      1    0.0%    0.0%  Handler: _addHeaderLine
+      1    0.0%    0.0%  Handler: Object
+      1    0.0%    0.0%  Handler: Array
+      1    0.0%    0.0%  Handler: An IC handler from the snapshot {9}
+      1    0.0%    0.0%  Handler: An IC handler from the snapshot {8}
+      1    0.0%    0.0%  Function: ~<anonymous> /home/root/node_modules/validator/lib/isPostalCode.js:1:11
+      1    0.0%    0.0%  Function: ~<anonymous> /home/root/node_modules/glob/common.js:1:11
+      1    0.0%    0.0%  Builtin: MakeQuadragenarianCodeYoungAgainEvenMarking
+      1    0.0%    0.0%  Builtin: ArrayBufferConstructor_ConstructStub
+      1    0.0%    0.0%  Builtin: Apply
+
+ [C++]:
+   ticks  total  nonlib   name
+
+ [Summary]:
+   ticks  total  nonlib   name
+  77409   19.6%   78.0%  JavaScript
+      0    0.0%    0.0%  C++
+   4199    1.1%    4.2%  GC
+  296114   74.9%          Shared libraries
+  21866    5.5%          Unaccounted
+
+ [C++ entry points]:
+   ticks    cpp   total   name
+
+ [Bottom up (heavy) profile]:
+  Note: percentage shows a share of a particular caller in the total
+  amount of its parent calls.
+  Callers occupying less than 2.0% are not shown.
+
+   ticks parent  name
+  272146   68.8%  /usr/local/bin/node
+  255915   94.0%    /usr/local/bin/node
+  150509   58.8%      LazyCompile: *parse native json.js:61:19
+  142276   94.5%        LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+  142275  100.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+  118911   83.6%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+  19645   13.8%            LazyCompile: *Readable.push _stream_readable.js:123:35
+   2886    2.0%            LazyCompile: ~emit events.js:136:44
+   7073    4.7%        LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+   7052   99.7%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   3707   52.6%            LazyCompile: ~emitOne events.js:94:17
+   1324   18.8%            LazyCompile: ~emit events.js:136:44
+   1065   15.1%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+    792   11.2%            Stub: BinaryOpICWithAllocationSiteStub(ADD_CreateAllocationMementos:String*String->String) {23}
+    164    2.3%            LazyCompile: ~ReadStream._read fs.js:1975:38
+  75168   29.4%      LazyCompile: *CreateDataProperty native json.js:28:28
+  75168  100.0%        LazyCompile: *InternalizeJSONProperty native json.js:32:33
+  51658   68.7%          LazyCompile: *parse native json.js:61:19
+  48775   94.4%            LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+   2463    4.8%            LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+  23510   31.3%          LazyCompile: *InternalizeJSONProperty native json.js:32:33
+  23510  100.0%            LazyCompile: *parse native json.js:61:19
+   9088    3.6%      LazyCompile: *InternalizeJSONProperty native json.js:32:33
+   5300   58.3%        LazyCompile: *parse native json.js:61:19
+   5054   95.4%          LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+   5054  100.0%            LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+    214    4.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+    214  100.0%            LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   3788   41.7%        LazyCompile: *InternalizeJSONProperty native json.js:32:33
+   3787  100.0%          LazyCompile: *parse native json.js:61:19
+   3561   94.0%            LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+    202    5.3%            LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+   5602    2.2%      LazyCompile: *fs.read fs.js:646:19
+   4750   84.8%        LazyCompile: ~ReadStream._read fs.js:1975:38
+   4605   96.9%          LazyCompile: *Readable.read _stream_readable.js:271:35
+   4524   98.2%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+    125    2.6%          LazyCompile: ~Readable.read _stream_readable.js:271:35
+     73   58.4%            LazyCompile: ~readableAddChunk _stream_readable.js:147:26
+     48   38.4%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+      4    3.2%            LazyCompile: *Readable.push _stream_readable.js:123:35
+    732   13.1%        LazyCompile: *ReadStream._read fs.js:1975:38
+    693   94.7%          LazyCompile: *Readable.read _stream_readable.js:271:35
+    588   84.8%            LazyCompile: *Readable.push _stream_readable.js:123:35
+     93   13.4%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+     27    3.7%          Handler: view
+     27  100.0%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+    120    2.1%        Handler: onPodiumError
+    120  100.0%          LazyCompile: *readableAddChunk _stream_readable.js:147:26
+    120  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+   7233    2.7%    LazyCompile: *slowToString buffer.js:420:22
+   7233  100.0%      LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   5823   80.5%        LazyCompile: *readableAddChunk _stream_readable.js:147:26
+   5823  100.0%          LazyCompile: *Readable.push _stream_readable.js:123:35
+   5823  100.0%            LazyCompile: ~onread fs.js:2013:18
+    948   13.1%        LazyCompile: *Readable.push _stream_readable.js:123:35
+    948  100.0%          LazyCompile: ~onread fs.js:2013:18
+    948  100.0%            LazyCompile: ~wrapper fs.js:681:19
+    216    3.0%        LazyCompile: ~emit events.js:136:44
+    111   51.4%          LazyCompile: *readableAddChunk _stream_readable.js:147:26
+    111  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+     46   21.3%          LazyCompile: ~readableAddChunk _stream_readable.js:147:26
+     46  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+     38   17.6%          LazyCompile: *Readable.push _stream_readable.js:123:35
+     38  100.0%            LazyCompile: ~onread fs.js:2013:18
+     21    9.7%          Handler: finish
+     21  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+    160    2.2%        LazyCompile: ~emitOne events.js:94:17
+    160  100.0%          LazyCompile: ~emit events.js:136:44
+    147   91.9%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+     13    8.1%            LazyCompile: ~readableAddChunk _stream_readable.js:147:26
+
+  22405    5.7%  /lib/ld-musl-x86_64.so.1
+  11744   52.4%    /usr/local/bin/node
+  10088   85.9%      LazyCompile: *parse native json.js:61:19
+   9530   94.5%        LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+   9528  100.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   7978   83.7%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+   1303   13.7%            LazyCompile: *Readable.push _stream_readable.js:123:35
+    197    2.1%            LazyCompile: ~emit events.js:136:44
+    497    4.9%        LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+    496   99.8%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+    273   55.0%            LazyCompile: ~emitOne events.js:94:17
+     80   16.1%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+     75   15.1%            LazyCompile: ~emit events.js:136:44
+     54   10.9%            Stub: BinaryOpICWithAllocationSiteStub(ADD_CreateAllocationMementos:String*String->String) {23}
+     14    2.8%            LazyCompile: ~ReadStream._read fs.js:1975:38
+    376    3.2%      LazyCompile: *Uint8ArrayConstructByLength native typedarray.js:184:37
+    376  100.0%        LazyCompile: *Uint8Array native typedarray.js:241:31
+    376  100.0%          LazyCompile: *FastBuffer buffer.js:10:14
+    376  100.0%            LazyCompile: createUnsafeBuffer buffer.js:35:28
+    242    2.1%      LazyCompile: ~<anonymous> /home/root/node_modules/nosql/utils.js:611:26
+    242  100.0%        LazyCompile: *_shellInsertionSort /home/root/node_modules/nosql/utils.js:768:29
+    242  100.0%          LazyCompile: ~shellsort /home/root/node_modules/nosql/utils.js:781:19
+    242  100.0%            LazyCompile: ~Array.quicksort.Array.orderBy /home/root/node_modules/nosql/utils.js:569:63
+   1968    8.8%    LazyCompile: *bidirectionalIndexOf buffer.js:579:30
+   1967   99.9%      LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   1582   80.4%        LazyCompile: *readableAddChunk _stream_readable.js:147:26
+   1582  100.0%          LazyCompile: *Readable.push _stream_readable.js:123:35
+   1582  100.0%            LazyCompile: ~onread fs.js:2013:18
+    259   13.2%        LazyCompile: *Readable.push _stream_readable.js:123:35
+    259  100.0%          LazyCompile: ~onread fs.js:2013:18
+    259  100.0%            LazyCompile: ~wrapper fs.js:681:19
+     55    2.8%        LazyCompile: ~emit events.js:136:44
+     29   52.7%          LazyCompile: *readableAddChunk _stream_readable.js:147:26
+     29  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+     16   29.1%          LazyCompile: ~readableAddChunk _stream_readable.js:147:26
+     16  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+     10   18.2%          LazyCompile: *Readable.push _stream_readable.js:123:35
+     10  100.0%            LazyCompile: ~onread fs.js:2013:18
+     50    2.5%        LazyCompile: ~emitOne events.js:94:17
+     50  100.0%          LazyCompile: ~emit events.js:136:44
+     47   94.0%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+      3    6.0%            LazyCompile: ~readableAddChunk _stream_readable.js:147:26
+   1370    6.1%    LazyCompile: *Buffer.concat buffer.js:293:25
+   1370  100.0%      LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   1184   86.4%        LazyCompile: *readableAddChunk _stream_readable.js:147:26
+   1184  100.0%          LazyCompile: *Readable.push _stream_readable.js:123:35
+   1184  100.0%            LazyCompile: ~onread fs.js:2013:18
+    161   11.8%        LazyCompile: *Readable.push _stream_readable.js:123:35
+    161  100.0%          LazyCompile: ~onread fs.js:2013:18
+    161  100.0%            LazyCompile: ~wrapper fs.js:681:19
+   1355    6.0%    LazyCompile: *slowToString buffer.js:420:22
+   1355  100.0%      LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   1099   81.1%        LazyCompile: *readableAddChunk _stream_readable.js:147:26
+   1099  100.0%          LazyCompile: *Readable.push _stream_readable.js:123:35
+   1099  100.0%            LazyCompile: ~onread fs.js:2013:18
+    170   12.5%        LazyCompile: *Readable.push _stream_readable.js:123:35
+    170  100.0%          LazyCompile: ~onread fs.js:2013:18
+    170  100.0%            LazyCompile: ~wrapper fs.js:681:19
+     46    3.4%        LazyCompile: ~emit events.js:136:44
+     23   50.0%          LazyCompile: *readableAddChunk _stream_readable.js:147:26
+     23  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+     14   30.4%          LazyCompile: ~readableAddChunk _stream_readable.js:147:26
+     14  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+      8   17.4%          LazyCompile: *Readable.push _stream_readable.js:123:35
+      8  100.0%            LazyCompile: ~onread fs.js:2013:18
+      1    2.2%          Handler: finish
+      1  100.0%            LazyCompile: *Readable.push _stream_readable.js:123:35
+
+  21866    5.5%  UNKNOWN
+
+  12156    3.1%  KeyedLoadIC: A keyed load IC from the snapshot
+   7936   65.3%    LazyCompile: *InternalizeJSONProperty native json.js:32:33
+   7147   90.1%      LazyCompile: *InternalizeJSONProperty native json.js:32:33
+   4701   65.8%        LazyCompile: *parse native json.js:61:19
+   4441   94.5%          LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+   4441  100.0%            LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+    233    5.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+    232   99.6%            LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+   2446   34.2%        LazyCompile: *InternalizeJSONProperty native json.js:32:33
+   2445  100.0%          LazyCompile: *parse native json.js:61:19
+   2338   95.6%            LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+     95    3.9%            LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+    789    9.9%      LazyCompile: *parse native json.js:61:19
+    744   94.3%        LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+    744  100.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+    610   82.0%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+    116   15.6%            LazyCompile: *Readable.push _stream_readable.js:123:35
+     15    2.0%            LazyCompile: ~emit events.js:136:44
+     39    4.9%        LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+     39  100.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+     19   48.7%            LazyCompile: ~emitOne events.js:94:17
+      7   17.9%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+      6   15.4%            LazyCompile: ~emit events.js:136:44
+      5   12.8%            Stub: BinaryOpICWithAllocationSiteStub(ADD_CreateAllocationMementos:String*String->String) {23}
+      2    5.1%            LazyCompile: ~ReadStream._read fs.js:1975:38
+   2445   20.1%    LazyCompile: ~<anonymous> /home/root/node_modules/nosql/utils.js:611:26
+   2445  100.0%      LazyCompile: *_shellInsertionSort /home/root/node_modules/nosql/utils.js:768:29
+   2445  100.0%        LazyCompile: ~shellsort /home/root/node_modules/nosql/utils.js:781:19
+   2445  100.0%          LazyCompile: ~Array.quicksort.Array.orderBy /home/root/node_modules/nosql/utils.js:569:63
+   2445  100.0%            LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:774:26
+   1211   10.0%    LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:611:26
+   1211  100.0%      LazyCompile: *_shellInsertionSort /home/root/node_modules/nosql/utils.js:768:29
+   1211  100.0%        LazyCompile: ~shellsort /home/root/node_modules/nosql/utils.js:781:19
+   1211  100.0%          LazyCompile: ~Array.quicksort.Array.orderBy /home/root/node_modules/nosql/utils.js:569:63
+   1211  100.0%            LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:774:26
+    303    2.5%    LazyCompile: *compare_eq /home/root/node_modules/nosql/index.js:2492:20
+    291   96.0%      LazyCompile: ~DatabaseBuilder.compare /home/root/node_modules/nosql/index.js:1437:45
+    291  100.0%        LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+    291  100.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+    255   87.6%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+     33   11.3%            LazyCompile: *Readable.push _stream_readable.js:123:35
+     12    4.0%      LazyCompile: *DatabaseBuilder.compare /home/root/node_modules/nosql/index.js:1437:45
+      9   75.0%        LazyCompile: *<anonymous> /home/root/node_modules/nosql/index.js:713:62
+      9  100.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+      3   33.3%            LazyCompile: ~emitOne events.js:94:17
+      3   33.3%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+      2   22.2%            Stub: BinaryOpICWithAllocationSiteStub(ADD_CreateAllocationMementos:String*String->String) {23}
+      1   11.1%            LazyCompile: ~emit events.js:136:44
+      3   25.0%        LazyCompile: ~<anonymous> /home/root/node_modules/nosql/index.js:713:62
+      3  100.0%          LazyCompile: *<anonymous> /home/root/node_modules/nosql/utils.js:174:18
+      3  100.0%            LazyCompile: *readableAddChunk _stream_readable.js:147:26
+

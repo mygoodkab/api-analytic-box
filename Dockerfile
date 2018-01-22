@@ -12,4 +12,6 @@ COPY . .
 
 EXPOSE 8000
 
-CMD [ "node", "dist/server.js" ]
+ENV DEBUG=http,app:log,app:error,worker:a
+
+CMD ["node", "dist/server.js" ]

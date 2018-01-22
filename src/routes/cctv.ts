@@ -19,7 +19,7 @@ module.exports = [
             notes: 'Get All cctv data'
         },
         handler: (request, reply) => {
-            db.collection('cctv').find().make((builder: any) => {
+            db.collectionServer('cctv').find().make((builder: any) => {
                 builder.callback((err: any, res: any) => {
                     return reply({
                         statusCode: 200,
@@ -45,7 +45,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('cctv').find().make((builder: any) => {
+            db.collectionServer('cctv').find().make((builder: any) => {
                 builder.where("_id", request.params._id)
                 builder.callback((err: any, res: any) => {
                     return reply({
@@ -76,7 +76,7 @@ module.exports = [
         handler: (request, reply) => {
             if (request.payload) {
                 request.payload._id = objectid();
-                db.collection('cctv').insert(request.payload)
+                db.collectionServer('cctv').insert(request.payload)
                 return reply({
                     statusCode: 200,
                     message: "OK",
@@ -107,7 +107,7 @@ module.exports = [
         },
         handler: function (request, reply) {
             if (request.payload) {
-                db.collection('cctv').modify(request.payload).make(function (builder) {
+                db.collectionServer('cctv').modify(request.payload).make(function (builder) {
                     builder.where("_id", request.payload._id);
                     builder.callback(function (err, res) {
                         return reply({
@@ -140,7 +140,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('cctv').remove().make((builder: any) => {
+            db.collectionServer('cctv').remove().make((builder: any) => {
                 builder.where("_id", request.payload._id)
                 builder.callback((err: any, res: any) => {
                     if (err) {
@@ -260,7 +260,7 @@ module.exports = [
                                                 removeFile(filename + "." + fileType)
                                             } else {
                                                 for (let data of csvtojson) {
-                                                    db.collection('cctv').insert(data).callback((err) => {
+                                                    db.collectionServer('cctv').insert(data).callback((err) => {
                                                         if (err) {
                                                             isErr = true
                                                         }

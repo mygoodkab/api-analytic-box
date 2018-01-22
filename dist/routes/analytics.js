@@ -22,7 +22,7 @@ module.exports = [
             notes: 'Get All analytics data'
         },
         handler: (request, reply) => {
-            db.collection('analytics').find().make((builder) => {
+            db.collectionServer('analytics').find().make((builder) => {
                 builder.callback((err, res) => {
                     return reply({
                         statusCode: 200,
@@ -49,7 +49,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('analytics').find().make((builder) => {
+            db.collectionServer('analytics').find().make((builder) => {
                 builder.where("id", request.params._id);
                 builder.callback((err, res) => {
                     return reply({
@@ -78,10 +78,10 @@ module.exports = [
         handler: function (request, reply) {
             if (request.payload) {
                 request.payload.updateDate = new Date();
-                db.collection('analytics').modify(request.payload).make((builder) => {
+                db.collectionServer('analytics').modify(request.payload).make((builder) => {
                     builder.where("id", request.payload.id);
                     builder.callback(function (err, res) {
-                        db.collection('analytics').find().make((builder) => {
+                        db.collectionServer('analytics').find().make((builder) => {
                             builder.where("id", request.payload.id);
                             builder.first();
                             builder.callback(function (err, res) {
@@ -126,7 +126,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             let payload = request.payload;
-            db.collection('analytics').find().make((builder) => {
+            db.collectionServer('analytics').find().make((builder) => {
                 builder.where('id', payload._id);
                 builder.first();
                 builder.callback((err, res) => {
@@ -157,7 +157,7 @@ module.exports = [
                                                         badRequest("Error " + error);
                                                     }
                                                     else if (stdout) {
-                                                        db.collection('analytics').remove().make((builder) => {
+                                                        db.collectionServer('analytics').remove().make((builder) => {
                                                             builder.where("id", request.payload._id);
                                                             builder.callback((err, res) => {
                                                                 if (err) {
@@ -340,7 +340,7 @@ module.exports = [
                                                                                 analyticsProfile: result.analytics,
                                                                                 analyticsFileInfo: analyticsFileInfo,
                                                                             };
-                                                                            db.collection('analytics').insert(analytics).callback(function (err) {
+                                                                            db.collectionServer('analytics').insert(analytics).callback(function (err) {
                                                                                 if (err) {
                                                                                     removeFile(filename);
                                                                                     return reply({
@@ -425,7 +425,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('analytics').find().make((builder) => {
+            db.collectionServer('analytics').find().make((builder) => {
                 builder.where("id", request.params.id);
                 builder.callback((err, res) => {
                     if (res.length == 0) {
@@ -491,7 +491,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            db.collection('analytics').find().make((builder) => {
+            db.collectionServer('analytics').find().make((builder) => {
                 builder.where("id", request.params.id);
                 builder.callback((err, res) => {
                     if (res.length == 0) {
@@ -558,7 +558,7 @@ module.exports = [
         },
         handler: (request, reply) => {
             const payload = request.payload;
-            db.collection('analytics').find().make((builder) => {
+            db.collectionServer('analytics').find().make((builder) => {
                 builder.where('id', payload._analyticsId);
                 builder.first();
                 builder.callback((err, res) => {

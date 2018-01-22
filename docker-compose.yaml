@@ -2,13 +2,11 @@ version: '3'
 services:
  vam_webconfig-api:
   build: .
-  image: embedded-performance-server.local:5000/eslab/webconfig-api:BACKEND-RFC01-V0.1
-  container_name: vam-webconfig-api
-  ports:
-    - 8000:8000
+  image: embedded-performance-server.local:5000/eslab/webconfig-api:BACKEND-RFC01-V0.3
   labels:
       - "traefik.backend=webconfig-api"
-      - "traefik.frontend.rule=PathPrefixStrip:/api/"
+      - "traefik.frontend.entryPoints=legacyapi"
+      - "traefik.frontend.rule=PathPrefix:/"
       - "traefik.port=8000"
   networks:
       - net_webgateway
@@ -18,21 +16,6 @@ services:
    - /var/run/docker.sock:/var/run/docker.sock
    - /opt/vam/:/opt/vam/
   restart: unless-stopped
-
-#  vam_webconfig-api-swaggerui:
-#   # build: .
-#   image: embedded-performance-server.local:5000/eslab/webconfig-api:latest
-#   container_name: webconfig-api-swaggerui
-#   labels:
-#       - "traefik.backend=webconfig-api"
-#       - "traefik.frontend.rule=PathPrefix:/swaggerui/"
-#       - "traefik.port=8000"
-#   networks:
-#       - net_analytics
-#   volumes:
-#    - ${HOME}/vam-data/:/vam-data/
-#    - /var/run/docker.sock:/var/run/docker.sock
-#   restart: always
 
 networks:
   net_webgateway:
