@@ -3,7 +3,6 @@ const debug = require('debug');
 const objectid = require('objectid');
 const Joi = require('joi')
 var a = require('debug')('worker:a')
-var error = debug('app:error');
 
 module.exports = [
     {  // Select all user
@@ -68,35 +67,27 @@ module.exports = [
             }
         },
         handler: function (request, reply) {
-
-            // error('goes to stderr!');
-            // var log = debug('worker:a');
-            // log.log = console.log.bind(console); 
-            // log('goes to stdout');
-            // error('still goes to stderr!');
-            // debug.log = console.info.bind(console);
-            // error('now goes to stdout via console.info');
-            // log('still goes to stdout, but via console.info now');
-            // log('start....')
+            // a('start....')
 
             if (request.payload) {
-              //  log('before query')
+                 
+                 // a('before query')
                 request.payload._id = objectid();
                 db.collectionServer('users').find().make((builder: any) => {
                     builder.where('username', request.payload.username);
                     builder.callback((err, res) => {
-                     //   log('after query')
+                           //a('after query')
                         if (res.length != 0) { // duplicate username 
-                        //    log('condition nodata')
+                                //a('condition nodata')
                             return reply({
                                 statusCode: 400,
                                 message: "username's duplicate",
 
                             })
                         } else {
-                         //   log('condition data')
+                               //a('condition data')
                             db.collectionServer('users').insert(request.payload)
-                        //    log('insert data')
+                               // a('insert data')
                             return reply({
                                 statusCode: 200,
                                 message: "OK",

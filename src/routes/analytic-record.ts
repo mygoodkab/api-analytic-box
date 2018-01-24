@@ -12,6 +12,8 @@ const pathSep = require('path');
 const httprequest = require('request');
 const fs = require('fs')
 let previousRequestData = [];
+var debug = require('debug')('worker:a')
+var sendData = require('debug')('worker:sendData')
 module.exports = [
 
     { // insert  record 
@@ -32,6 +34,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
+
             let timezone = (5) * 60 * 60 * 1000;
             let now: any = new Date(new Date().getTime() + timezone); // * timezone thai
             let tomorrow = new Date(new Date().getTime() + (24 + 5) * 60 * 60 * 1000); // * timezone thai * 24 hours
@@ -41,44 +44,51 @@ module.exports = [
             payload.id = id
             payload.timedb = Date.now()
             payload.fileType = payload.fileType.toLowerCase()
+
             db.collection('assignAnalytics').find().make((builder) => {
                 builder.where('nickname', payload.dockerNickname)
                 builder.first()
                 builder.callback((err, res) => {
+
                     if (!res) {
+
                         console.log("Can't find docker contrainer" + payload.dockerNickname)
                         badrequest("Can't find docker contrainer" + payload.dockerNickname)
                     } else {
                         let camInfo = res.cameraInfo
                         // ถ้า outputType ต้องตรงตามเงือนไข  
                         if (payload && (payload.outputType == 'cropping-counting' || payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
-
                             db.collection('analytics-record').insert(payload).callback((err) => {
                                 console.log("insert data ");
                                 if (err) {
                                     console.log(err)
                                     badrequest(err)
                                 } else {
-
-                                    if (typeof previousRequestData[payload.dockerNickname] == "undefined") {
-                                        console.log("first notification")
-                                        previousRequestData[payload.dockerNickname] = payload
-                                        notification()
-                                    } else {
-                                        let limitTime = 5 // minute
-                                        let analyticsDataTime: any = new Date(parseInt(previousRequestData[payload.dockerNickname].ts + "000") + timezone)
-                                        let diffTime = (now - analyticsDataTime) / (1000 * 60);
-                                        console.log("difftime : " + diffTime)
-                                        if (diffTime > limitTime) {
-                                            previousRequestData[payload.dockerNickname] = payload
-                                            console.log("Notification more 5 minute")
-                                            notification()
-                                        } else {
-                                            console.log("Notification less 5 minute")
-                                            sentDataToSmartliving()
-                                        }
-
-                                    }
+                                    db.collection('notification').find().make((builder) => {
+                                        builder.sort('timedb', true)
+                                        builder.where('dockerNickname', payload.dockerNickname)
+                                        builder.first()
+                                        builder.callback((err, res) => {
+                                            if (err) {
+                                                badrequest("Can't select notification" + payload.dockerNickname)
+                                            } else if (!res) { // ถ้าไม่มีข้อมูล
+                                                notification()
+                                            } else {
+                                                let currentTime:any = new Date  
+                                                let limitTime = 5 // minute
+                                                let analyticsDataTime: any = res.timedb
+                                                let diffTime = (currentTime - analyticsDataTime)/(1000*60);
+                                                console.log("difftime : " + diffTime)
+                                                if (diffTime > limitTime) { // ข้อมูลล่าสุดส่งมาเกิน 5 นาที 
+                                                    console.log("Notification more 5 minute")
+                                                    notification()
+                                                } else {
+                                                    console.log("Notification less 5 minute")
+                                                    sentDataToSmartliving()
+                                                }
+                                            }
+                                        })
+                                    })
                                     //=----------------------------------------------=
                                     //| check rule by dockerNickname to notification |
                                     //=----------------------------------------------=
@@ -94,27 +104,26 @@ module.exports = [
                                                     console.log("No rule")
                                                     sentDataToSmartliving()
                                                 } else {
+                                                    console.log("rule compare")
                                                     try {
                                                         for (let rule of res.rule) {
-                                                            // console.log(diffdate(rule))
+
                                                             if (diffdate(rule)) {
                                                                 let notificationData = payload
                                                                 notificationData.id = objectid()
-                                                                notificationData.statusRead = false
+                                                                notificationData.isRead = false
+                                                                notificationData.isHide = false
                                                                 let isNotification = false
                                                                 // notification
                                                                 if (rule.type == "cropping") {
                                                                     isNotification = true
                                                                 } else if (rule.type == "counting") {
-
                                                                     if (rule.condition == "more") {
-                                                                        if (rule.value >= payload.metadata.n) isNotification = true
+                                                                        if (parseInt(rule.value) <= parseInt(payload.metadata.n)) isNotification = true
                                                                     } else if (rule.condition == "less") {
-                                                                        if (rule.value <= payload.metadata.n) isNotification = true
-                                                                    } else badrequest("Invaild condition")
-
+                                                                        if (parseInt(rule.value) >= parseInt(payload.metadata.n)) isNotification = true
+                                                                    }// else badrequest("Invaild condition")
                                                                 }
-
                                                                 if (isNotification) {
                                                                     db.collection('notification').insert(notificationData).callback((err, res) => {
                                                                         if (err) {
@@ -127,9 +136,7 @@ module.exports = [
                                                         }
 
                                                         sentDataToSmartliving()
-
                                                     } catch (e) {
-
                                                         console.log("Error Notification")
                                                         console.log(e)
                                                         badrequest(e)
@@ -142,7 +149,7 @@ module.exports = [
                                     }
                                     // ถ้า file type เป็นแบบรูปภาพจะส่งไปยัง smart living 
                                     function sentDataToSmartliving() {
-
+                                        // sendData('18---------begin sentDataToSmartliving')
                                         if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
                                             let str = {
                                                 ts: payload.ts,
@@ -154,9 +161,11 @@ module.exports = [
                                             //get file
                                             let path: any = Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + Util.hash(str) + "." + payload.fileType;
                                             if (!fs.existsSync(path)) {
+                                                //  sendData('19')
                                                 console.log("Can't find image file")
                                                 badRequest("Can't find image file")
                                             } else {
+                                                //  sendData('20')
                                                 var formData = new FormData();
                                                 formData.append('refId', camInfo._id)
                                                 formData.append('type', payload.outputType)
@@ -166,10 +175,13 @@ module.exports = [
 
                                                 console.log("sending data . . . .")
                                                 formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
+                                                    //sendData('21')
                                                     if (err) {
+                                                        //sendData('22')
                                                         console.log(err)
                                                         badrequest(err)
                                                     } else {
+                                                        // sendData('finish')
                                                         // console.log(res)
                                                         console.log("-----------------sent data to smart living--------------------")
                                                         return reply({
@@ -181,6 +193,7 @@ module.exports = [
                                             }
 
                                         } else {
+
                                             console.log("-----------------------Reord data-------------------")
                                             return reply({
                                                 statusCode: 200,
@@ -420,10 +433,12 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
+            //debug('start 1')
             db.collection('analytics-record').find().make((builder: any) => {
                 builder.where("id", request.params._id)
                 builder.first()
                 builder.callback((err: any, res: any) => {
+                    //debug('2 get analytics-record')
                     if (!res) {
                         return reply({
                             statusCode: 404,
@@ -431,6 +446,7 @@ module.exports = [
                             data: "Data not found"
                         })
                     } else if (res.fileType == "png" || res.fileType == "jpg" || res.fileType == "jpeg") {
+                        //debug('3')
                         // let test = "good"
                         let str = {
                             ts: res.ts,
@@ -441,12 +457,14 @@ module.exports = [
                         }
                         //let hash = crypto.createHmac('sha256', JSON.stringify(res)).digest('base64'); 
                         //hash = hash.replace(/[^a-zA-Z ]/g, "")
+                        //debug('4')
                         let path: any = Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + Util.hash(str) + "." + res.fileType; // path + folder + \ + filename.png
+                        // debug('5')
                         // console.log(str)
                         //  console.log("test : " + hash)
                         //  console.log("hash : " + res.hash)
                         //console.log(path)   
-                        return reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + res.dockerNickname + '/output'+ pathSep.sep + Util.hash(str) + "." + res.fileType)
+                        return reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + res.dockerNickname + '/output' + pathSep.sep + Util.hash(str) + "." + res.fileType)
                         // return reply.file(path,
                         //     {   
                         //         filename: res.name + '.' + res.fileType,

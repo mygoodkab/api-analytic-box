@@ -12,6 +12,8 @@ COPY . .
 
 EXPOSE 8000
 
-ENV DEBUG=http,app:log,app:error,worker:a
+ENV DEBUG=http,worker:a,worker:sendData
+
+ENV DEBUG_COLORS=true
 
 CMD ["node", "dist/server.js" ]

@@ -5,7 +5,6 @@ const debug = require('debug');
 const objectid = require('objectid');
 const Joi = require('joi');
 var a = require('debug')('worker:a');
-var error = debug('app:error');
 module.exports = [
     {
         method: 'GET',

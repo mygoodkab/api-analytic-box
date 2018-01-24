@@ -13,6 +13,8 @@ const pathSep = require('path');
 const httprequest = require('request');
 const fs = require('fs');
 let previousRequestData = [];
+var debug = require('debug')('worker:a');
+var sendData = require('debug')('worker:sendData');
 module.exports = [
     {
         method: 'POST',
@@ -58,26 +60,34 @@ module.exports = [
                                     badrequest(err);
                                 }
                                 else {
-                                    if (typeof previousRequestData[payload.dockerNickname] == "undefined") {
-                                        console.log("first notification");
-                                        previousRequestData[payload.dockerNickname] = payload;
-                                        notification();
-                                    }
-                                    else {
-                                        let limitTime = 5;
-                                        let analyticsDataTime = new Date(parseInt(previousRequestData[payload.dockerNickname].ts + "000") + timezone);
-                                        let diffTime = (now - analyticsDataTime) / (1000 * 60);
-                                        console.log("difftime : " + diffTime);
-                                        if (diffTime > limitTime) {
-                                            previousRequestData[payload.dockerNickname] = payload;
-                                            console.log("Notification more 5 minute");
-                                            notification();
-                                        }
-                                        else {
-                                            console.log("Notification less 5 minute");
-                                            sentDataToSmartliving();
-                                        }
-                                    }
+                                    db.collection('notification').find().make((builder) => {
+                                        builder.sort('timedb', true);
+                                        builder.where('dockerNickname', payload.dockerNickname);
+                                        builder.first();
+                                        builder.callback((err, res) => {
+                                            if (err) {
+                                                badrequest("Can't select notification" + payload.dockerNickname);
+                                            }
+                                            else if (!res) {
+                                                notification();
+                                            }
+                                            else {
+                                                let currentTime = new Date;
+                                                let limitTime = 5;
+                                                let analyticsDataTime = res.timedb;
+                                                let diffTime = (currentTime - analyticsDataTime) / (1000 * 60);
+                                                console.log("difftime : " + diffTime);
+                                                if (diffTime > limitTime) {
+                                                    console.log("Notification more 5 minute");
+                                                    notification();
+                                                }
+                                                else {
+                                                    console.log("Notification less 5 minute");
+                                                    sentDataToSmartliving();
+                                                }
+                                            }
+                                        });
+                                    });
                                     function notification() {
                                         db.collection('rules').find().make((builder) => {
                                             builder.where('dockerNickname', payload.dockerNickname);
@@ -89,27 +99,27 @@ module.exports = [
                                                     sentDataToSmartliving();
                                                 }
                                                 else {
+                                                    console.log("rule compare");
                                                     try {
                                                         for (let rule of res.rule) {
                                                             if (diffdate(rule)) {
                                                                 let notificationData = payload;
                                                                 notificationData.id = objectid();
-                                                                notificationData.statusRead = false;
+                                                                notificationData.isRead = false;
+                                                                notificationData.isHide = false;
                                                                 let isNotification = false;
                                                                 if (rule.type == "cropping") {
                                                                     isNotification = true;
                                                                 }
                                                                 else if (rule.type == "counting") {
                                                                     if (rule.condition == "more") {
-                                                                        if (rule.value >= payload.metadata.n)
+                                                                        if (parseInt(rule.value) <= parseInt(payload.metadata.n))
                                                                             isNotification = true;
                                                                     }
                                                                     else if (rule.condition == "less") {
-                                                                        if (rule.value <= payload.metadata.n)
+                                                                        if (parseInt(rule.value) >= parseInt(payload.metadata.n))
                                                                             isNotification = true;
                                                                     }
-                                                                    else
-                                                                        badrequest("Invaild condition");
                                                                 }
                                                                 if (isNotification) {
                                                                     db.collection('notification').insert(notificationData).callback((err, res) => {

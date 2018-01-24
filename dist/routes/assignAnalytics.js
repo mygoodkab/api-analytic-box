@@ -95,7 +95,7 @@ module.exports = [
                 payload.status = 'stop';
                 payload.timestamp = Date.now();
                 payload.stopTime = Date.now();
-                db.collection('analytics').find().make((builder) => {
+                db.collectionServer('analytics').find().make((builder) => {
                     builder.where('id', payload._refAnalyticsId);
                     builder.callback((err, res) => {
                         if (res.length == 0) {

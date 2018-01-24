@@ -10,7 +10,7 @@ var fork = require('child_process').fork;
 //var curl = require('curlrequest')
 var net = require('net');
 const { exec } = require('child_process');
-
+var debug = require('debug')('worker:a')
 module.exports = [
     {   // GET log from docker 
         method: 'POST',
@@ -26,16 +26,17 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
+            debug("1")
             // request.payload._nickname = "webconfig-dist"
             // request.payload._nickname = "optimistic_clarke"
             const options = {
                 socketPath: '/var/run/docker.sock',
                 // path: '/v1.24/containers/' + request.payload._nickname + '/logs?stdout=1',
                 path: '/v1.24/containers/' + request.payload._nickname + '/logs?follow=false&stdout=true&stderr=true&since=0&timestamps=false&tail=50',
-            };       
+            };
 
-
-            console.log('Path get logs=>',options);
+            debug("2")
+            //console.log('Path get logs=>', options);
             var url = 'http://unix:' + options.socketPath + ':' + options.path
             var option = {
                 url: url,
@@ -43,8 +44,11 @@ module.exports = [
                     "Host": "http",
                 }
             }
+            debug("3")
             requestPath.get(option, (err, res, body) => {
+               debug("4")
                 if (err) {
+                    debug("5")
                     console.log('Error : ', err)
                     return reply({
                         statusCode: 400,
@@ -52,8 +56,8 @@ module.exports = [
                         data: err
                     })
                 } else {
+                    debug("6")
                     //  console.log("log docker " + body)
-                  
                     return reply({
                         statusCode: 200,
                         msg: 'Get log docker success',
@@ -77,6 +81,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
+
             // request.payload._nickname = "webconfig-dist"
             // request.payload._nickname = "optimistic_clarke"
             const options = {
@@ -90,6 +95,7 @@ module.exports = [
                     "Host": "http",
                 }
             }
+
             requestPath.get(option, (err, res, body) => {
                 if (err) {
                     console.log('Error : ', err)

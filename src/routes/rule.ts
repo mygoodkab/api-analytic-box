@@ -124,7 +124,6 @@ module.exports = [
             let payload = request.payload
             if (payload) {
                 payload.id = objectid();
-                console.log(payload)
                 let validate = payload.rule[0];
                 if (typeof validate.type == "undefined" && typeof validate.day == "undefined" && typeof validate.timeStart == "undefined" && typeof validate.timeEnd == "undefined" && typeof validate.condition == "undefined") {
                     badRequest("Invaid  Payload")

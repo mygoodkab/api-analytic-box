@@ -9,6 +9,7 @@ var child_process = require('child_process');
 var fork = require('child_process').fork;
 var net = require('net');
 const { exec } = require('child_process');
+var debug = require('debug')('worker:a');
 module.exports = [
     {
         method: 'POST',
@@ -24,11 +25,12 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
+            debug("1");
             const options = {
                 socketPath: '/var/run/docker.sock',
                 path: '/v1.24/containers/' + request.payload._nickname + '/logs?follow=false&stdout=true&stderr=true&since=0&timestamps=false&tail=50',
             };
-            console.log('Path get logs=>', options);
+            debug("2");
             var url = 'http://unix:' + options.socketPath + ':' + options.path;
             var option = {
                 url: url,
@@ -36,8 +38,11 @@ module.exports = [
                     "Host": "http",
                 }
             };
+            debug("3");
             requestPath.get(option, (err, res, body) => {
+                debug("4");
                 if (err) {
+                    debug("5");
                     console.log('Error : ', err);
                     return reply({
                         statusCode: 400,
@@ -46,6 +51,7 @@ module.exports = [
                     });
                 }
                 else {
+                    debug("6");
                     return reply({
                         statusCode: 200,
                         msg: 'Get log docker success',
