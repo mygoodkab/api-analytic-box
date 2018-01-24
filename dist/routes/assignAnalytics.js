@@ -11,6 +11,7 @@ const pathSep = require('path');
 const writeyaml = require('write-yaml');
 const fs = require('fs');
 const { exec } = require('child_process');
+const httprequest = require('request');
 module.exports = [
     {
         method: 'GET',
@@ -24,12 +25,12 @@ module.exports = [
             db.collection('assignAnalytics').find().make((builder) => {
                 builder.callback((err, res) => {
                     if (res.length == 0) {
-                        return reply({
+                        reply({
                             statusCode: 404,
                             message: "No data",
                         });
                     }
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -57,12 +58,45 @@ module.exports = [
                 builder.first();
                 builder.callback((err, res) => {
                     if (err || typeof res == 'undefined') {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             message: "Error have no data from this id",
                         });
                     }
-                    return reply({
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                });
+            });
+        }
+    },
+    {
+        method: 'GET',
+        path: '/assignAnalytics/docker-nickname/{nickname}',
+        config: {
+            tags: ['api'],
+            description: 'Get assignAnalytics data by docker nickname',
+            notes: 'Get assignAnalytics data by docker nickname',
+            validate: {
+                params: {
+                    nickname: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            db.collection('assignAnalytics').find().make((builder) => {
+                builder.where('nickname', request.params.nickname);
+                builder.first();
+                builder.callback((err, res) => {
+                    if (err || !res) {
+                        reply({
+                            statusCode: 400,
+                            message: "Error have no data from this nickname",
+                        });
+                    }
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -154,7 +188,7 @@ module.exports = [
                                                                                 if (err) {
                                                                                     serverError("Can't insert data in AssignAnalytics");
                                                                                 }
-                                                                                return reply({
+                                                                                reply({
                                                                                     statusCode: 200,
                                                                                     msg: 'insert data success',
                                                                                 });
@@ -185,14 +219,14 @@ module.exports = [
                 badRequest("No data in payload");
             }
             function badRequest(msg) {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: msg
                 });
             }
             function serverError(msg) {
-                return reply({
+                reply({
                     statusCode: 500,
                     message: "Bad Request",
                     data: msg
@@ -220,7 +254,7 @@ module.exports = [
                 builder.callback((err, res) => {
                     let dockerNickname = res.nickname;
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "Can't delete id : " + request.payload._id,
                         });
@@ -247,7 +281,7 @@ module.exports = [
                                                         badRequest("Can't Delete data");
                                                     }
                                                     else {
-                                                        return reply({
+                                                        reply({
                                                             statusCode: 200,
                                                             message: "OK",
                                                         });
@@ -267,7 +301,7 @@ module.exports = [
                 });
             });
             function badRequest(msg) {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "OK",
                     data: msg
@@ -293,7 +327,7 @@ module.exports = [
             db.collection('assignAnalytics').find().make((builder) => {
                 builder.where('_refCameraId', request.params.id);
                 builder.callback((err, res) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -320,7 +354,7 @@ module.exports = [
             db.collection('assignAnalytics').find().make((builder) => {
                 builder.where('_refAnalyticsId', request.params.id);
                 builder.callback((err, res) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -358,12 +392,12 @@ module.exports = [
                 builder.where('_id', request.payload.id);
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             message: "Bad request",
                         });
                     }
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                     });

@@ -34,24 +34,22 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-
-            let timezone = (5) * 60 * 60 * 1000;
+            console.log("revcive data from analytics")
+            let timezone = (7) * 60 * 60 * 1000;
             let now: any = new Date(new Date().getTime() + timezone); // * timezone thai
-            let tomorrow = new Date(new Date().getTime() + (24 + 5) * 60 * 60 * 1000); // * timezone thai * 24 hours
+            let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000); // * timezone thai * 24 hours
             const id = objectid()
             const payload = request.payload;
             //payload.ts = parseInt(payload.ts, 10)
             payload.id = id
             payload.timedb = Date.now()
             payload.fileType = payload.fileType.toLowerCase()
-
             db.collection('assignAnalytics').find().make((builder) => {
                 builder.where('nickname', payload.dockerNickname)
                 builder.first()
                 builder.callback((err, res) => {
 
                     if (!res) {
-
                         console.log("Can't find docker contrainer" + payload.dockerNickname)
                         badrequest("Can't find docker contrainer" + payload.dockerNickname)
                     } else {
@@ -64,6 +62,7 @@ module.exports = [
                                     console.log(err)
                                     badrequest(err)
                                 } else {
+
                                     db.collection('notification').find().make((builder) => {
                                         builder.sort('timedb', true)
                                         builder.where('dockerNickname', payload.dockerNickname)
@@ -72,26 +71,26 @@ module.exports = [
                                             if (err) {
                                                 badrequest("Can't select notification" + payload.dockerNickname)
                                             } else if (!res) { // ถ้าไม่มีข้อมูล
-                                                notification()
+                                                // notification()
                                             } else {
-                                                let currentTime:any = new Date  
+                                                let currentTime: any = new Date
                                                 let limitTime = 5 // minute
                                                 let analyticsDataTime: any = res.timedb
-                                                let diffTime = (currentTime - analyticsDataTime)/(1000*60);
+                                                let diffTime = (currentTime - analyticsDataTime) / (1000 * 60);
                                                 console.log("difftime : " + diffTime)
                                                 if (diffTime > limitTime) { // ข้อมูลล่าสุดส่งมาเกิน 5 นาที 
                                                     console.log("Notification more 5 minute")
-                                                    notification()
+                                                    //notification()
                                                 } else {
                                                     console.log("Notification less 5 minute")
-                                                    sentDataToSmartliving()
+                                                    // sentDataToSmartliving()
                                                 }
                                             }
                                         })
                                     })
-                                    //=----------------------------------------------=
-                                    //| check rule by dockerNickname to notification |
-                                    //=----------------------------------------------=
+                                    // =----------------------------------------------=
+                                    // | check rule by dockerNickname to notification |
+                                    // =----------------------------------------------=
                                     function notification() {
 
                                         db.collection('rules').find().make((builder) => {
@@ -116,7 +115,9 @@ module.exports = [
                                                                 let isNotification = false
                                                                 // notification
                                                                 if (rule.type == "cropping") {
+
                                                                     isNotification = true
+
                                                                 } else if (rule.type == "counting") {
                                                                     if (rule.condition == "more") {
                                                                         if (parseInt(rule.value) <= parseInt(payload.metadata.n)) isNotification = true
@@ -134,7 +135,6 @@ module.exports = [
                                                                 }
                                                             }
                                                         }
-
                                                         sentDataToSmartliving()
                                                     } catch (e) {
                                                         console.log("Error Notification")
@@ -184,18 +184,16 @@ module.exports = [
                                                         // sendData('finish')
                                                         // console.log(res)
                                                         console.log("-----------------sent data to smart living--------------------")
-                                                        return reply({
+                                                        reply({
                                                             statusCode: 200,
                                                             data: res
                                                         })
                                                     }
                                                 })
                                             }
-
                                         } else {
-
                                             console.log("-----------------------Reord data-------------------")
-                                            return reply({
+                                            reply({
                                                 statusCode: 200,
                                                 msg: "OK Insert success",
                                             })
@@ -211,6 +209,7 @@ module.exports = [
             })
 
             function diffdate(data) {
+
                 let isToday = false;
                 var year = parseInt(dateFormat(now, "yy"))
                 var month = parseInt(dateFormat(now, "m"))
@@ -240,6 +239,7 @@ module.exports = [
                             new Date(year, month, day, hour, min, 0),
                             new Date(year, month, day, timeEndH, timeEndM, 0)
                         )
+                        //console.log("*-************************** " + end )
                         if (start >= 0 && end <= 0) {
                             return true
                         }
@@ -257,12 +257,13 @@ module.exports = [
                             return true
                         }
                     }
+
                 }
                 return false
             }
             function badrequest(msg) {
                 console.log("Bad Request: " + msg)
-                return reply({
+                reply({
                     statusCode: 400,
                     msg: "Bad Request",
                     data: msg
@@ -285,13 +286,13 @@ module.exports = [
                 // builder.sort('ts', true)
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: err
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res
@@ -323,13 +324,13 @@ module.exports = [
                 builder.sort('ts', true)
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                         reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: err
                         })
                     } else {
-                        return reply({
+                         reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res
@@ -363,13 +364,13 @@ module.exports = [
                 builder.sort('timedb', true)
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                         reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: err
                         })
                     } else {
-                        return reply({
+                         reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res
@@ -402,13 +403,13 @@ module.exports = [
                 builder.between('ts', 1513146685761, 1513146764330)
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                         reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: err
                         })
                     } else {
-                        return reply({
+                         reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res,
@@ -440,7 +441,7 @@ module.exports = [
                 builder.callback((err: any, res: any) => {
                     //debug('2 get analytics-record')
                     if (!res) {
-                        return reply({
+                         reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Data not found"
@@ -464,7 +465,7 @@ module.exports = [
                         //  console.log("test : " + hash)
                         //  console.log("hash : " + res.hash)
                         //console.log(path)   
-                        return reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + res.dockerNickname + '/output' + pathSep.sep + Util.hash(str) + "." + res.fileType)
+                         reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + res.dockerNickname + '/output' + pathSep.sep + Util.hash(str) + "." + res.fileType)
                         // return reply.file(path,
                         //     {   
                         //         filename: res.name + '.' + res.fileType,
@@ -473,7 +474,7 @@ module.exports = [
                         //     })
                     }
                     else {
-                        return reply({
+                         reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Invail file type"
@@ -501,12 +502,12 @@ module.exports = [
                 db.collection('analytics-record').remove().make((builder) => {
                     builder.callback((err, res) => {
                         if (err) {
-                            return reply({
+                             reply({
                                 statusCode: 400,
                                 msg: "Bad request"
                             })
                         } else {
-                            return reply({
+                             reply({
                                 statusCode: 200,
                                 msg: "OK"
                             })
@@ -514,7 +515,7 @@ module.exports = [
                     })
                 })
             } else {
-                return reply({
+                 reply({
                     statusCode: 400,
                     msg: "Bad request"
                 })

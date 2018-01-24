@@ -18,14 +18,14 @@ module.exports = [
                 builder.sort('timedb', true);
                 builder.callback((err, res) => {
                     if (res.length == 0) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -37,7 +37,44 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/notification/{dockerNickname}',
+        path: '/notification/{id}',
+        config: {
+            tags: ['api'],
+            description: 'Get id notification data',
+            notes: 'Get id notification data',
+            validate: {
+                params: {
+                    id: Joi.string()
+                        .required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            db.collection('notification').find().make((builder) => {
+                builder.where('id', request.params.id);
+                builder.first();
+                builder.callback((err, res) => {
+                    if (!res) {
+                        reply({
+                            statusCode: 500,
+                            message: "No data",
+                            data: "-"
+                        });
+                    }
+                    else {
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: res
+                        });
+                    }
+                });
+            });
+        }
+    },
+    {
+        method: 'GET',
+        path: '/notification/sort-dockerNickname/{dockerNickname}',
         config: {
             tags: ['api'],
             description: 'Get id notification data',
@@ -55,14 +92,14 @@ module.exports = [
                 builder.sort('timedb', true);
                 builder.callback((err, res) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -93,14 +130,14 @@ module.exports = [
                 builder.sort('timedb', true);
                 builder.callback((err, res) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -130,14 +167,14 @@ module.exports = [
                 builder.first();
                 builder.callback((err, res) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -166,7 +203,7 @@ module.exports = [
                 builder.first();
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "Bad request"
                         });
@@ -176,13 +213,13 @@ module.exports = [
                             builder.where('id', request.payload.id);
                             builder.callback((err, res) => {
                                 if (err) {
-                                    return reply({
+                                    reply({
                                         statusCode: 400,
                                         msg: "Bad request"
                                     });
                                 }
                                 else {
-                                    return reply({
+                                    reply({
                                         statusCode: 200,
                                         msg: "OK"
                                     });
@@ -215,14 +252,14 @@ module.exports = [
                 builder.sort('timedb', true);
                 builder.callback((err, res) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -250,13 +287,13 @@ module.exports = [
                 db.collection('notification').remove().make((builder) => {
                     builder.callback((err, res) => {
                         if (err) {
-                            return reply({
+                            reply({
                                 statusCode: 400,
                                 msg: "Bad request"
                             });
                         }
                         else {
-                            return reply({
+                            reply({
                                 statusCode: 200,
                                 msg: "OK"
                             });
@@ -265,7 +302,7 @@ module.exports = [
                 });
             }
             else {
-                return reply({
+                reply({
                     statusCode: 400,
                     msg: "Bad request"
                 });

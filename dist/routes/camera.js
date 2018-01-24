@@ -20,7 +20,7 @@ module.exports = [
         handler: (request, reply) => {
             db.collection('camera').find().make((builder) => {
                 builder.callback((err, res) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -48,7 +48,7 @@ module.exports = [
             db.collection('camera').find().make((builder) => {
                 builder.where('_id', request.params.id);
                 builder.callback((err, res) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -90,7 +90,7 @@ module.exports = [
                         payload.portrelay = 8082;
                     }
                     else if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             message: "Bad request",
                         });
@@ -105,12 +105,12 @@ module.exports = [
                     payload.cmdffmpeg = "ffmpeg -f rtsp  -rtsp_transport tcp -i \"" + payload.rtsp + "\" -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://localhost:" + payload.portffmpeg + "/embedded";
                     db.collection('camera').insert(request.payload).callback(function (err) {
                         if (err) {
-                            return reply({
+                            reply({
                                 statusCode: 500,
                                 message: "can't insert data",
                             });
                         }
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: "insert success"
@@ -157,12 +157,12 @@ module.exports = [
                                     builder.where("_refCameraId", request.payload._id);
                                     builder.callback(function (err, res) {
                                         if (err) {
-                                            return reply({
+                                            reply({
                                                 statusCode: 400,
                                                 message: "Bad Request",
                                             });
                                         }
-                                        return reply({
+                                        reply({
                                             statusCode: 200,
                                             message: "OK",
                                             data: "Update Succeed"
@@ -175,7 +175,7 @@ module.exports = [
                 });
             }
             else {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: "No payload"
@@ -206,13 +206,13 @@ module.exports = [
                             builder.where("_id", request.payload._id);
                             builder.callback((err, res) => {
                                 if (err) {
-                                    return reply({
+                                    reply({
                                         statusCode: 500,
                                         message: "Can't delete id : " + request.payload._id,
                                     });
                                 }
                                 else {
-                                    return reply({
+                                    reply({
                                         statusCode: 200,
                                         message: "OK",
                                     });
@@ -221,7 +221,7 @@ module.exports = [
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "Some data's used in assignAnalytics",
                         });
@@ -252,13 +252,13 @@ module.exports = [
                 jsonfile.writeFile(file, obj, function (err) {
                     if (err) {
                         console.error(err);
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "Server Error",
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: "insert success"
@@ -267,7 +267,7 @@ module.exports = [
                 });
             }
             else
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: "No payload"
@@ -305,7 +305,7 @@ module.exports = [
                                 console.log(error);
                             }
                         });
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                         });
@@ -313,7 +313,7 @@ module.exports = [
                 });
             }
             else {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: "No payload"
@@ -333,21 +333,21 @@ module.exports = [
             let cmd = "../jsmpeg/live.sh";
             exec(cmd, (error, stdout, stderr) => {
                 if (stdout) {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: stdout
                     });
                 }
                 else if (stderr) {
-                    return reply({
+                    reply({
                         statusCode: 500,
                         message: "Server stdError",
                         data: stderr
                     });
                 }
                 else {
-                    return reply({
+                    reply({
                         statusCode: 500,
                         message: "Server Error",
                         data: error

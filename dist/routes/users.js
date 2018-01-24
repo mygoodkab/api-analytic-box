@@ -17,7 +17,7 @@ module.exports = [
         handler: function (request, reply) {
             db.collectionServer('users').find().make((builder) => {
                 builder.callback((err, res) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -43,7 +43,7 @@ module.exports = [
             db.collectionServer('users').find().make((builder) => {
                 builder.where('_id', request.params.id);
                 builder.callback((err, res) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -74,14 +74,14 @@ module.exports = [
                     builder.where('username', request.payload.username);
                     builder.callback((err, res) => {
                         if (res.length != 0) {
-                            return reply({
+                            reply({
                                 statusCode: 400,
                                 message: "username's duplicate",
                             });
                         }
                         else {
                             db.collectionServer('users').insert(request.payload);
-                            return reply({
+                            reply({
                                 statusCode: 200,
                                 message: "OK",
                                 data: res
@@ -91,7 +91,7 @@ module.exports = [
                 });
             }
             else
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: "No payload"
@@ -117,7 +117,7 @@ module.exports = [
                 db.collectionServer('users').modify(request.payload).make(function (builder) {
                     builder.where("_id", request.payload._id);
                     builder.callback(function (err, res) {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: "Update Succeed"
@@ -126,7 +126,7 @@ module.exports = [
                 });
             }
             else {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: "No payload"
@@ -152,13 +152,13 @@ module.exports = [
                 builder.where("_id", request.payload._id);
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "Can't delete id : " + request.payload._id,
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                         });

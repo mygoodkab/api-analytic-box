@@ -21,7 +21,7 @@ module.exports = [
         handler: (request, reply) => {
             db.collectionServer('cctv').find().make((builder: any) => {
                 builder.callback((err: any, res: any) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -48,7 +48,7 @@ module.exports = [
             db.collectionServer('cctv').find().make((builder: any) => {
                 builder.where("_id", request.params._id)
                 builder.callback((err: any, res: any) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -77,12 +77,12 @@ module.exports = [
             if (request.payload) {
                 request.payload._id = objectid();
                 db.collectionServer('cctv').insert(request.payload)
-                return reply({
+                reply({
                     statusCode: 200,
                     message: "OK",
                     data: "cctv Succeed"
                 })
-            } else return reply({
+            } else reply({
                 statusCode: 400,
                 message: "Bad Request",
                 data: "No payload"
@@ -110,7 +110,7 @@ module.exports = [
                 db.collectionServer('cctv').modify(request.payload).make(function (builder) {
                     builder.where("_id", request.payload._id);
                     builder.callback(function (err, res) {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: "Update Succeed"
@@ -118,7 +118,7 @@ module.exports = [
                     });
                 })
             } else {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: "No payload"
@@ -144,12 +144,12 @@ module.exports = [
                 builder.where("_id", request.payload._id)
                 builder.callback((err: any, res: any) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "Can't delete id : " + request.payload._id,
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                         })
@@ -279,7 +279,7 @@ module.exports = [
                                             if (isErr) {
                                                 serverError("Can't insert data")
                                             } else {
-                                                return reply({
+                                                reply({
                                                     statusCode: 200,
                                                     msg: 'OK',
                                                     data: csvtojson
@@ -302,14 +302,14 @@ module.exports = [
             }
 
             function badRequest(msg) {
-                return reply({
+                reply({
                     statusCode: 400,
                     msg: 'Bad Request',
                     data: msg
                 })
             }
             function serverError(msg) {
-                return reply({
+                reply({
                     statusCode: 500,
                     msg: 'Server Error',
                     data: msg

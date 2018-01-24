@@ -2,7 +2,7 @@ import * as db from '../nosql-util';
 const objectid = require('objectid');
 const Joi = require('joi')
 module.exports = [
-    {  // select all rule
+    {  // select all notification
         method: 'GET',
         path: '/notification',
         config: {
@@ -16,13 +16,13 @@ module.exports = [
                 builder.sort('timedb', true)
                 builder.callback((err: any, res: any) => {
                     if (res.length == 0) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -33,9 +33,46 @@ module.exports = [
             })
         }
     },
-    {  // select rule by rule id
+    { // select notification by id  
         method: 'GET',
-        path: '/notification/{dockerNickname}',
+        path: '/notification/{id}',
+        config: {
+            tags: ['api'],
+            description: 'Get id notification data',
+            notes: 'Get id notification data',
+            validate: {
+                params: {
+                    id: Joi.string()
+                        .required()
+                }
+            }
+        },
+        handler: (request, reply) => {
+            db.collection('notification').find().make((builder: any) => {
+                builder.where('id', request.params.id)
+                builder.first()
+                builder.callback((err: any, res: any) => {
+                    if (!res) {
+                        reply({
+                            statusCode: 500,
+                            message: "No data",
+                            data: "-"
+                        })
+                    } else {
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: res
+                        })
+                    }
+
+                });
+            });
+        }
+    },
+    {  // select notification by rule id
+        method: 'GET',
+        path: '/notification/sort-dockerNickname/{dockerNickname}',
         config: {
             tags: ['api'],
             description: 'Get id notification data',
@@ -53,13 +90,13 @@ module.exports = [
                 builder.sort('timedb', true)
                 builder.callback((err: any, res: any) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -70,7 +107,7 @@ module.exports = [
             });
         }
     },
-    {  // select rule by dockerNickname and isRead is false 
+    {  // select notification by dockerNickname and isRead is false 
         method: 'GET',
         path: '/notification/sort-statusRead/{dockerNickname}',
         config: {
@@ -91,13 +128,13 @@ module.exports = [
                 builder.sort('timedb', true)
                 builder.callback((err: any, res: any) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -108,7 +145,7 @@ module.exports = [
             });
         }
     },
-    {  // select lastest rule by rule id
+    {  // select lastest notification by rule id
         method: 'GET',
         path: '/notification/lastest/{dockerNickname}',
         config: {
@@ -128,13 +165,13 @@ module.exports = [
                 builder.first()
                 builder.callback((err: any, res: any) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -164,7 +201,7 @@ module.exports = [
                 builder.first()
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "Bad request"
                         })
@@ -173,12 +210,12 @@ module.exports = [
                             builder.where('id', request.payload.id)
                             builder.callback((err, res) => {
                                 if (err) {
-                                    return reply({
+                                    reply({
                                         statusCode: 400,
                                         msg: "Bad request"
                                     })
                                 } else {
-                                    return reply({
+                                    reply({
                                         statusCode: 200,
                                         msg: "OK"
                                     })
@@ -191,7 +228,7 @@ module.exports = [
         }
 
     },
-    {  // select rule by dockerNickname and isHide is false 
+    {  // select notification by dockerNickname and isHide is false 
         method: 'GET',
         path: '/notification/sort-hide/{dockerNickname}',
         config: {
@@ -212,13 +249,13 @@ module.exports = [
                 builder.sort('timedb', true)
                 builder.callback((err: any, res: any) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             message: "No data",
                             data: "-"
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -247,12 +284,12 @@ module.exports = [
                 db.collection('notification').remove().make((builder) => {
                     builder.callback((err, res) => {
                         if (err) {
-                            return reply({
+                            reply({
                                 statusCode: 400,
                                 msg: "Bad request"
                             })
                         } else {
-                            return reply({
+                            reply({
                                 statusCode: 200,
                                 msg: "OK"
                             })
@@ -260,7 +297,7 @@ module.exports = [
                     })
                 })
             } else {
-                return reply({
+                reply({
                     statusCode: 400,
                     msg: "Bad request"
                 })

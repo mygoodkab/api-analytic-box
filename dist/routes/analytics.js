@@ -24,7 +24,7 @@ module.exports = [
         handler: (request, reply) => {
             db.collectionServer('analytics').find().make((builder) => {
                 builder.callback((err, res) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -52,7 +52,7 @@ module.exports = [
             db.collectionServer('analytics').find().make((builder) => {
                 builder.where("id", request.params._id);
                 builder.callback((err, res) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
@@ -90,7 +90,7 @@ module.exports = [
                                 db.collection('assignAnalytics').modify({ analyticsInfo: res }).make(function (builder) {
                                     builder.where("_refAnalyticsId", request.payload.id);
                                     builder.callback(function (err, res) {
-                                        return reply({
+                                        reply({
                                             statusCode: 200,
                                             message: "OK",
                                             data: "Update Succeed"
@@ -103,7 +103,7 @@ module.exports = [
                 });
             }
             else {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: "No payload"
@@ -164,7 +164,7 @@ module.exports = [
                                                                     badRequest("Can't Delete data");
                                                                 }
                                                                 else {
-                                                                    return reply({
+                                                                    reply({
                                                                         statusCode: 200,
                                                                         message: "OK",
                                                                     });
@@ -187,7 +187,7 @@ module.exports = [
                 });
             });
             function badRequest(msg) {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad Request",
                     data: msg
@@ -253,7 +253,7 @@ module.exports = [
                             mkdirp(path, function (err) {
                                 if (err) {
                                     console.log("can't crate folder : " + err);
-                                    return reply({
+                                    reply({
                                         statusCode: 500,
                                         msg: 'Server error',
                                         data: 'can\'t crate folder'
@@ -264,7 +264,7 @@ module.exports = [
                                     let file = fs.createWriteStream(fileUploadName);
                                     file.on('error', (err) => {
                                         console.log("can't upload analytics profile : " + err);
-                                        return reply({
+                                        reply({
                                             statusCode: 500,
                                             msg: 'Server error',
                                             data: 'can\'t upload profile'
@@ -343,13 +343,13 @@ module.exports = [
                                                                             db.collectionServer('analytics').insert(analytics).callback(function (err) {
                                                                                 if (err) {
                                                                                     removeFile(filename);
-                                                                                    return reply({
+                                                                                    reply({
                                                                                         statusCode: 500,
                                                                                         message: "Can't insert analytics profile ",
                                                                                     });
                                                                                 }
                                                                                 else {
-                                                                                    return reply({
+                                                                                    reply({
                                                                                         statusCode: 200,
                                                                                         message: "OK",
                                                                                         data: "Upload Analytics Successful"
@@ -385,14 +385,14 @@ module.exports = [
                 badRequest("No file in payload");
             }
             function serverError(msg) {
-                return reply({
+                reply({
                     statusCode: 500,
                     msg: 'Server error',
                     data: msg
                 });
             }
             function badRequest(msg) {
-                return reply({
+                reply({
                     statusCode: 400,
                     msg: 'Bad Request',
                     data: msg
@@ -429,7 +429,7 @@ module.exports = [
                 builder.where("id", request.params.id);
                 builder.callback((err, res) => {
                     if (res.length == 0) {
-                        return reply({
+                        reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Data not found"
@@ -467,7 +467,7 @@ module.exports = [
                         let analyticsFileInfo = res.analyticsFileInfo;
                         let analyticsProfile = res.analyticsProfile;
                         let path = util_1.Util.analyticsPath() + analyticsFileInfo.name + pathSep.sep + analyticsProfile.logo;
-                        return reply.file(path, {
+                        reply.file(path, {
                             filename: res.name + '.' + res.fileType,
                             mode: 'inline'
                         }).type(contentType);
@@ -495,7 +495,7 @@ module.exports = [
                 builder.where("id", request.params.id);
                 builder.callback((err, res) => {
                     if (res.length == 0) {
-                        return reply({
+                        reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Data not found"
@@ -534,7 +534,7 @@ module.exports = [
                         let analyticsProfile = res.analyticsProfile;
                         let path = util_1.Util.analyticsPath() + analyticsFileInfo.name + pathSep.sep + request.params.image;
                         console.log("Path analytics logo : " + path);
-                        return reply.file(path, {
+                        reply.file(path, {
                             filename: res.name + '.' + res.fileType,
                             mode: 'inline'
                         }).type(contentType);
@@ -585,7 +585,7 @@ module.exports = [
                                                 inputSchema.properties[str[0]] = JSON.parse('{"type":"' + typeof str[1] + '","default":"' + str[1] + '","description":"' + str[0] + '"}');
                                             }
                                         }
-                                        return reply({
+                                        reply({
                                             statusCode: 200,
                                             message: "Read Yaml convent to Json success",
                                             data: inputSchema
@@ -611,7 +611,7 @@ module.exports = [
                 });
             });
             function badRequest(msg) {
-                return reply({
+                reply({
                     statusCode: 400,
                     message: "Bad request",
                     data: msg

@@ -77,7 +77,7 @@ module.exports = [
                 let path = Util.uploadImagePath() + payload.refInfo;
                 mkdirp(path, function (err) {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 500,
                             msg: 'Server error',
                             data: 'can\'t crate folder'
@@ -87,11 +87,11 @@ module.exports = [
                 });
                 payload._id = objectid()
                 db.collection('faceInfo').insert(payload);
-                return reply({
+                reply({
                     statusCode: 200,
                     msg: 'OK',
                 })
-            } else return reply({
+            } else reply({
                 statusCode: 400,
                 msg: 'Bad Request',
                 data: 'No file in payload'
@@ -143,7 +143,7 @@ module.exports = [
                 let file = fs.createWriteStream(path + imageInfo.storeName);
 
                 file.on('error', (err: any) => {
-                    return reply({
+                    reply({
                         statusCode: 500,
                         msg: 'Server error',
                         data: 'can\'t upload image'
@@ -173,12 +173,12 @@ module.exports = [
                                         builder.where('type', 'recognition')
                                         builder.callback((err: any, res: any) => {
                                             if (res.length == 0) {
-                                                return reply({
+                                                reply({
                                                     statusCode: 200,
                                                     msg: 'have no assignAnalytics data to stop docker',
                                                 })
                                             } else {
-                                                return reply({
+                                                reply({
                                                     statusCode: 200,
                                                     msg: 'updata status success',
                                                 })
@@ -190,7 +190,7 @@ module.exports = [
                         })
                     })
                 })
-            } else return reply({
+            } else reply({
                 statusCode: 400,
                 msg: 'Bad Request',
                 data: 'No file in payload'
@@ -210,13 +210,13 @@ module.exports = [
             db.collection('faceInfo').find().make((builder: any) => {
                 builder.callback((err: any, res: any) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             message: "Bad Request",
                             data: "Error"
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: res
@@ -244,7 +244,7 @@ module.exports = [
                 builder.where("_idImageRegister", request.params.id)
                 builder.callback((err: any, res: any) => {
                     if (res.length == 0) {
-                        return reply({
+                        reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Data not found"
@@ -281,7 +281,7 @@ module.exports = [
                         }
                         let path: any = Util.uploadImagePath() + res.refInfo + pathSep.sep + res.storeName; // path + folder + \ + filename.png
                         console.log('Getting image . . . . . success')
-                        return reply.file(path,
+                        reply.file(path,
                             {
                                 filename: res.name + '.' + res.fileType,
                                 mode: 'inline',
@@ -311,7 +311,7 @@ module.exports = [
                 builder.callback((err: any, res: any) => {
 
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             message: "Bad Request",
                             data: "Error"
@@ -321,7 +321,7 @@ module.exports = [
                             builder.where('refInfo', request.payload.refInfo)
                             builder.callback((err: any, res: any) => {
                                 if (err) {
-                                    return reply({
+                                    reply({
                                         statusCode: 400,
                                         message: "Bad Request",
                                         data: "Error"
@@ -332,21 +332,21 @@ module.exports = [
                                     child_process.exec(cmd, function (error, stdout, stderr) {
                                         if (stdout) {
                                             console.log("Delete Image Folder Successful" + stdout)
-                                            return reply({
+                                            reply({
                                                 statusCode: 200,
                                                 message: "Delete Image Folder Successful",
                                                 data: stdout
                                             })
                                         } else if (stderr) {
                                             console.log("stderr" + stderr)
-                                            return reply({
+                                            reply({
                                                 statusCode: 400,
                                                 message: "Std Error Can't Delete Image Folder",
                                                 data: stderr
                                             })
                                         } else {
                                             console.log("Error "+error)
-                                            return reply({
+                                            reply({
                                                 statusCode: 400,
                                                 message: "Error Can't Delete Image Folder",
                                                 data: error
@@ -358,12 +358,12 @@ module.exports = [
 
                                     //     if (paths != "") {
 
-                                    //         return reply({
+                                    //         reply({
                                     //             statusCode: 200,
                                     //             message: 'Deleted files and folders:\n' + paths.join('\n')
                                     //         })
                                     //     } else {
-                                    //         return reply({
+                                    //         reply({
                                     //             statusCode: 200,
                                     //             message: "Can\'t delete this folder or Have no folder",
                                     //         })
@@ -396,21 +396,21 @@ module.exports = [
     //         child_process.exec(cmd, function (error, stdout, stderr) {
     //             if (stdout) {
     //                 console.log("Delete Image Folder Successful" + stdout)
-    //                 return reply({
+    //                 reply({
     //                     statusCode: 200,
     //                     message: "Delete Image Folder Successful",
     //                     data: stdout
     //                 })
     //             } else if (stderr) {
     //                 console.log("stderr" + stderr)
-    //                 return reply({
+    //                 reply({
     //                     statusCode: 400,
     //                     message: "Std Error Can't Delete Image Folder",
     //                     data: stderr
     //                 })
     //             } else {
     //                 console.log("Error "+error)
-    //                 return reply({
+    //                 reply({
     //                     statusCode: 400,
     //                     message: "Error Can't Delete Image Folder",
     //                     data: error
@@ -439,13 +439,13 @@ module.exports = [
     //             builder.where('refInfo', request.params.refInfo)
     //             builder.callback((err: any, res: any) => {
     //                 if (err) {
-    //                     return reply({
+    //                     reply({
     //                         statusCode: 400,
     //                         message: "Bad Request",
     //                         data: "Error"
     //                     })
     //                 } else {
-    //                     return reply({
+    //                     reply({
     //                         statusCode: 200,
     //                         message: "OK",
     //                         data: res

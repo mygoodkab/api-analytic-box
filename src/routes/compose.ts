@@ -48,7 +48,7 @@ module.exports = [
                     }
 
                     function success(data) {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "OK",
                             data: data
@@ -56,7 +56,7 @@ module.exports = [
                     }
 
                     function badrequest(msg) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             message: "Bad Request",
                             data: msg
@@ -87,7 +87,7 @@ module.exports = [
             db.collection('assignAnalytics').modify({ status: "start" }).make((builder: any) => {
                 builder.where('_id', request.params.id)
                 builder.callback((err: any, res: any) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
 
@@ -114,7 +114,7 @@ module.exports = [
             db.collection('assignAnalytics').modify({ status: "stop" }).make((builder: any) => {
                 builder.where('_id', request.params.id)
                 builder.callback((err: any, res: any) => {
-                    return reply({
+                    reply({
                         statusCode: 200,
                         message: "OK",
 

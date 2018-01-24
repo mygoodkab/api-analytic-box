@@ -25,12 +25,12 @@ module.exports = [
                 builder.callback((err: any, res: any) => {
                     var userInfo = encodeURIComponent(JSON.stringify(res));
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             message: "Invaild username or password",
                         })
                     } else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             message: "Login success",
                             //data: JWT.sign(userInfo, Util.SECRET_KEY)

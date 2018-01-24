@@ -34,9 +34,10 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            let timezone = (5) * 60 * 60 * 1000;
+            console.log("revcive data from analytics");
+            let timezone = (7) * 60 * 60 * 1000;
             let now = new Date(new Date().getTime() + timezone);
-            let tomorrow = new Date(new Date().getTime() + (24 + 5) * 60 * 60 * 1000);
+            let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000);
             const id = objectid();
             const payload = request.payload;
             payload.id = id;
@@ -69,7 +70,6 @@ module.exports = [
                                                 badrequest("Can't select notification" + payload.dockerNickname);
                                             }
                                             else if (!res) {
-                                                notification();
                                             }
                                             else {
                                                 let currentTime = new Date;
@@ -79,11 +79,9 @@ module.exports = [
                                                 console.log("difftime : " + diffTime);
                                                 if (diffTime > limitTime) {
                                                     console.log("Notification more 5 minute");
-                                                    notification();
                                                 }
                                                 else {
                                                     console.log("Notification less 5 minute");
-                                                    sentDataToSmartliving();
                                                 }
                                             }
                                         });
@@ -171,7 +169,7 @@ module.exports = [
                                                     }
                                                     else {
                                                         console.log("-----------------sent data to smart living--------------------");
-                                                        return reply({
+                                                        reply({
                                                             statusCode: 200,
                                                             data: res
                                                         });
@@ -181,7 +179,7 @@ module.exports = [
                                         }
                                         else {
                                             console.log("-----------------------Reord data-------------------");
-                                            return reply({
+                                            reply({
                                                 statusCode: 200,
                                                 msg: "OK Insert success",
                                             });
@@ -233,7 +231,7 @@ module.exports = [
             }
             function badrequest(msg) {
                 console.log("Bad Request: " + msg);
-                return reply({
+                reply({
                     statusCode: 400,
                     msg: "Bad Request",
                     data: msg
@@ -253,14 +251,14 @@ module.exports = [
             db.collection('analytics-record').find().make((builder) => {
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: err
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res
@@ -290,14 +288,14 @@ module.exports = [
                 builder.sort('ts', true);
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: err
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res
@@ -329,14 +327,14 @@ module.exports = [
                 builder.sort('timedb', true);
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: err
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res
@@ -367,14 +365,14 @@ module.exports = [
                 builder.between('ts', 1513146685761, 1513146764330);
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: err
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res,
@@ -403,7 +401,7 @@ module.exports = [
                 builder.first();
                 builder.callback((err, res) => {
                     if (!res) {
-                        return reply({
+                        reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Data not found"
@@ -418,10 +416,10 @@ module.exports = [
                             metadata: res.metadata
                         };
                         let path = util_1.Util.dockerAnalyticsCameraPath() + res.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + res.fileType;
-                        return reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + res.dockerNickname + '/output' + pathSep.sep + util_1.Util.hash(str) + "." + res.fileType);
+                        reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + res.dockerNickname + '/output' + pathSep.sep + util_1.Util.hash(str) + "." + res.fileType);
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Invail file type"
@@ -449,13 +447,13 @@ module.exports = [
                 db.collection('analytics-record').remove().make((builder) => {
                     builder.callback((err, res) => {
                         if (err) {
-                            return reply({
+                            reply({
                                 statusCode: 400,
                                 msg: "Bad request"
                             });
                         }
                         else {
-                            return reply({
+                            reply({
                                 statusCode: 200,
                                 msg: "OK"
                             });
@@ -464,7 +462,7 @@ module.exports = [
                 });
             }
             else {
-                return reply({
+                reply({
                     statusCode: 400,
                     msg: "Bad request"
                 });

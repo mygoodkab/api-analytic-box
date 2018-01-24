@@ -27,7 +27,7 @@ module.exports = [
                     let path = util_1.Util.uploadMatchImagePath();
                     fs.readdir(path, (err, files) => {
                         let num = files.length;
-                        return reply({
+                        reply({
                             statusCode: 200,
                             msg: "OK",
                             data: res,
@@ -62,14 +62,14 @@ module.exports = [
                         builder.where('analytics', request.payload.type);
                         builder.callback((err, res) => {
                             if (res.length == 0) {
-                                return reply({
+                                reply({
                                     statusCode: 200,
                                     msg: "Have no Match Images",
                                 });
                             }
                             else {
                                 res[0].faceInfo = faceInfo;
-                                return reply({
+                                reply({
                                     statusCode: 200,
                                     msg: "OK",
                                     data: res
@@ -99,7 +99,7 @@ module.exports = [
                 builder.where("_id", request.params.id);
                 builder.callback((err, res) => {
                     if (res.length == 0) {
-                        return reply({
+                        reply({
                             statusCode: 404,
                             message: "Bad Request",
                             data: "Data not found"
@@ -108,7 +108,7 @@ module.exports = [
                     else {
                         res = res[0];
                         let path = util_1.Util.uploadMatchImagePath() + res.face_id;
-                        return reply.file(path, {
+                        reply.file(path, {
                             filename: res.name + '.' + res.fileType,
                             mode: 'inline'
                         });
@@ -143,7 +143,7 @@ module.exports = [
                 builder.where('refInfo', payload.match_register);
                 builder.callback((err, res) => {
                     if (res.length == 0) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "refInfo not match",
                         });
@@ -152,7 +152,7 @@ module.exports = [
                         console.log(ip.address());
                         payload.faceInfo = res[0];
                         db.collection('record').insert(payload);
-                        return reply({
+                        reply({
                             statusCode: 200,
                             msg: "OK",
                             ip: ip.address()
@@ -180,14 +180,14 @@ module.exports = [
                 builder.where("match_register", request.payload.match_register);
                 builder.callback((err, res) => {
                     if (err) {
-                        return reply({
+                        reply({
                             statusCode: 400,
                             msg: "Bad Request",
                             data: "Invaild match_register "
                         });
                     }
                     else {
-                        return reply({
+                        reply({
                             statusCode: 200,
                             msg: "OK",
                             data: "Can Delete"

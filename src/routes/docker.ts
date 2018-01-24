@@ -26,7 +26,7 @@ module.exports = [
             }
         },
         handler: (request, reply) => {
-            debug("1")
+            // debug("1")
             // request.payload._nickname = "webconfig-dist"
             // request.payload._nickname = "optimistic_clarke"
             const options = {
@@ -35,7 +35,7 @@ module.exports = [
                 path: '/v1.24/containers/' + request.payload._nickname + '/logs?follow=false&stdout=true&stderr=true&since=0&timestamps=false&tail=50',
             };
 
-            debug("2")
+            // debug("2")
             //console.log('Path get logs=>', options);
             var url = 'http://unix:' + options.socketPath + ':' + options.path
             var option = {
@@ -44,21 +44,22 @@ module.exports = [
                     "Host": "http",
                 }
             }
-            debug("3")
+         
+          //  debug("3")
             requestPath.get(option, (err, res, body) => {
-               debug("4")
+                // debug("4")
                 if (err) {
-                    debug("5")
+                    //debug("5")
                     console.log('Error : ', err)
-                    return reply({
+                    reply({
                         statusCode: 400,
                         msg: "Can't get log ",
                         data: err
                     })
                 } else {
-                    debug("6")
+                    //debug("6")
                     //  console.log("log docker " + body)
-                    return reply({
+                    reply({
                         statusCode: 200,
                         msg: 'Get log docker success',
                         data: body
@@ -99,14 +100,14 @@ module.exports = [
             requestPath.get(option, (err, res, body) => {
                 if (err) {
                     console.log('Error : ', err)
-                    return reply({
+                    reply({
                         statusCode: 400,
                         msg: "Can't get state ",
                         data: err
                     })
                 } else {
                     //  console.log("log docker " + body)
-                    return reply({
+                    reply({
                         statusCode: 200,
                         msg: 'Get state docker success',
                         data: JSON.parse(body)
@@ -167,7 +168,7 @@ module.exports = [
                                                 if (err) {
                                                     badRequest("Can't up status")
                                                 }
-                                                return reply({
+                                                reply({
                                                     statusCode: 200,
                                                     message: "OK",
                                                     data: "update status success"
@@ -181,7 +182,7 @@ module.exports = [
                                                 if (err) {
                                                     badRequest("Can't up status")
                                                 }
-                                                return reply({
+                                                reply({
                                                     statusCode: 200,
                                                     message: "OK",
                                                     data: "update status success"
@@ -195,7 +196,7 @@ module.exports = [
                                     //         if (err) {
                                     //             badRequest("Can't up status")
                                     //         }
-                                    //         return reply({
+                                    //         reply({
                                     //             statusCode: 200,
                                     //             message: "OK",
                                     //             data: stdout
@@ -225,7 +226,7 @@ module.exports = [
                             // requestPath.get(dockerCmdUrl, (err, res, body) => {
                             //     if (err) {
                             //         console.log("err=>", err)
-                            //         return reply({
+                            //         reply({
                             //             statusCode: 500,
                             //             message: "Internal Error",
                             //             data: err
@@ -240,7 +241,7 @@ module.exports = [
                             //             if (err) {
                             //                 badRequest("Can't up status")
                             //             }
-                            //             return reply({
+                            //             reply({
                             //                 statusCode: 200,
                             //                 message: "OK",
                             //                 data: body
@@ -254,7 +255,7 @@ module.exports = [
                             //             if (err) {
                             //                 badRequest("Can't up status")
                             //             }
-                            //             return reply({
+                            //             reply({
                             //                 statusCode: 200,
                             //                 message: "OK",
                             //                 data: body
@@ -273,7 +274,7 @@ module.exports = [
                 badRequest("Please check your command")
             }
             function badRequest(msg) {
-                return reply({
+                reply({
                     statusCode: 400,
                     msg: "Bad request",
                     data: msg
