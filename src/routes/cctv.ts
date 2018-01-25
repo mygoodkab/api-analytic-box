@@ -6,8 +6,6 @@ const fs = require('fs');
 const pathSep = require('path');
 var csv = require('csvtojson');
 const { exec } = require('child_process');
-//import { sqliteUtil } from '../sqlite-util';
-//import { dbpath } from '../server';
 
 module.exports = [
     {  // Get all cctv profile
