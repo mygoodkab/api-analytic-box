@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const db = require("../nosql-util");
 const util_1 = require("../util");
+var ObjectId = require('mongodb').ObjectId;
 const objectid = require('objectid');
 const Joi = require('joi');
 const fs = require('fs');
@@ -618,6 +619,6 @@ module.exports = [
                 });
             }
         }
-    }
+    },
 ];
 //# sourceMappingURL=analytics.js.map

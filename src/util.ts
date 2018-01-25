@@ -1,9 +1,12 @@
 const pathSep = require('path');
 const crypto = require('crypto');
+import { Db } from 'mongodb'
 //pathSep.sep is check os that use / or \
+exports.MONGODB = { URL:  "mongodb",// "10.0.0.71",
+                    PORT: "27017" }
 exports.SECRET_KEY = "2CD1DF62C76F2122599E17B894A92"
 export class Util {
-	static getDb(request: any): any {
+	static getDb(request: any): Db {
 		return request.mongo.db;
 		// if (request.auth.isAuthenticated) {
 		//     let dbName = request.auth.credentials.domain;
@@ -16,7 +19,6 @@ export class Util {
 		//     //            console.log(db.length);
 		// }
 	}
-
 	static validate(model: any, obj: any): any {
 		var validation: any = {
 			isValid: false,
@@ -34,7 +36,6 @@ export class Util {
 		}
 		return validation;
 	}
-
 	static timestamp() {
 		let time = new Date();
 		return time.getFullYear() + '-' + (+time.getMonth() < 9 ? '0' + (+time.getMonth() + 1) : (+time.getMonth() + 1)) +
@@ -43,7 +44,6 @@ export class Util {
 			':' + (+time.getMinutes() < 10 ? '0' + (time.getMinutes()) : time.getMinutes()) +
 			':' + (+time.getSeconds() < 10 ? '0' + (time.getSeconds()) : time.getSeconds());
 	}
-
 	static replyError(err: any, reply: any) {
 		if (err) {
 			let error: any = {
@@ -57,7 +57,6 @@ export class Util {
 		}
 		return;
 	}
-
 	static deepCopy(obj: any) {
 		let copy: any;
 
@@ -98,7 +97,6 @@ export class Util {
 
 		throw new Error("Unable to copy obj! Its type isn't supported.");
 	}
-
 	static msToTime(s: number) {
 		let ms = s % 1000;
 		s = (s - ms) / 1000;
@@ -122,18 +120,15 @@ export class Util {
 
 		return msg;
 	}
-
 	static isMongoObjectId(strId: string) {
 		let { ObjectId } = require('mongodb');
 		let objectId: any = strId.toString();
 		return ObjectId.isValid(objectId) ? true : false;
 	}
-
 	static uniqid() {
 		let uniqid = require('uniqid');
 		return uniqid();
 	}
-
 	static uploadPath() {
 		let path: any = process.cwd().split(pathSep.sep);
 		//	path.splice(path.indexOf('src'), path.length - path.indexOf('src'));
@@ -148,8 +143,6 @@ export class Util {
 		path = path.join(pathSep.sep) + pathSep.sep + "JSMpeg" + pathSep.sep;
 		return path;
 	}
-
-
 	static csvPath() {
 		let path: any = process.cwd().split(pathSep.sep);
 		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "cctv"
@@ -159,7 +152,6 @@ export class Util {
 		}
 		return path
 	}
-
 	static dockerAnalyticsCameraPath() {
 		let path: any = process.cwd().split(pathSep.sep);
 		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "docker-analytics-camera"
@@ -169,7 +161,6 @@ export class Util {
 		}
 		return path
 	}
-
 	static analyticsPath() {
 		let path: any = process.cwd().split(pathSep.sep);
 		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics"
@@ -179,7 +170,6 @@ export class Util {
 		}
 		return path
 	}
-
 	static uploadImagePath() {
 		//pathSep.sep is check os that use / or \
 		let path: any = process.cwd().split(pathSep.sep);
@@ -190,7 +180,6 @@ export class Util {
 		}
 		return path;
 	}
-
 	static uploadMatchImagePath() {
 
 		//pathSep.sep is check os that use / or \
@@ -202,7 +191,6 @@ export class Util {
 		}
 		return path;
 	}
-
 	static uploadRootPath() {
 
 		let path: any = process.cwd().split(pathSep.sep);
@@ -214,7 +202,6 @@ export class Util {
 		}
 		return path;
 	}
-
 	static calculatePageQuery(pageIndex: any, pageSize: any) {
 		if (isNaN(pageIndex) || isNaN(pageSize)) return false;
 		let pageSkip = +pageSize * +pageIndex;

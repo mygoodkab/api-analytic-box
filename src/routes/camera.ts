@@ -1,5 +1,6 @@
 import * as db from '../nosql-util';
 import { Util } from '../util';
+var ObjectId = require('mongodb').ObjectId;
 const find = require('find-process');
 const objectid = require('objectid');
 const Joi = require('joi')
@@ -9,7 +10,7 @@ var fork = require('child_process').fork;
 //import { sqliteUtil } from '../sqlite-util';
 //import { dbpath } from '../server';
 const { exec } = require('child_process');
-
+import * as  Boom from 'boom'
 module.exports = [
     {  // Get all camera profile
         method: 'GET',
@@ -327,75 +328,115 @@ module.exports = [
                 })
             }
         }
-    },
-    //---------------------------------------------------------
-    {
-        method: 'GET',
-        path: '/camera/live',
+    }
+    //========================================================================================================================================================
+    ,
+    {  // Insert camera profile
+        method: 'POST',
+        path: '/camera/insert1',
         config: {
             tags: ['api'],
-            description: 'Live camera ',
-            notes: 'Live camera ',
-        },
-        handler: (request, reply) => {
-            let cmd = "../jsmpeg/live.sh"
-            exec(cmd, (error, stdout, stderr) => {
-                if (stdout) {
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: stdout
-                    })
-                } else if (stderr) {
-                    reply({
-                        statusCode: 500,
-                        message: "Server stdError",
-                        data: stderr
-                    })
-                } else {
-                    reply({
-                        statusCode: 500,
-                        message: "Server Error",
-                        data: error
-                    })
+            description: 'Insert camera data',
+            notes: 'Insert camera data',
+            validate: {
+                payload: {
+                    ip: Joi.string().required(),
+                    name: Joi.string().required(),
+                    username: Joi.string().required(),
+                    password: Joi.string().required(),
+                    brand: Joi.string().required(),
+                    model: Joi.string().required(),
+                    rtsp: Joi.string().required(),
+                    mac: Joi.string(),
+                    location: Joi.string(),
+                    status: Joi.string(),
                 }
-            })
+            }
+        },
+        handler: async (request, reply) => {
+            let payload = request.payload;
+            try {
+                const mongo = Util.getDb(request)
+                const resCamera: any = await mongo.collection('camera').find().sort({ portrelay: -1 }).limit(1).toArray()
+
+                if (resCamera.length == 0) {
+                    payload.portffmpeg = 8081;
+                    payload.portrelay = 8082;
+                } else {
+                    payload.portffmpeg = resCamera[0].portrelay + 1
+                    payload.portrelay = resCamera[0].portrelay + 2
+                }
+
+                //payload._id = objectid();
+                payload.updateDate = new Date();
+                payload.runrelay = "cd ../JSMpeg node websocket-relay.js embedded " + payload.portffmpeg + " " + payload.portrelay;
+                payload.cmdffmpeg = "ffmpeg -f rtsp  -rtsp_transport tcp -i \"" + payload.rtsp + "\" -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://localhost:" + payload.portffmpeg + "/embedded";
+
+                const insertCamera: any = await mongo.collection('camera').insertOne(payload)
+                //  console.log(insertCamera)
+                // if (insertCamera.acknowledged) {
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: "insert success"
+                })
+                // }
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
         }
     },
-    {
+    {  // Get all camera profile
         method: 'GET',
-        path: '/camera/kill',
+        path: '/camera1',
         config: {
             tags: ['api'],
-            description: 'Kill process camera live',
-            notes: 'Kill process camera live',
+            description: 'Get All camera data',
+            notes: 'Get All camera data'
         },
-        handler: (request, reply) => {
+        handler: async (request, reply) => {
+            const mongo = Util.getDb(request)
+            try {
+                const resCamera = await mongo.collection('camera').find().toArray()
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: resCamera
+                })
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
+        }
+    },
+    {  // Get id camera profile
+        method: 'GET',
+        path: '/camera1/{id}',
+        config: {
+            tags: ['api'],
+            description: 'Get id camera data',
+            notes: 'Get id camera data',
+            validate: {
+                params: {
+                    id: Joi.string()
+                        .required()
+                        .description('id feature'),
+                }
+            }
+        },
+        handler: async (request, reply) => {
 
-
-            // exec(cmd, (error, stdout, stderr) => {
-            //     if (stdout) {
-            //         reply({
-            //             statusCode: 200,
-            //             message: "OK",
-            //             data: stdout
-            //         })
-            //     } else if (stderr) {
-            //         reply({
-            //             statusCode: 500,
-            //             message: "Server stdError",
-            //             data: stderr
-            //         })
-            //     } else {
-            //         reply({
-            //             statusCode: 500,
-            //             message: "Server Error",
-            //             data: error
-            //         })
-            //     }
-            // })
+            const mongo = Util.getDb(request)
+            console.log(request.params.id)
+            try {
+                const resCamera = await mongo.collection('camera').findOne({ _id:  ObjectId(request.params.id) })
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: resCamera
+                })
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
         }
     }
-
-
 ];

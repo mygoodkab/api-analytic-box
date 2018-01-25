@@ -1,8 +1,11 @@
 import * as db from '../nosql-util';
+import * as  Boom from 'boom'
+import { Util } from '../util';
 const debug = require('debug');
 const objectid = require('objectid');
 const Joi = require('joi')
 var a = require('debug')('worker:a')
+const { MONGODB } = require('../util')
 
 module.exports = [
     {  // Select all user
@@ -13,16 +16,18 @@ module.exports = [
             description: 'Select all user ',
             notes: 'Select all user '
         },
-        handler: function (request, reply) {
-            db.collectionServer('users').find().make((builder: any) => {
-                builder.callback((err: any, res: any) => {
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: res
-                    })
+        handler: async (request, reply) => {
+            let dbm = Util.getDb(request)
+            try {
+                const res = await dbm.collection('user').find().toArray()
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: res
                 })
-            })
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
         }
     },
     {  // Select id user
@@ -70,24 +75,24 @@ module.exports = [
             // a('start....')
 
             if (request.payload) {
-                 
-                 // a('before query')
+
+                // a('before query')
                 request.payload._id = objectid();
                 db.collectionServer('users').find().make((builder: any) => {
                     builder.where('username', request.payload.username);
                     builder.callback((err, res) => {
-                           //a('after query')
+                        //a('after query')
                         if (res.length != 0) { // duplicate username 
-                                //a('condition nodata')
+                            //a('condition nodata')
                             reply({
                                 statusCode: 400,
                                 message: "username's duplicate",
 
                             })
                         } else {
-                               //a('condition data')
+                            //a('condition data')
                             db.collectionServer('users').insert(request.payload)
-                               // a('insert data')
+                            // a('insert data')
                             reply({
                                 statusCode: 200,
                                 message: "OK",

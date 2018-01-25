@@ -1,10 +1,21 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const db = require("../nosql-util");
+const Boom = require("boom");
+const util_1 = require("../util");
 const debug = require('debug');
 const objectid = require('objectid');
 const Joi = require('joi');
 var a = require('debug')('worker:a');
+const { MONGODB } = require('../util');
 module.exports = [
     {
         method: 'GET',
@@ -14,17 +25,20 @@ module.exports = [
             description: 'Select all user ',
             notes: 'Select all user '
         },
-        handler: function (request, reply) {
-            db.collectionServer('users').find().make((builder) => {
-                builder.callback((err, res) => {
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: res
-                    });
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('user').find().toArray();
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: res
                 });
-            });
-        }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'GET',

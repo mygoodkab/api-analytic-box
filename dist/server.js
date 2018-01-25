@@ -7,12 +7,20 @@ const Vision = require('vision');
 const Pack = require('./../package');
 const util = require('./util');
 const autoRoute = { dir: process.cwd() + "/dist/routes" };
-const options = {
+const Boom = require('boom');
+const optionsSwagger = {
     auth: false,
     info: {
         'title': 'API Documentation',
         'version': Pack.version,
     }
+};
+const optionsMongo = {
+    url: 'mongodb://' + util.MONGODB.URL + ':' + util.MONGODB.PORT + '/admin',
+    settings: {
+        poolSize: 10
+    },
+    decorate: true
 };
 const server = new Hapi.Server();
 server.connection({
@@ -25,6 +33,10 @@ server.connection({
     }
 });
 server.register([
+    {
+        register: require('hapi-mongodb'),
+        options: optionsMongo
+    },
     Inert,
     Vision,
     {
@@ -33,7 +45,7 @@ server.register([
     },
     {
         register: require('hapi-swagger'),
-        options: options
+        options: optionsSwagger
     },
 ], (error) => {
     if (error)

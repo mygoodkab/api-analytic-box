@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const pathSep = require('path');
 const crypto = require('crypto');
+exports.MONGODB = { URL: "mongodb",
+    PORT: "27017" };
 exports.SECRET_KEY = "2CD1DF62C76F2122599E17B894A92";
 class Util {
     static getDb(request) {
