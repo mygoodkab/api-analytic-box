@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const db = require("../nosql-util");
 const Boom = require("boom");
 const util_1 = require("../util");
 const debug = require('debug');
@@ -16,6 +15,7 @@ const objectid = require('objectid');
 const Joi = require('joi');
 var a = require('debug')('worker:a');
 const { MONGODB } = require('../util');
+const mongoObjectId = require('mongodb').ObjectId;
 module.exports = [
     {
         method: 'GET',
@@ -28,12 +28,17 @@ module.exports = [
         handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
             let dbm = util_1.Util.getDb(request);
             try {
-                const res = yield dbm.collection('user').find().toArray();
-                reply({
-                    statusCode: 200,
-                    message: "OK",
-                    data: res
-                });
+                const res = yield dbm.collection('users').find().toArray();
+                if (res.length > 0) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound("NO data"));
+                }
             }
             catch (error) {
                 reply(Boom.badGateway(error));
@@ -53,18 +58,25 @@ module.exports = [
                 }
             }
         },
-        handler: function (request, reply) {
-            db.collectionServer('users').find().make((builder) => {
-                builder.where('_id', request.params.id);
-                builder.callback((err, res) => {
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('users').findOne({ _id: mongoObjectId(request.params.id) });
+                if (res) {
                     reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
                     });
-                });
-            });
-        }
+                }
+                else {
+                    reply(Boom.notFound);
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'POST',
@@ -81,36 +93,28 @@ module.exports = [
                 }
             }
         },
-        handler: function (request, reply) {
-            if (request.payload) {
-                request.payload._id = objectid();
-                db.collectionServer('users').find().make((builder) => {
-                    builder.where('username', request.payload.username);
-                    builder.callback((err, res) => {
-                        if (res.length != 0) {
-                            reply({
-                                statusCode: 400,
-                                message: "username's duplicate",
-                            });
-                        }
-                        else {
-                            db.collectionServer('users').insert(request.payload);
-                            reply({
-                                statusCode: 200,
-                                message: "OK",
-                                data: res
-                            });
-                        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const resUser = yield dbm.collection('users').findOne({ username: request.payload.username });
+                if (!resUser) {
+                    const insertUser = yield dbm.collection('users').insertOne(request.payload);
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
                     });
-                });
+                }
+                else {
+                    reply({
+                        statusCode: 400,
+                        message: "username's duplicate",
+                    });
+                }
             }
-            else
-                reply({
-                    statusCode: 400,
-                    message: "Bad Request",
-                    data: "No payload"
-                });
-        }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'POST',
@@ -126,27 +130,25 @@ module.exports = [
                 }
             }
         },
-        handler: function (request, reply) {
-            if (request.payload) {
-                db.collectionServer('users').modify(request.payload).make(function (builder) {
-                    builder.where("_id", request.payload._id);
-                    builder.callback(function (err, res) {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: "Update Succeed"
-                        });
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('users').findOne({ _id: mongoObjectId(request.payload._id) });
+                if (res) {
+                    const update = yield dbm.collection('users').updateOne({ _id: mongoObjectId(request.payload._id) }, { $set: { password: request.payload.password } });
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
                     });
-                });
+                }
+                else {
+                    reply(Boom.notFound);
+                }
             }
-            else {
-                reply({
-                    statusCode: 400,
-                    message: "Bad Request",
-                    data: "No payload"
-                });
+            catch (error) {
+                reply(Boom.badGateway(error));
             }
-        }
+        })
     },
     {
         method: 'POST',
@@ -161,25 +163,19 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collectionServer('users').remove().make((builder) => {
-                builder.where("_id", request.payload._id);
-                builder.callback((err, res) => {
-                    if (err) {
-                        reply({
-                            statusCode: 500,
-                            message: "Can't delete id : " + request.payload._id,
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                        });
-                    }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const del = yield dbm.collection('users').deleteOne({ _id: mongoObjectId(request.payload._id) });
+                reply({
+                    statusCode: 200,
+                    message: "OK",
                 });
-            });
-        }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     }
 ];
 //# sourceMappingURL=users.js.map

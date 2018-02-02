@@ -1,8 +1,19 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const db = require("../nosql-util");
+const util_1 = require("../util");
+const Boom = require("boom");
 const objectid = require('objectid');
 const Joi = require('joi');
+const { MONGODB } = require('../util');
+const mongoObjectId = require('mongodb').ObjectId;
 module.exports = [
     {
         method: 'GET',
@@ -12,28 +23,25 @@ module.exports = [
             description: 'Select all notification  ',
             notes: 'Select all notification '
         },
-        handler: function (request, reply) {
-            db.collection('notification').find().make((builder) => {
-                builder.where('isHide', false);
-                builder.sort('timedb', true);
-                builder.callback((err, res) => {
-                    if (res.length == 0) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('notification').find({ isHide: false }).sort({ timedb: -1 }).toArray();
+                if (res.length == 0) {
+                    reply(Boom.notFound);
+                }
+                else {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'GET',
@@ -49,28 +57,25 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('notification').find().make((builder) => {
-                builder.where('id', request.params.id);
-                builder.first();
-                builder.callback((err, res) => {
-                    if (!res) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('notification').findOne({ _id: mongoObjectId(request.params.id) });
+                if (res) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound);
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'GET',
@@ -86,28 +91,25 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('notification').find().make((builder) => {
-                builder.where('dockerNickname', request.params.dockerNickname);
-                builder.sort('timedb', true);
-                builder.callback((err, res) => {
-                    if (!res) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('notification').find({ dockerNickname: request.params.dockerNickname }).sort({ timedb: -1 }).toArray();
+                if (res) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound);
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'GET',
@@ -123,29 +125,25 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('notification').find().make((builder) => {
-                builder.where('dockerNickname', request.params.dockerNickname);
-                builder.where('isRead', false);
-                builder.sort('timedb', true);
-                builder.callback((err, res) => {
-                    if (!res) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('notification').find({ dockerNickname: request.params.dockerNickname, isRead: false }).sort({ timedb: -1 }).toArray();
+                if (res) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound);
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'GET',
@@ -160,29 +158,25 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('notification').find().make((builder) => {
-                builder.where('dockerNickname', request.params.dockerNickname);
-                builder.sort('timedb', true);
-                builder.first();
-                builder.callback((err, res) => {
-                    if (!res) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('notification').find({ dockerNickname: request.params.dockerNickname, isRead: false }).sort({ timedb: -1 }).limit(1).toArray();
+                if (res) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound);
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'POST',
@@ -197,39 +191,19 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('notification').find().make((builder) => {
-                builder.where('id', request.payload.id);
-                builder.first();
-                builder.callback((err, res) => {
-                    if (err) {
-                        reply({
-                            statusCode: 400,
-                            msg: "Bad request"
-                        });
-                    }
-                    else {
-                        db.collection('notification').modify({ isHide: true }).make((builder) => {
-                            builder.where('id', request.payload.id);
-                            builder.callback((err, res) => {
-                                if (err) {
-                                    reply({
-                                        statusCode: 400,
-                                        msg: "Bad request"
-                                    });
-                                }
-                                else {
-                                    reply({
-                                        statusCode: 200,
-                                        msg: "OK"
-                                    });
-                                }
-                            });
-                        });
-                    }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const update = yield dbm.collection("notification").updateOne({ _id: mongoObjectId(request.payload.id) }, { $set: { isHide: true } });
+                reply({
+                    statusCode: 200,
+                    message: "Update success",
                 });
-            });
-        }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'GET',
@@ -245,69 +219,52 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('notification').find().make((builder) => {
-                builder.where('dockerNickname', request.params.dockerNickname);
-                builder.where('isHide', false);
-                builder.sort('timedb', true);
-                builder.callback((err, res) => {
-                    if (!res) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection("notification").find({ dockerNickname: request.params.dockerNickname, isHide: false }).sort({ timedb: -1 }).toArray();
+                if (res) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound);
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'POST',
-        path: '/notification/delete-all',
+        path: '/notification/insert',
         config: {
             tags: ['api'],
-            description: 'delete all',
-            notes: 'delete all',
+            description: 'insert notification data',
+            notes: 'insert notification data',
             validate: {
                 payload: {
-                    pass: Joi.string().required(),
+                    dockerNickname: Joi.object()
                 }
             }
         },
-        handler: (request, reply) => {
-            if (request.payload.pass == "pass") {
-                db.collection('notification').remove().make((builder) => {
-                    builder.callback((err, res) => {
-                        if (err) {
-                            reply({
-                                statusCode: 400,
-                                msg: "Bad request"
-                            });
-                        }
-                        else {
-                            reply({
-                                statusCode: 200,
-                                msg: "OK"
-                            });
-                        }
-                    });
-                });
-            }
-            else {
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const insertAnalyticsRecord = yield dbm.collection('analytics-record').insertOne(request.payload);
                 reply({
-                    statusCode: 400,
-                    msg: "Bad request"
+                    statusCode: 200,
+                    message: "OK",
                 });
             }
-        }
-    }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
+    },
 ];
 //# sourceMappingURL=notification.js.map

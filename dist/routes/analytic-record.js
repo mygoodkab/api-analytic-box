@@ -49,14 +49,12 @@ module.exports = [
             let timezone = (7) * 60 * 60 * 1000;
             let now = new Date(new Date().getTime() + timezone);
             let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000);
-            const id = objectid();
-            payload.id = id;
             payload.timedb = Date.now();
             payload.fileType = payload.fileType.toLowerCase();
             db.collection('assignAnalytics').find().make((builder) => {
                 builder.where('nickname', payload.dockerNickname);
                 builder.first();
-                builder.callback((err, res) => {
+                builder.callback((err, res) => __awaiter(this, void 0, void 0, function* () {
                     if (!res) {
                         console.log("Can't find docker contrainer" + payload.dockerNickname);
                         badrequest("Can't find docker contrainer" + payload.dockerNickname);
@@ -64,7 +62,7 @@ module.exports = [
                     else {
                         let camInfo = res.cameraInfo;
                         if (payload && (payload.outputType == 'cropping-counting' || payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
-                            const insertAnalyticsRecord = mongo.collection('analytics-record').insertOne(payload);
+                            const insertAnalyticsRecord = yield mongo.collection('analytics-record').insertOne(payload);
                             db.collection('notification').find().make((builder) => {
                                 builder.sort('timedb', true);
                                 builder.where('dockerNickname', payload.dockerNickname);
@@ -98,7 +96,7 @@ module.exports = [
                                 db.collection('rules').find().make((builder) => {
                                     builder.where('dockerNickname', payload.dockerNickname);
                                     builder.first();
-                                    builder.callback((err, res) => {
+                                    builder.callback((err, res) => __awaiter(this, void 0, void 0, function* () {
                                         console.log("read rule :  " + payload.dockerNickname);
                                         if (!res) {
                                             console.log("No rule");
@@ -144,7 +142,7 @@ module.exports = [
                                                 console.log(e);
                                             }
                                         }
-                                    });
+                                    }));
                                 });
                             }
                             function sentDataToSmartliving() {
@@ -196,7 +194,7 @@ module.exports = [
                             badrequest("Please check 'outputType'");
                         }
                     }
-                });
+                }));
             });
             function diffdate(data) {
                 let isToday = false;
@@ -344,6 +342,7 @@ module.exports = [
             const params = request.params;
             try {
                 const resAnalyticsRecord = yield mongo.collection('analytics-record').findOne({ _id: mongoObjectId(params._id) });
+                resAnalyticsRecord;
                 if (!resAnalyticsRecord) {
                     reply(Boom.notFound);
                 }
@@ -356,7 +355,11 @@ module.exports = [
                         metadata: resAnalyticsRecord.metadata
                     };
                     let path = util_1.Util.dockerAnalyticsCameraPath() + resAnalyticsRecord.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + resAnalyticsRecord.fileType;
-                    reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + resAnalyticsRecord.dockerNickname + '/output' + pathSep.sep + util_1.Util.hash(str) + "." + resAnalyticsRecord.fileType);
+                    reply.file(path, {
+                        filename: resAnalyticsRecord.name + '.' + resAnalyticsRecord.fileType,
+                        mode: 'inline',
+                        confine: false
+                    });
                 }
                 else {
                     reply(Boom.badRequest("Invail file type"));

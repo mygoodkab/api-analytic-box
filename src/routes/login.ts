@@ -1,7 +1,10 @@
 import * as db from '../nosql-util';
-const { Util } = require('../util');
+import * as  Boom from 'boom'
+import { Util } from '../util';
 const Joi = require('joi')
 const JWT = require('jsonwebtoken');
+const mongoObjectId = require('mongodb').ObjectId;
+const { MONGODB } = require('../util')
 module.exports = [
     {
         method: 'POST',
@@ -17,27 +20,23 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collectionServer('users').find().make((builder: any) => {
-                builder.where("username", request.payload.username);
-                builder.where("password", request.payload.password);
-                builder.first()
-                builder.callback((err: any, res: any) => {
-                    var userInfo = encodeURIComponent(JSON.stringify(res));
-                    if (!res) {
-                        reply({
-                            statusCode: 400,
-                            message: "Invaild username or password",
-                        })
-                    } else {
-                        reply({
-                            statusCode: 200,
-                            message: "Login success",
-                            //data: JWT.sign(userInfo, Util.SECRET_KEY)
-                        })
-                    }
-                });
-            });
+        handler: async (request, reply) => {
+            let mongo = Util.getDb(request)
+            try {
+                const login = await mongo.collection('users').findOne({ username: request.payload.username, password: request.payload.password })
+                if (login) {
+                    reply({
+                        statusCode: 200,
+                        message: "Login success",
+                        //data: JWT.sign(userInfo, Util.SECRET_KEY)
+                    })
+                } else {
+                    reply(Boom.notFound("Invaild username or password"))
+                }
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
+
         }
     }
 

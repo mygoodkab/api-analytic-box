@@ -1,8 +1,19 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const db = require("../nosql-util");
+const util_1 = require("../util");
+const Boom = require("boom");
 const objectid = require('objectid');
 const Joi = require('joi');
+const { MONGODB } = require('../util');
+const mongoObjectId = require('mongodb').ObjectId;
 module.exports = [
     {
         method: 'GET',
@@ -12,26 +23,25 @@ module.exports = [
             description: 'Select all rules ',
             notes: 'Select all rules '
         },
-        handler: function (request, reply) {
-            db.collection('rules').find().make((builder) => {
-                builder.callback((err, res) => {
-                    if (res.length == 0) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('rules').find().toArray();
+                if (res.length > 0) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound("NO data"));
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'GET',
@@ -48,28 +58,25 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('rules').find().make((builder) => {
-                builder.where('id', request.params.id);
-                builder.first();
-                builder.callback((err, res) => {
-                    if (!res) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('rules').findOne({ _id: mongoObjectId(request.params.id) });
+                if (res) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound);
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'GET',
@@ -85,28 +92,25 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('rules').find().make((builder) => {
-                builder.where('dockerNickname', request.params.id);
-                builder.first();
-                builder.callback((err, res) => {
-                    if (!res) {
-                        reply({
-                            statusCode: 500,
-                            message: "No data",
-                            data: "-"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: res
-                        });
-                    }
-                });
-            });
-        }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('rules').findOne({ dockerNickname: request.params.id });
+                if (res) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
+                else {
+                    reply(Boom.notFound);
+                }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
     {
         method: 'POST',
@@ -122,80 +126,27 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
             let payload = request.payload;
-            if (payload) {
-                payload.id = objectid();
-                let validate = payload.rule[0];
+            let dbm = util_1.Util.getDb(request);
+            let validate = payload.rule[0];
+            try {
                 if (typeof validate.type == "undefined" && typeof validate.day == "undefined" && typeof validate.timeStart == "undefined" && typeof validate.timeEnd == "undefined" && typeof validate.condition == "undefined") {
-                    badRequest("Invaid  Payload");
+                    reply(Boom.badRequest("Invaid  Payload"));
                 }
                 else {
-                    db.collection('rules').insert(request.payload).callback((err, res) => {
-                        if (err) {
-                            badRequest("can't insert");
-                        }
-                        else {
-                            reply({
-                                statusCode: 200,
-                                message: "OK",
-                                data: "Create rule Succeed"
-                            });
-                        }
+                    const insert = yield dbm.collection('rules').insertOne(payload);
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: "Create rule Success"
                     });
                 }
             }
-            else {
-                badRequest("no payload");
+            catch (error) {
+                reply(Boom.badGateway(error));
             }
-            function badRequest(msg) {
-                reply({
-                    statusCode: 400,
-                    message: "Bad Request",
-                    data: msg
-                });
-            }
-        }
-    },
-    {
-        method: 'POST',
-        path: '/rules/delete-all',
-        config: {
-            tags: ['api'],
-            description: 'delete all',
-            notes: 'delete all',
-            validate: {
-                payload: {
-                    pass: Joi.string().required(),
-                }
-            }
-        },
-        handler: (request, reply) => {
-            if (request.payload.pass == "pass") {
-                db.collection('rules').remove().make((builder) => {
-                    builder.callback((err, res) => {
-                        if (err) {
-                            reply({
-                                statusCode: 400,
-                                msg: "Bad request"
-                            });
-                        }
-                        else {
-                            reply({
-                                statusCode: 200,
-                                msg: "OK"
-                            });
-                        }
-                    });
-                });
-            }
-            else {
-                reply({
-                    statusCode: 400,
-                    msg: "Bad request"
-                });
-            }
-        }
+        })
     },
     {
         method: 'POST',
@@ -212,45 +163,27 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
             let payload = request.payload;
-            if (payload) {
-                let validate = payload.rule[0];
+            let validate = payload.rule[0];
+            try {
                 if (typeof validate.type == "undefined" && typeof validate.day == "undefined" && typeof validate.timeStart == "undefined" && typeof validate.timeEnd == "undefined" && typeof validate.condition == "undefined") {
-                    badRequest("Invaid  Payload");
+                    reply(Boom.badRequest("Invaid  Payload"));
                 }
                 else {
-                    db.collection('rules').modify(payload).make((builder) => {
-                        builder.where('id', payload.id);
-                        builder.callback((err, res) => {
-                            if (err) {
-                                badRequest("can't update ");
-                            }
-                            else if (!res) {
-                                badRequest("Can't find rule id " + payload.id);
-                            }
-                            else {
-                                reply({
-                                    statusCode: 200,
-                                    message: "OK",
-                                    data: "Update rule Succeed"
-                                });
-                            }
-                        });
+                    const update = yield dbm.collection('rules').updateOne({ _id: mongoObjectId(payload.id) }, { $set: { rule: payload.rule } });
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: "Update rule Success"
                     });
                 }
             }
-            else {
-                badRequest("no payload");
+            catch (error) {
+                reply(Boom.badGateway(error));
             }
-            function badRequest(msg) {
-                reply({
-                    statusCode: 400,
-                    message: "Bad Request",
-                    data: msg
-                });
-            }
-        }
+        })
     },
     {
         method: 'POST',
@@ -265,25 +198,21 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collection('rules').remove().make((builder) => {
-                builder.where('id', request.payload.id);
-                builder.callback((err, res) => {
-                    if (err) {
-                        reply({
-                            statusCode: 400,
-                            msg: "Bad request"
-                        });
-                    }
-                    else {
-                        reply({
-                            statusCode: 200,
-                            msg: "OK"
-                        });
-                    }
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            let payload = request.payload;
+            try {
+                const del = yield dbm.collection('rules').deleteOne({ _id: mongoObjectId(payload.id) });
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: "Delete rule Success"
                 });
-            });
-        }
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
     },
 ];
 //# sourceMappingURL=rule.js.map

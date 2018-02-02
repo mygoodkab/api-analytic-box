@@ -21,7 +21,7 @@ const writeyaml = require('write-yaml');
 const fs = require('fs')
 const { exec } = require('child_process');
 const httprequest = require('request');
-const ObjectId = require('mongodb').ObjectId;
+const ObjectIdMongo = require('mongodb').ObjectId;
 import * as  Boom from 'boom'
 module.exports = [
     { // Get all assignAnalytics
@@ -40,12 +40,14 @@ module.exports = [
                             statusCode: 404,
                             message: "No data",
                         })
+                    } else {
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: res
+                        })
                     }
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: res
-                    })
+
                 });
             });
         }
@@ -68,17 +70,19 @@ module.exports = [
                 builder.where('_id', request.params.id)
                 builder.first()
                 builder.callback((err: any, res: any) => {
-                    if (err || typeof res == 'undefined') {
+                    if (err || !res) {
                         reply({
                             statusCode: 400,
                             message: "Error have no data from this id",
                         })
+                    } else {
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: res
+                        })
                     }
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: res
-                    })
+
                 });
             });
         }
@@ -106,12 +110,14 @@ module.exports = [
                             statusCode: 400,
                             message: "Error have no data from this nickname",
                         })
+                    } else {
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: res
+                        })
                     }
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: res
-                    })
+
                 });
             });
         }
@@ -126,6 +132,7 @@ module.exports = [
             validate: {
                 payload: {
                     nickname: Joi.string().required(),
+                    nameAssignAnalytics: Joi.string(),
                     _refCameraId: Joi.string().required(),
                     _refAnalyticsId: Joi.string().required(),
                     environment: Joi.array().required(),
@@ -177,6 +184,7 @@ module.exports = [
                                                 // create folder by nickname docker 
                                                 fs.mkdir(Util.dockerAnalyticsCameraPath() + nickname, (err) => {
                                                     if (err) {
+
                                                         console.log("can't create folder : \n" + err)
                                                         console.log(dockerAnalyticsCameraPath + nickname)
                                                         serverError("can't create folder : \n" + err)
@@ -206,12 +214,14 @@ module.exports = [
                                                                             db.collection('assignAnalytics').insert(request.payload).callback((err) => {
                                                                                 if (err) {
                                                                                     serverError("Can't insert data in AssignAnalytics")
+                                                                                } else {
+                                                                                    reply({
+                                                                                        statusCode: 200,
+                                                                                        msg: 'insert data success',
+                                                                                    })
                                                                                 }
 
-                                                                                reply({
-                                                                                    statusCode: 200,
-                                                                                    msg: 'insert data success',
-                                                                                })
+
                                                                             })
                                                                             // db.collection('assignAnalytics').modify({ status: 'stop' }).make((builder: any) => {
                                                                             //     builder.where("_refCameraId", payload._refCameraId)
@@ -361,11 +371,19 @@ module.exports = [
             db.collection('assignAnalytics').find().make((builder: any) => {
                 builder.where('_refCameraId', request.params.id)
                 builder.callback((err: any, res: any) => {
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: res
-                    })
+                    if (res.length == 0) {
+                        reply({
+                            statusCode: 404,
+                            message: "No data",
+                        })
+                    } else {
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: res
+                        })
+                    }
+
                 });
             });
         }
@@ -388,11 +406,18 @@ module.exports = [
             db.collection('assignAnalytics').find().make((builder: any) => {
                 builder.where('_refAnalyticsId', request.params.id)
                 builder.callback((err: any, res: any) => {
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: res
-                    })
+                    if (res.length == 0) {
+                        reply({
+                            statusCode: 404,
+                            message: "No data",
+                        })
+                    } else {
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                            data: res
+                        })
+                    }
                 });
             });
         }
@@ -429,262 +454,264 @@ module.exports = [
                             statusCode: 400,
                             message: "Bad request",
                         })
+                    } else {
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                        })
                     }
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                    })
+
                 });
             });
         }
     },
     //=======================================================================================================================================
-    { // Get all assignAnalytics
-        method: 'GET',
-        path: '/assignAnalytics1',
-        config: {
-            tags: ['api'],
-            description: 'Get All assignAnalytics data',
-            notes: 'Get All assignAnalytics data'
-        },
-        handler: async (request, reply) => {
-            const mongo = Util.getDb(request)
-            try {
-                const resAssignAnalytics = await mongo.collection('assignAnalytics').find().toArray()
-                reply({
-                    statusCode: 200,
-                    message: "OK",
-                    data: resAssignAnalytics
-                })
-            } catch (error) {
-                reply(Boom.badGateway(error))
-            }
+    // { // Get all assignAnalytics
+    //     method: 'GET',
+    //     path: '/assignAnalytics1',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'Get All assignAnalytics data',
+    //         notes: 'Get All assignAnalytics data'
+    //     },
+    //     handler: async (request, reply) => {
+    //         const mongo = Util.getDb(request)
+    //         try {
+    //             const resAssignAnalytics = await mongo.collection('assignAnalytics').find().toArray()
+    //             reply({
+    //                 statusCode: 200,
+    //                 message: "OK",
+    //                 data: resAssignAnalytics
+    //             })
+    //         } catch (error) {
+    //             reply(Boom.badGateway(error))
+    //         }
 
-        }
-    },
-    { // Get assignAnalytics by id
-        method: 'GET',
-        path: '/assignAnalytics1/{id}',
-        config: {
-            tags: ['api'],
-            description: 'Get All assignAnalytics data',
-            notes: 'Get All assignAnalytics data',
-            validate: {
-                params: {
-                    id: Joi.string().required()
-                }
-            }
-        },
-        handler: async (request, reply) => {
-            const mongo = Util.getDb(request)
-            try {
-                const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _id: ObjectId(request.params.id) })
-                reply({
-                    statusCode: 200,
-                    message: "OK",
-                    data: resAssignAnalytics
-                })
-            } catch (error) {
-                reply(Boom.badGateway(error))
-            }
-        }
-    },
-    { // Get assignAnalytics by dockernickname
-        method: 'GET',
-        path: '/assignAnalytics/docker-nickname1/{nickname}',
-        config: {
-            tags: ['api'],
-            description: 'Get assignAnalytics data by docker nickname',
-            notes: 'Get assignAnalytics data by docker nickname',
-            validate: {
-                params: {
-                    nickname: Joi.string().required()
-                }
-            }
-        },
-        handler: async (request, reply) => {
-            const mongo = Util.getDb(request)
-            try {
-                const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ nickname: ObjectId(request.params.nickname) })
-                reply({
-                    statusCode: 200,
-                    message: "OK",
-                    data: resAssignAnalytics
-                })
-            } catch (error) {
-                reply(Boom.badGateway(error))
-            }
-        }
-    },
-    { // Insert assignAnalytics
-        method: 'POST',
-        path: '/assignAnalytics/insert1',
-        config: {
-            tags: ['api'],
-            description: 'Insert assignAnalytics data',
-            notes: 'Insert assignAnalytics data',
-            validate: {
-                payload: {
-                    nickname: Joi.string().required(),
-                    _refCameraId: Joi.string().required(),
-                    _refAnalyticsId: Joi.string().required(),
-                    environment: Joi.array().required(),
+    //     }
+    // },
+    // { // Get assignAnalytics by id
+    //     method: 'GET',
+    //     path: '/assignAnalytics1/{id}',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'Get All assignAnalytics data',
+    //         notes: 'Get All assignAnalytics data',
+    //         validate: {
+    //             params: {
+    //                 id: Joi.string().required()
+    //             }
+    //         }
+    //     },
+    //     handler: async (request, reply) => {
+    //         const mongo = Util.getDb(request)
+    //         try {
+    //             const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _id: ObjectIdMongo(request.params.id) })
+    //             reply({
+    //                 statusCode: 200,
+    //                 message: "OK",
+    //                 data: resAssignAnalytics
+    //             })
+    //         } catch (error) {
+    //             reply(Boom.badGateway(error))
+    //         }
+    //     }
+    // },
+    // { // Get assignAnalytics by dockernickname
+    //     method: 'GET',
+    //     path: '/assignAnalytics/docker-nickname1/{nickname}',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'Get assignAnalytics data by docker nickname',
+    //         notes: 'Get assignAnalytics data by docker nickname',
+    //         validate: {
+    //             params: {
+    //                 nickname: Joi.string().required()
+    //             }
+    //         }
+    //     },
+    //     handler: async (request, reply) => {
+    //         const mongo = Util.getDb(request)
+    //         try {
+    //             const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ nickname: ObjectIdMongo(request.params.nickname) })
+    //             reply({
+    //                 statusCode: 200,
+    //                 message: "OK",
+    //                 data: resAssignAnalytics
+    //             })
+    //         } catch (error) {
+    //             reply(Boom.badGateway(error))
+    //         }
+    //     }
+    // },
+    // { // Insert assignAnalytics
+    //     method: 'POST',
+    //     path: '/assignAnalytics/insert1',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'Insert assignAnalytics data',
+    //         notes: 'Insert assignAnalytics data',
+    //         validate: {
+    //             payload: {
+    //                 nickname: Joi.string().required(),
+    //                 _refCameraId: Joi.string().required(),
+    //                 _refAnalyticsId: Joi.string().required(),
+    //                 environment: Joi.array().required(),
 
-                }
-            }
-        },
-        handler: async (request, reply) => {
-            const mongo = Util.getDb(request)
-            let payload = request.payload;
-            try {
-                let nickname = payload.nickname;
-                payload.status = 'stop';
-                payload.timestamp = Date.now()
-                payload.stopTime = Date.now()
-                const resAnalytics: any = await mongo.collection('analytics').findOne({ _id: ObjectId(payload._refAnalyticsId) })
-                if (resAnalytics) {
-                    const dockerAnalyticsCameraPath = Util.dockerAnalyticsCameraPath()
-                    fs.stat(dockerAnalyticsCameraPath, function (err, stats) {
-                        if (err) { // if file  docker-analytics-camera not exist
-                            fs.mkdir(Util.uploadRootPath() + "docker-analytics-camera", (err) => {
-                                if (err) {
-                                    serverError("can't create folder docker-analytics-camera \n" + err)
-                                }
-                                existFile()
-                            })
-                        } else { // if file docker-analytics-camera exist
-                            existFile()
-                        }
-                        function existFile() {
-                            // read file yaml => change environment => generate docker-compose.yaml
-                            const ReadYamlPath = Util.analyticsPath() + resAnalytics.analyticsFileInfo.name + pathSep.sep
-                            // read file yaml 
-                            YAML.load(ReadYamlPath + 'docker-compose.yaml', (result) => {
-                                if (result != null) {
-                                    //console.log("Read YAML file from " + result)
-                                    if (typeof result.services != 'undefined') {
-                                        let key = Object.keys(result.services) // json docker-compose  result.services
-                                        // change environment 
-                                        result.services[key[0]].container_name = nickname;
-                                        result.services[key[0]].environment = request.payload.environment;
-                                        // create folder by nickname docker 
-                                        fs.mkdir(Util.dockerAnalyticsCameraPath() + nickname, (err) => {
-                                            if (err) {
-                                                console.log("can't create folder : \n" + err)
-                                                console.log(dockerAnalyticsCameraPath + nickname)
-                                                serverError("can't create folder : \n" + err)
-                                            } else {
-                                                //write file docker-compose.yml
-                                                writeyaml(dockerAnalyticsCameraPath + nickname + pathSep.sep + 'docker-compose.yml', result, function (err) {
-                                                    if (err) {
-                                                        badRequest(err)
-                                                    } else {
-                                                        console.log('create folder and docker-compose.yaml file')
-                                                        let analyticsInfo = resAnalytics;
-                                                        const resCamera: any = mongo.collection('camera').findOne({ _id: ObjectId(payload._refCameraId) })
-                                                        if (resCamera) {
-                                                            let cameraInfo = resCamera;
-                                                            let command = "nvidia-docker run --rm -td --name '" + nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights"
-                                                            payload.cmd = command + " '" + cameraInfo.rtsp + "''";
-                                                            payload.type = analyticsInfo.analyticsProfile.name;
-                                                            payload.analyticsInfo = analyticsInfo;
-                                                            payload.cameraInfo = cameraInfo
-                                                            const insertAssignAnalytics = mongo.collection('assignAnalytics').insertOne(payload)
-                                                            reply({
-                                                                statusCode: 200,
-                                                                msg: 'insert data success',
-                                                            })
-                                                        } else {
-                                                            reply(Boom.notFound)
-                                                        }
+    //             }
+    //         }
+    //     },
+    //     handler: async (request, reply) => {
+    //         const mongo = Util.getDb(request)
+    //         let payload = request.payload;
+    //         try {
+    //             let nickname = payload.nickname;
+    //             payload.status = 'stop';
+    //             payload.timestamp = Date.now()
+    //             payload.stopTime = Date.now()
+    //             const resAnalytics: any = await mongo.collection('analytics').findOne({ _id: ObjectIdMongo(payload._refAnalyticsId) })
+    //             if (resAnalytics) {
+    //                 const dockerAnalyticsCameraPath = Util.dockerAnalyticsCameraPath()
+    //                 fs.stat(dockerAnalyticsCameraPath, function (err, stats) {
+    //                     if (err) { // if file  docker-analytics-camera not exist
+    //                         fs.mkdir(Util.uploadRootPath() + "docker-analytics-camera", (err) => {
+    //                             if (err) {
+    //                                 // serverError("can't create folder docker-analytics-camera \n" + err)
+    //                             }
+    //                             existFile()
+    //                         })
+    //                     } else { // if file docker-analytics-camera exist
+    //                         existFile()
+    //                     }
+    //                     async function existFile() {
+    //                         // read file yaml => change environment => generate docker-compose.yaml
+    //                         const ReadYamlPath = Util.analyticsPath() + resAnalytics.analyticsFileInfo.name + pathSep.sep
+    //                         // read file yaml 
+    //                         YAML.load(ReadYamlPath + 'docker-compose.yaml', (result) => {
+    //                             if (result != null) {
+    //                                 //console.log("Read YAML file from " + result)
+    //                                 if (typeof result.services != 'undefined') {
+    //                                     let key = Object.keys(result.services) // json docker-compose  result.services
+    //                                     // change environment 
+    //                                     result.services[key[0]].container_name = nickname;
+    //                                     result.services[key[0]].environment = request.payload.environment;
+    //                                     // create folder by nickname docker 
+    //                                     fs.mkdir(Util.dockerAnalyticsCameraPath() + nickname, (err) => {
+    //                                         if (err) {
+    //                                             console.log("can't create folder : \n" + err)
+    //                                             console.log(dockerAnalyticsCameraPath + nickname)
+    //                                             //serverError("can't create folder : \n" + err)
+    //                                         } else {
+    //                                             //write file docker-compose.yml
+    //                                             writeyaml(dockerAnalyticsCameraPath + nickname + pathSep.sep + 'docker-compose.yml', result, async (err) => {
+    //                                                 if (err) {
+    //                                                     // badRequest(err)
+    //                                                 } else {
+    //                                                     console.log('create folder and docker-compose.yaml file')
+    //                                                     let analyticsInfo = resAnalytics;
+    //                                                     const resCamera: any = await mongo.collection('camera').findOne({ _id: ObjectIdMongo(payload._refCameraId) })
+    //                                                     if (resCamera) {
+    //                                                         let cameraInfo = resCamera;
+    //                                                         let command = "nvidia-docker run --rm -td --name '" + nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights"
+    //                                                         payload.cmd = command + " '" + cameraInfo.rtsp + "''";
+    //                                                         payload.type = analyticsInfo.analyticsProfile.name;
+    //                                                         payload.analyticsInfo = analyticsInfo;
+    //                                                         payload.cameraInfo = cameraInfo
+    //                                                         const insertAssignAnalytics =await mongo.collection('assignAnalytics').insertOne(payload)
+    //                                                         reply({
+    //                                                             statusCode: 200,
+    //                                                             msg: 'insert data success',
+    //                                                         })
+    //                                                     } else {
+    //                                                         reply(Boom.notFound)
+    //                                                     }
 
-                                                    }
-                                                });
-                                            }
+    //                                                 }
+    //                                             });
+    //                                         }
 
-                                        })
+    //                                     })
 
-                                    } else {
-                                        badRequest("YAML file can't find 'service'")
-                                    }
-                                } else {
-                                    badRequest("Can't Read YAML file \n path : " + ReadYamlPath)
-                                }
-                            })
-                        }
-                    })
-                } else {
-                    reply(Boom.notFound)
-                }
-            } catch (error) {
-                reply(Boom.badGateway(error))
-            }
+    //                                 } else {
+    //                                     badRequest("YAML file can't find 'service'")
+    //                                 }
+    //                             } else {
+    //                                 badRequest("Can't Read YAML file \n path : " + ReadYamlPath)
+    //                             }
+    //                         })
+    //                     }
+    //                 })
+    //             } else {
+    //                 reply(Boom.notFound)
+    //             }
+    //         } catch (error) {
+    //             reply(Boom.badGateway(error))
+    //         }
 
-            function badRequest(msg) {
-                reply(Boom.badRequest(msg))
-            }
+    //         function badRequest(msg) {
+    //             reply(Boom.badRequest(msg))
+    //         }
 
-            function serverError(msg) {
-                reply(Boom.badGateway(msg))
-            }
-        }
+    //         function serverError(msg) {
+    //             reply(Boom.badGateway(msg))
+    //         }
+    //     }
 
-    },
-    { // Get assignAnalytics by Camera id
-        method: 'GET',
-        path: '/assignAnalytics/camera1/{id}',
-        config: {
-            tags: ['api'],
-            description: 'Get assignAnalytics data from camera id',
-            notes: 'Get assignAnalytics data from camera id',
-            validate: {
-                params: {
-                    id: Joi.string()
-                        .required()
-                }
-            }
-        },
-        handler: async (request, reply) => {
-            const mongo = Util.getDb(request)
-            try {
-                const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({_refCameraId:request.params.id})
-                reply({
-                    statusCode: 200,
-                    message: "OK",
-                    data: resAssignAnalytics
-                })
-            } catch (error) {
-                reply(Boom.badGateway(error))
-            }
-        }
-    },
-     { // Get assignAnalytics by Analytics id
-        method: 'GET',
-        path: '/assignAnalytics/analytics1/{id}',
-        config: {
-            tags: ['api'],
-            description: 'Get assignAnalytics data from analytics id',
-            notes: 'Get assignAnalytics data from analytics id',
-            validate: {
-                params: {
-                    id: Joi.string()
-                        .required()
-                }
-            }
-        },
-        handler: async(request, reply) => {
-            const mongo = Util.getDb(request)
-            try {
-                const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({_refAnalyticsId:request.params.id})
-                reply({
-                    statusCode: 200,
-                    message: "OK",
-                    data: resAssignAnalytics
-                })
-            } catch (error) {
-                reply(Boom.badGateway(error))
-            }
-        }
+    // },
+    // { // Get assignAnalytics by Camera id
+    //     method: 'GET',
+    //     path: '/assignAnalytics/camera1/{id}',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'Get assignAnalytics data from camera id',
+    //         notes: 'Get assignAnalytics data from camera id',
+    //         validate: {
+    //             params: {
+    //                 id: Joi.string()
+    //                     .required()
+    //             }
+    //         }
+    //     },
+    //     handler: async (request, reply) => {
+    //         const mongo = Util.getDb(request)
+    //         try {
+    //             const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _refCameraId: request.params.id })
+    //             reply({
+    //                 statusCode: 200,
+    //                 message: "OK",
+    //                 data: resAssignAnalytics
+    //             })
+    //         } catch (error) {
+    //             reply(Boom.badGateway(error))
+    //         }
+    //     }
+    // },
+    // { // Get assignAnalytics by Analytics id
+    //     method: 'GET',
+    //     path: '/assignAnalytics/analytics1/{id}',
+    //     config: {
+    //         tags: ['api'],
+    //         description: 'Get assignAnalytics data from analytics id',
+    //         notes: 'Get assignAnalytics data from analytics id',
+    //         validate: {
+    //             params: {
+    //                 id: Joi.string()
+    //                     .required()
+    //             }
+    //         }
+    //     },
+    //     handler: async (request, reply) => {
+    //         const mongo = Util.getDb(request)
+    //         try {
+    //             const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _refAnalyticsId: request.params.id })
+    //             reply({
+    //                 statusCode: 200,
+    //                 message: "OK",
+    //                 data: resAssignAnalytics
+    //             })
+    //         } catch (error) {
+    //             reply(Boom.badGateway(error))
+    //         }
+    //     }
 
-    },
+    // },
 ]

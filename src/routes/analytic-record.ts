@@ -43,16 +43,15 @@ module.exports = [
             let timezone = (7) * 60 * 60 * 1000;
             let now: any = new Date(new Date().getTime() + timezone); // * timezone thai
             let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000); // * timezone thai * 24 hours
-            const id = objectid()
-            //payload.ts = parseInt(payload.ts, 10)
-            payload.id = id
+            //const id = objectid()
+            // payload.ts = parseInt(payload.ts, 10)
+            //payload.id = id
             payload.timedb = Date.now()
             payload.fileType = payload.fileType.toLowerCase()
             db.collection('assignAnalytics').find().make((builder) => {
                 builder.where('nickname', payload.dockerNickname)
                 builder.first()
-                builder.callback((err, res) => {
-
+                builder.callback(async (err, res) => {
                     if (!res) {
                         console.log("Can't find docker contrainer" + payload.dockerNickname)
                         badrequest("Can't find docker contrainer" + payload.dockerNickname)
@@ -61,7 +60,7 @@ module.exports = [
                         // ถ้า outputType ต้องตรงตามเงือนไข  
                         if (payload && (payload.outputType == 'cropping-counting' || payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
 
-                            const insertAnalyticsRecord = mongo.collection('analytics-record').insertOne(payload)
+                            const insertAnalyticsRecord = await mongo.collection('analytics-record').insertOne(payload)
                             //db.collection('analytics-record').insert(payload).callback((err) => {
                             //    console.log("insert data ");
                             //     if (err) {
@@ -105,7 +104,7 @@ module.exports = [
                                 db.collection('rules').find().make((builder) => {
                                     builder.where('dockerNickname', payload.dockerNickname)
                                     builder.first()
-                                    builder.callback((err, res) => {
+                                    builder.callback(async (err, res) => {
                                         console.log("read rule :  " + payload.dockerNickname)
                                         if (!res) {
                                             //  No rule
@@ -135,6 +134,8 @@ module.exports = [
                                                             }// else badrequest("Invaild condition")
                                                         }
                                                         if (isNotification) {
+
+                                                           // const insertAnalyticsRecord = await mongo.collection('analytics-record').insertOne(payload)
                                                             db.collection('notification').insert(notificationData).callback((err, res) => {
                                                                 if (err) {
                                                                     console.log("can't insert notification ")
@@ -785,7 +786,7 @@ module.exports = [
             const params = request.params
             try {
                 const resAnalyticsRecord: any = await mongo.collection('analytics-record').findOne({ _id: mongoObjectId(params._id) })
-
+                resAnalyticsRecord
                 if (!resAnalyticsRecord) {
                     reply(Boom.notFound)
                 } else if (resAnalyticsRecord.fileType == "png" || resAnalyticsRecord.fileType == "jpg" || resAnalyticsRecord.fileType == "jpeg") {
@@ -797,13 +798,13 @@ module.exports = [
                         metadata: resAnalyticsRecord.metadata
                     }
                     let path: any = Util.dockerAnalyticsCameraPath() + resAnalyticsRecord.dockerNickname + pathSep.sep + "output" + pathSep.sep + Util.hash(str) + "." + resAnalyticsRecord.fileType; // path + folder + \ + filename.png
-                     reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + resAnalyticsRecord.dockerNickname + '/output' + pathSep.sep + Util.hash(str) + "." + resAnalyticsRecord.fileType)
-                    // reply.file(path,
-                    //     {
-                    //         filename: resAnalyticsRecord.name + '.' + resAnalyticsRecord.fileType,
-                    //         mode: 'inline',
-                    //         confine: false
-                    //     })
+                    //reply.redirect('http://10.0.0.71:10099/docker-analytics-camera/' + resAnalyticsRecord.dockerNickname + '/output' + pathSep.sep + Util.hash(str) + "." + resAnalyticsRecord.fileType)
+                    reply.file(path,
+                        {
+                            filename: resAnalyticsRecord.name + '.' + resAnalyticsRecord.fileType,
+                            mode: 'inline',
+                            confine: false
+                        })
                 } else {
                     reply(Boom.badRequest("Invail file type"))
                 }

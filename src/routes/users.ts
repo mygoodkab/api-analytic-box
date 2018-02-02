@@ -6,7 +6,7 @@ const objectid = require('objectid');
 const Joi = require('joi')
 var a = require('debug')('worker:a')
 const { MONGODB } = require('../util')
-
+const mongoObjectId = require('mongodb').ObjectId;
 module.exports = [
     {  // Select all user
         method: 'GET',
@@ -19,12 +19,17 @@ module.exports = [
         handler: async (request, reply) => {
             let dbm = Util.getDb(request)
             try {
-                const res = await dbm.collection('user').find().toArray()
-                reply({
-                    statusCode: 200,
-                    message: "OK",
-                    data: res
-                })
+                const res = await dbm.collection('users').find().toArray()
+                if (res.length > 0) {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    })
+                } else {
+                    reply(Boom.notFound("NO data"))
+                }
+
             } catch (error) {
                 reply(Boom.badGateway(error))
             }
@@ -43,17 +48,24 @@ module.exports = [
                 }
             }
         },
-        handler: function (request, reply) {
-            db.collectionServer('users').find().make((builder: any) => {
-                builder.where('_id', request.params.id)
-                builder.callback((err: any, res: any) => {
+        handler: async (request, reply) => {
+            let dbm = Util.getDb(request)
+            try {
+                const res = await dbm.collection('users').findOne({ _id: mongoObjectId(request.params.id) })
+                if (res) {
                     reply({
                         statusCode: 200,
                         message: "OK",
                         data: res
                     })
-                })
-            })
+                } else {
+                    reply(Boom.notFound)
+                }
+
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
+
         }
     },
     {  // Insert user profile
@@ -71,43 +83,27 @@ module.exports = [
                 }
             }
         },
-        handler: function (request, reply) {
+        handler: async (request, reply) => {
             // a('start....')
-
-            if (request.payload) {
-
-                // a('before query')
-                request.payload._id = objectid();
-                db.collectionServer('users').find().make((builder: any) => {
-                    builder.where('username', request.payload.username);
-                    builder.callback((err, res) => {
-                        //a('after query')
-                        if (res.length != 0) { // duplicate username 
-                            //a('condition nodata')
-                            reply({
-                                statusCode: 400,
-                                message: "username's duplicate",
-
-                            })
-                        } else {
-                            //a('condition data')
-                            db.collectionServer('users').insert(request.payload)
-                            // a('insert data')
-                            reply({
-                                statusCode: 200,
-                                message: "OK",
-                                data: res
-                            })
-                        }
+            let dbm = Util.getDb(request)
+            try {
+                const resUser = await dbm.collection('users').findOne({ username: request.payload.username })
+                if (!resUser) {
+                    const insertUser = await dbm.collection('users').insertOne(request.payload)
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
                     })
-                })
-            } else reply({
-                statusCode: 400,
-                message: "Bad Request",
-                data: "No payload"
-            })
+                } else {
+                    reply({
+                        statusCode: 400,
+                        message: "username's duplicate",
+                    })
+                }
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
         }
-
     },
     {  // Change password
         method: 'POST',
@@ -123,24 +119,23 @@ module.exports = [
                 }
             }
         },
-        handler: function (request, reply) {
-            if (request.payload) {
-                db.collectionServer('users').modify(request.payload).make(function (builder) {
-                    builder.where("_id", request.payload._id);
-                    builder.callback(function (err, res) {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                            data: "Update Succeed"
-                        })
-                    });
-                })
-            } else {
-                reply({
-                    statusCode: 400,
-                    message: "Bad Request",
-                    data: "No payload"
-                })
+        handler: async (request, reply) => {
+            let dbm = Util.getDb(request)
+            try {
+                const res = await dbm.collection('users').findOne({ _id: mongoObjectId(request.payload._id) })
+                if (res) {
+                    const update = await dbm.collection('users').updateOne({ _id: mongoObjectId(request.payload._id) }, { $set: {password:request.payload.password} })
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                    })
+
+                } else {
+                    reply(Boom.notFound)
+                }
+
+            } catch (error) {
+                reply(Boom.badGateway(error))
             }
         }
     },
@@ -157,24 +152,17 @@ module.exports = [
                 }
             }
         },
-        handler: (request, reply) => {
-            db.collectionServer('users').remove().make((builder: any) => {
-                builder.where("_id", request.payload._id)
-                builder.callback((err: any, res: any) => {
-                    if (err) {
-                        reply({
-                            statusCode: 500,
-                            message: "Can't delete id : " + request.payload._id,
-                        })
-                    } else {
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                        })
-                    }
-
-                });
-            });
+        handler: async (request, reply) => {
+            let dbm = Util.getDb(request)
+            try {
+                const del = await dbm.collection('users').deleteOne({ _id: mongoObjectId(request.payload._id) })
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                })
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
         }
     }
 ] 
