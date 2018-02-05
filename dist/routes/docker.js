@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const db = require("../nosql-util");
 const util_1 = require("../util");
 const Boom = require("boom");
 const mongoObjectId = require('mongodb').ObjectId;
@@ -129,7 +128,7 @@ module.exports = [
             let payload = request.payload;
             try {
                 if (payload && (payload._command == "stop" || payload._command == "start")) {
-                    const resAssignAnalytics = yield dbm.collection('assignAnalytics').findOne({ _id: payload._assignAnayticsId });
+                    const resAssignAnalytics = yield dbm.collection('assignAnalytics').findOne({ _id: mongoObjectId(payload._assignAnayticsId) });
                     if (typeof resAssignAnalytics == 'undefined') {
                         reply(Boom.badRequest("Can't query data in assignAnaytics by " + payload._assignAnayticsId));
                     }
@@ -179,103 +178,5 @@ module.exports = [
             }
         })
     },
-    {
-        method: 'POST',
-        path: '/docker/command',
-        config: {
-            tags: ['api'],
-            description: 'Get All analytics data',
-            notes: 'Get All analytics data',
-            validate: {
-                payload: {
-                    _assignAnayticsId: Joi.string().required(),
-                    _command: Joi.string().required()
-                }
-            }
-        },
-        handler: (request, reply) => {
-            let dbm = util_1.Util.getDb(request);
-            let payload = request.payload;
-            try {
-            }
-            catch (error) {
-            }
-            if (payload && (payload._command == "stop" || payload._command == "start")) {
-                db.collection('assignAnalytics').find().make((builder) => {
-                    builder.where('_id', payload._assignAnayticsId);
-                    builder.first();
-                    builder.callback((err, res) => {
-                        if (typeof res == 'undefined') {
-                            badRequest("Can't query data in assignAnaytics by " + payload._assignAnayticsId);
-                        }
-                        else {
-                            const nickname = res.nickname;
-                            let cmd;
-                            if (payload._command == "start") {
-                                cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/" + nickname + "/up";
-                                console.log("full command string=>", cmd);
-                            }
-                            else {
-                                cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/" + nickname + "/down";
-                                console.log("full command string=>", cmd);
-                            }
-                            exec(cmd, (error, stdout, stderr) => {
-                                if (error) {
-                                    console.error(`exec error: ${error}`);
-                                    badRequest("Error : " + error);
-                                }
-                                else if (stdout) {
-                                    console.log("respone cmd curl=>", stdout);
-                                    if (payload._command == 'start') {
-                                        db.collection('assignAnalytics').modify({ status: payload._command }).make((builder) => {
-                                            builder.where('_id', payload._assignAnayticsId);
-                                            builder.callback((err, res) => {
-                                                if (err) {
-                                                    badRequest("Can't up status");
-                                                }
-                                                reply({
-                                                    statusCode: 200,
-                                                    message: "OK",
-                                                    data: "update status success"
-                                                });
-                                            });
-                                        });
-                                    }
-                                    else {
-                                        db.collection('assignAnalytics').modify({ status: payload._command, stopTime: Date.now() }).make((builder) => {
-                                            builder.where('_id', payload._assignAnayticsId);
-                                            builder.callback((err, res) => {
-                                                if (err) {
-                                                    badRequest("Can't up status");
-                                                }
-                                                reply({
-                                                    statusCode: 200,
-                                                    message: "OK",
-                                                    data: "update status success"
-                                                });
-                                            });
-                                        });
-                                    }
-                                }
-                                else {
-                                    badRequest("Command : " + cmd + "\n" + "Stderr : " + stderr);
-                                }
-                            });
-                        }
-                    });
-                });
-            }
-            else {
-                badRequest("Please check your command");
-            }
-            function badRequest(msg) {
-                reply({
-                    statusCode: 400,
-                    msg: "Bad request",
-                    data: msg
-                });
-            }
-        }
-    }
 ];
 //# sourceMappingURL=docker.js.map

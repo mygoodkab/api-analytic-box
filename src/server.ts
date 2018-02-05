@@ -24,7 +24,7 @@ const optionsMongo = {
 
 const server = new Hapi.Server();
 server.connection({
-    port: 8000,
+    port: 8000,//process.env.PORT,
     routes: {
         cors: true,
         files: {
