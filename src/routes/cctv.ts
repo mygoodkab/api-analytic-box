@@ -20,6 +20,7 @@ module.exports = [
         },
         handler: async (request, reply) => {
             let dbm = Util.getDb(request)
+            
             try {
                 const res = await dbm.collection('cctv').find().toArray()
                 if (res.length > 0) {
