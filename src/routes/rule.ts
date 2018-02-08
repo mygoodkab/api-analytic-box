@@ -151,6 +151,7 @@ module.exports = [
                     dayEnd: Joi.string().required(),
                     timeStart: Joi.string().required(),
                     timeEnd: Joi.string().required(),
+                    status: Joi.boolean().required(),
                     metadata: Joi.any()
                 }
             }
@@ -164,10 +165,10 @@ module.exports = [
                 dayEnd: payload.dayEnd,
                 timeStart: payload.timeStart,
                 timeEnd: payload.timeEnd,
+                status: payload.status,
                 metadata: payload.metadata,
             }
             try {
-                console.log("++++++++++++++++++++++++++++++++++++++")
                 const update = await dbm.collection('rules').updateOne({ _id: mongoObjectId(payload._id) }, { $set: ruleUpdate })
                 reply({
                     statusCode: 200,
