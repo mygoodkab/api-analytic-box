@@ -4,19 +4,24 @@ services:
   build: .
   image: embedded-performance-server.local:5000/eslab/webconfig-api:BACKEND-RFC01-V0.5
   labels:
-      - "traefik.backend=webconfig-api"
-      - "traefik.frontend.entryPoints=legacyapi"
-      - "traefik.frontend.rule=PathPrefix:/"
-      - "traefik.port=8000"
+        - "traefik.backend=webconfig-api"
+        - "traefik.frontend.entryPoints=legacyapi"
+        - "traefik.frontend.rule=PathPrefix:/"
+        - "traefik.port=8000"
   environment:
-      - PORT=8000
+        - PORT=8000
+        - DEBUG=http,worker:a,worker:sendData
+        - DEBUG_COLORS=true
+        - GIT_REPO=git@github.com:mygoodkab/api-analytic-box.git
+        - GIT_BRANCH=mongodb
+        - GIT_PULL=true
   networks:
-      - net_webgateway
-      - net_vam-internals
+        - net_webgateway
+        - net_vam-internals
   volumes:
-   - ${HOME}/vam-data/:/vam-data/
-   - /var/run/docker.sock:/var/run/docker.sock
-   - /opt/vam/:/opt/vam/
+        - ${HOME}/vam-data/:/vam-data/
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /opt/vam/:/opt/vam/
   restart: unless-stopped
 
 networks:

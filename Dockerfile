@@ -1,19 +1,9 @@
 FROM node:boron-alpine
 
-WORKDIR /home/root/
-
 RUN apk add --no-cache curl
 
-COPY package.json .
+ADD run.sh /run.sh
 
-RUN npm rebuild
+RUN chmod 755 /run.sh
 
-COPY . .
-
-EXPOSE 8000
-
-ENV DEBUG=http,worker:a,worker:sendData
-
-ENV DEBUG_COLORS=true
-
-CMD ["node", "dist/server.js" ]
+CMD '/run.sh'
