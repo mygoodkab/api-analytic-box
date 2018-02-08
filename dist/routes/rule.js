@@ -122,7 +122,12 @@ module.exports = [
             validate: {
                 payload: {
                     dockerNickname: Joi.string().required(),
-                    rule: Joi.object().required(),
+                    type: Joi.string().required(),
+                    dayStart: Joi.string().required(),
+                    dayEnd: Joi.string().required(),
+                    timeStart: Joi.string().required(),
+                    timeEnd: Joi.string().required(),
+                    metadata: Joi.any()
                 }
             }
         },
@@ -131,17 +136,12 @@ module.exports = [
             let dbm = util_1.Util.getDb(request);
             let validate = payload.rule;
             try {
-                if (typeof validate.type == "undefined" && typeof validate.day == "undefined" && typeof validate.timeStart == "undefined" && typeof validate.timeEnd == "undefined" && typeof validate.condition == "undefined") {
-                    reply(Boom.badRequest("Invaid  Payload"));
-                }
-                else {
-                    const insert = yield dbm.collection('rules').insertOne(payload);
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: "Create rule Success"
-                    });
-                }
+                const insert = yield dbm.collection('rules').insertOne(payload);
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: "Create rule Success"
+                });
             }
             catch (error) {
                 reply(Boom.badGateway(error));
@@ -157,9 +157,13 @@ module.exports = [
             notes: 'Update rules data',
             validate: {
                 payload: {
-                    id: Joi.string().required(),
                     dockerNickname: Joi.string().required(),
-                    rule: Joi.array().required(),
+                    type: Joi.string().required(),
+                    dayStart: Joi.string().required(),
+                    dayEnd: Joi.string().required(),
+                    timeStart: Joi.string().required(),
+                    timeEnd: Joi.string().required(),
+                    metadata: Joi.any()
                 }
             }
         },
@@ -167,18 +171,21 @@ module.exports = [
             let dbm = util_1.Util.getDb(request);
             let payload = request.payload;
             let validate = payload.rule[0];
+            let ruleUpdate = {
+                type: payload.type,
+                dayStart: payload.type,
+                dayEnd: payload.type,
+                timeStart: payload.type,
+                timeEnd: payload.type,
+                metadata: payload.type,
+            };
             try {
-                if (typeof validate.type == "undefined" && typeof validate.day == "undefined" && typeof validate.timeStart == "undefined" && typeof validate.timeEnd == "undefined" && typeof validate.condition == "undefined") {
-                    reply(Boom.badRequest("Invaid  Payload"));
-                }
-                else {
-                    const update = yield dbm.collection('rules').updateOne({ _id: mongoObjectId(payload.id) }, { $set: { rule: payload.rule } });
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: "Update rule Success"
-                    });
-                }
+                const update = yield dbm.collection('rules').updateOne({ dockerNickname: payload.dockerNickname }, { $set: ruleUpdate });
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: "Update rule Success"
+                });
             }
             catch (error) {
                 reply(Boom.badGateway(error));
