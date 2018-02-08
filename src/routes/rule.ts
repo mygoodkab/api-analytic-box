@@ -145,7 +145,7 @@ module.exports = [
             notes: 'Update rules data',
             validate: {
                 payload: {
-                    dockerNickname: Joi.string().required(),
+                    _id: Joi.string().required(),
                     type: Joi.string().required(),
                     dayStart: Joi.string().required(),
                     dayEnd: Joi.string().required(),
@@ -168,7 +168,7 @@ module.exports = [
                 metadata: payload.type,
             }
             try {
-                const update = await dbm.collection('rules').updateOne({ dockerNickname: payload.dockerNickname }, { $set: ruleUpdate })
+                const update = await dbm.collection('rules').updateOne({ _id: mongoObjectId(payload.id) }, { $set: ruleUpdate })
                 reply({
                     statusCode: 200,
                     message: "OK",
