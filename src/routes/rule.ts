@@ -168,7 +168,7 @@ module.exports = [
                 metadata: payload.type,
             }
             try {
-                const update = await dbm.collection('rules').updateOne({ _id: mongoObjectId(payload.id) }, { $set: ruleUpdate })
+                const update = await dbm.collection('rules').updateOne({ _id: mongoObjectId(payload._id) }, { $set: ruleUpdate })
                 reply({
                     statusCode: 200,
                     message: "OK",
