@@ -109,7 +109,6 @@ module.exports = [
         },
         handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
             const mongo = util_1.Util.getDb(request);
-            console.log(request.params.id);
             try {
                 const resCamera = yield mongo.collection('camera').findOne({ _id: ObjectId(request.params.id) });
                 reply({
@@ -209,6 +208,6 @@ module.exports = [
                 reply(Boom.badGateway(error));
             }
         })
-    }
+    },
 ];
 //# sourceMappingURL=camera.js.map

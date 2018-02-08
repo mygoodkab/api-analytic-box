@@ -1,15 +1,15 @@
 version: '3'
 services:
- vam_webconfig-api:
+ vam_webconfig-api-dev:
   build: .
-  image: embedded-performance-server.local:5000/eslab/webconfig-api:BACKEND-RFC01-V0.5
+  image: embedded-performance-server.local:5000/eslab/webconfig-api:BACKEND-DEV
   labels:
       - "traefik.backend=webconfig-api"
-      - "traefik.frontend.entryPoints=legacyapi"
+      - "traefik.frontend.entryPoints=legacyapiDEV"
       - "traefik.frontend.rule=PathPrefix:/"
-      - "traefik.port=8000"
+      - "traefik.port=8888"
   environment:
-      - PORT=8000
+      - PORT=8888
   networks:
       - net_webgateway
       - net_vam-internals

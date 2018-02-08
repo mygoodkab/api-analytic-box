@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const db = require("../nosql-util");
 const util_1 = require("../util");
 const objectid = require('objectid');
 const Joi = require('joi');
@@ -112,6 +111,7 @@ module.exports = [
             validate: {
                 payload: {
                     nickname: Joi.string().required(),
+                    nameAssignAnalytics: Joi.string(),
                     _refCameraId: Joi.string().required(),
                     _refAnalyticsId: Joi.string().required(),
                     environment: Joi.array().required(),
@@ -156,28 +156,24 @@ module.exports = [
                                                 }
                                                 else {
                                                     writeyaml(dockerAnalyticsCameraPath + nickname + pathSep.sep + 'docker-compose.yml', result, (err) => __awaiter(this, void 0, void 0, function* () {
-                                                        if (err) {
+                                                        console.log('create folder and docker-compose.yaml file');
+                                                        let analyticsInfo = resAnalytics;
+                                                        const resCamera = yield mongo.collection('camera').findOne({ _id: ObjectIdMongo(payload._refCameraId) });
+                                                        if (resCamera) {
+                                                            let cameraInfo = resCamera;
+                                                            let command = "nvidia-docker run --rm -td --name '" + nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights";
+                                                            payload.cmd = command + " '" + cameraInfo.rtsp + "''";
+                                                            payload.type = analyticsInfo.analyticsProfile.name;
+                                                            payload.analyticsInfo = analyticsInfo;
+                                                            payload.cameraInfo = cameraInfo;
+                                                            const insertAssignAnalytics = yield mongo.collection('assignAnalytics').insertOne(payload);
+                                                            reply({
+                                                                statusCode: 200,
+                                                                msg: 'insert data success',
+                                                            });
                                                         }
                                                         else {
-                                                            console.log('create folder and docker-compose.yaml file');
-                                                            let analyticsInfo = resAnalytics;
-                                                            const resCamera = yield mongo.collection('camera').findOne({ _id: ObjectIdMongo(payload._refCameraId) });
-                                                            if (resCamera) {
-                                                                let cameraInfo = resCamera;
-                                                                let command = "nvidia-docker run --rm -td --name '" + nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights";
-                                                                payload.cmd = command + " '" + cameraInfo.rtsp + "''";
-                                                                payload.type = analyticsInfo.analyticsProfile.name;
-                                                                payload.analyticsInfo = analyticsInfo;
-                                                                payload.cameraInfo = cameraInfo;
-                                                                const insertAssignAnalytics = yield mongo.collection('assignAnalytics').insertOne(payload);
-                                                                reply({
-                                                                    statusCode: 200,
-                                                                    msg: 'insert data success',
-                                                                });
-                                                            }
-                                                            else {
-                                                                reply(Boom.notFound);
-                                                            }
+                                                            reply(Boom.notFound);
                                                         }
                                                     }));
                                                 }
@@ -293,15 +289,11 @@ module.exports = [
                     }
                     else if (stdout) {
                         const delAssign = yield mongo.collection('assignAnalytics').deleteOne({ _id: ObjectIdMongo(payload._id) });
-                        const delRules = yield mongo.collection('rules').deleteOne({ dockerNickname: resAssign.nickname });
-                        db.collection('assignAnalytics').remove().make((builder) => {
-                            builder.where("_id", request.payload._id);
-                            builder.callback((err, res) => {
-                                reply({
-                                    statusCode: 200,
-                                    message: "OK",
-                                });
-                            });
+                        const delRules = yield mongo.collection('rules').deleteMany({ dockerNickname: resAssign.nickname });
+                        const delNoti = yield mongo.collection('notification').deleteMany({ dockerNickname: resAssign.nickname });
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
                         });
                     }
                     else {
@@ -313,6 +305,38 @@ module.exports = [
                 reply(Boom.badGateway(error));
             }
         })
-    }
+    },
+    {
+        method: 'POST',
+        path: '/assignAnalytics/container',
+        config: {
+            tags: ['api'],
+            description: 'Update status assignAnalytics ',
+            notes: 'Update status assignAnalytics',
+            validate: {
+                payload: {
+                    id: Joi.string().required(),
+                    command: Joi.string().required()
+                }
+            }
+        },
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const insertUser = yield dbm.collection('assignAnalytics').updateOne({ _id: ObjectIdMongo(request.payload.id) }, { $set: { status: request.payload.command } });
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                });
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                });
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
+    },
 ];
 //# sourceMappingURL=assignAnalytics.js.map

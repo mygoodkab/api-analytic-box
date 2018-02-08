@@ -70,7 +70,7 @@ module.exports = [
                     });
                 }
                 else {
-                    reply(Boom.notFound);
+                    reply(Boom.notFound("NO data"));
                 }
             }
             catch (error) {
@@ -104,7 +104,7 @@ module.exports = [
                     });
                 }
                 else {
-                    reply(Boom.notFound);
+                    reply(Boom.notFound("NO data"));
                 }
             }
             catch (error) {
@@ -122,14 +122,14 @@ module.exports = [
             validate: {
                 payload: {
                     dockerNickname: Joi.string().required(),
-                    rule: Joi.array().required(),
+                    rule: Joi.object().required(),
                 }
             }
         },
         handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
             let payload = request.payload;
             let dbm = util_1.Util.getDb(request);
-            let validate = payload.rule[0];
+            let validate = payload.rule;
             try {
                 if (typeof validate.type == "undefined" && typeof validate.day == "undefined" && typeof validate.timeStart == "undefined" && typeof validate.timeEnd == "undefined" && typeof validate.condition == "undefined") {
                     reply(Boom.badRequest("Invaid  Payload"));

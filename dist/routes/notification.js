@@ -28,7 +28,7 @@ module.exports = [
             try {
                 const res = yield dbm.collection('notification').find({ isHide: false }).sort({ timedb: -1 }).toArray();
                 if (res.length == 0) {
-                    reply(Boom.notFound);
+                    reply(Boom.notFound("NO data"));
                 }
                 else {
                     reply({
@@ -69,7 +69,7 @@ module.exports = [
                     });
                 }
                 else {
-                    reply(Boom.notFound);
+                    reply(Boom.notFound("NO data"));
                 }
             }
             catch (error) {
@@ -103,7 +103,7 @@ module.exports = [
                     });
                 }
                 else {
-                    reply(Boom.notFound);
+                    reply(Boom.notFound("NO data"));
                 }
             }
             catch (error) {
@@ -137,7 +137,7 @@ module.exports = [
                     });
                 }
                 else {
-                    reply(Boom.notFound);
+                    reply(Boom.notFound("NO data"));
                 }
             }
             catch (error) {
@@ -170,7 +170,7 @@ module.exports = [
                     });
                 }
                 else {
-                    reply(Boom.notFound);
+                    reply(Boom.notFound("NO data"));
                 }
             }
             catch (error) {
@@ -231,7 +231,7 @@ module.exports = [
                     });
                 }
                 else {
-                    reply(Boom.notFound);
+                    reply(Boom.notFound("NO data"));
                 }
             }
             catch (error) {
@@ -255,11 +255,73 @@ module.exports = [
         handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
             let dbm = util_1.Util.getDb(request);
             try {
-                const insertAnalyticsRecord = yield dbm.collection('analytics-record').insertOne(request.payload);
+                const insertAnalyticsRecord = yield dbm.collection('notification').insertOne(request.payload);
                 reply({
                     statusCode: 200,
                     message: "OK",
                 });
+            }
+            catch (error) {
+                reply(Boom.badGateway(error));
+            }
+        })
+    },
+    {
+        method: 'POST',
+        path: '/notification/delete',
+        config: {
+            tags: ['api'],
+            description: 'delete all',
+            notes: 'delete all',
+            validate: {
+                payload: {
+                    pass: Joi.string().required(),
+                }
+            }
+        },
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            let payload = request.payload;
+            if (payload.pass == "pass") {
+                try {
+                    const del = yield dbm.collection('notification').remove({});
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: "Delete rule Success"
+                    });
+                }
+                catch (error) {
+                    reply(Boom.badGateway(error));
+                }
+            }
+            else {
+                reply(Boom.badRequest("Invalid password"));
+            }
+        })
+    },
+    {
+        method: 'GET',
+        path: '/notification/test',
+        config: {
+            tags: ['api'],
+            description: 'Select all notification  ',
+            notes: 'Select all notification '
+        },
+        handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            let dbm = util_1.Util.getDb(request);
+            try {
+                const res = yield dbm.collection('notification').find().toArray();
+                if (res.length == 0) {
+                    reply(Boom.notFound);
+                }
+                else {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    });
+                }
             }
             catch (error) {
                 reply(Boom.badGateway(error));

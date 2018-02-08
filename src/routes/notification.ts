@@ -19,7 +19,7 @@ module.exports = [
             try {
                 const res = await dbm.collection('notification').find({ isHide: false }).sort({ timedb: -1 }).toArray()
                 if (res.length == 0) {
-                    reply(Boom.notFound)
+                    reply(Boom.notFound("NO data"))
                 } else {
                     reply({
                         statusCode: 200,
@@ -57,7 +57,7 @@ module.exports = [
                         data: res
                     })
                 } else {
-                    reply(Boom.notFound)
+                    reply(Boom.notFound("NO data"))
                 }
             } catch (error) {
                 reply(Boom.badGateway(error))
@@ -90,7 +90,7 @@ module.exports = [
                         data: res
                     })
                 } else {
-                    reply(Boom.notFound)
+                    reply(Boom.notFound("NO data"))
                 }
             } catch (error) {
                 reply(Boom.badGateway(error))
@@ -123,7 +123,7 @@ module.exports = [
                         data: res
                     })
                 } else {
-                    reply(Boom.notFound)
+                    reply(Boom.notFound("NO data"))
                 }
             } catch (error) {
                 reply(Boom.badGateway(error))
@@ -155,7 +155,7 @@ module.exports = [
                         data: res
                     })
                 } else {
-                    reply(Boom.notFound)
+                    reply(Boom.notFound("NO data"))
                 }
             } catch (error) {
                 reply(Boom.badGateway(error))
@@ -175,7 +175,7 @@ module.exports = [
                 }
             }
         },
-        handler: async(request, reply) => {
+        handler: async (request, reply) => {
             let dbm = Util.getDb(request)
             try {
                 const update = await dbm.collection("notification").updateOne({ _id: mongoObjectId(request.payload.id) }, { $set: { isHide: true } })
@@ -203,10 +203,10 @@ module.exports = [
                 }
             }
         },
-        handler: async(request, reply) => {
+        handler: async (request, reply) => {
             let dbm = Util.getDb(request)
             try {
-                const res =  await dbm.collection("notification").find({ dockerNickname: request.params.dockerNickname, isHide: false }).sort({ timedb: -1 }).toArray()
+                const res = await dbm.collection("notification").find({ dockerNickname: request.params.dockerNickname, isHide: false }).sort({ timedb: -1 }).toArray()
                 if (res) {
                     reply({
                         statusCode: 200,
@@ -214,7 +214,7 @@ module.exports = [
                         data: res
                     })
                 } else {
-                    reply(Boom.notFound)
+                    reply(Boom.notFound("NO data"))
                 }
             } catch (error) {
                 reply(Boom.badGateway(error))
@@ -234,10 +234,10 @@ module.exports = [
                 }
             }
         },
-        handler: async(request, reply) => {
+        handler: async (request, reply) => {
             let dbm = Util.getDb(request)
             try {
-                const insertAnalyticsRecord = await dbm.collection('analytics-record').insertOne(request.payload)
+                const insertAnalyticsRecord = await dbm.collection('notification').insertOne(request.payload)
 
                 reply({
                     statusCode: 200,
@@ -249,7 +249,65 @@ module.exports = [
             }
         }
     },
+    {  // delete notification all
+        method: 'POST',
+        path: '/notification/delete',
+        config: {
+            tags: ['api'],
+            description: 'delete all',
+            notes: 'delete all',
+            validate: {
+                payload: {
+                    pass: Joi.string().required(),
+                }
+            }
+        },
+        handler: async (request, reply) => {
+            let dbm = Util.getDb(request)
+            let payload = request.payload
+            if (payload.pass == "pass") {
+                try {
+                    const del = await dbm.collection('notification').remove({})
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: "Delete rule Success"
+                    })
+                } catch (error) {
+                    reply(Boom.badGateway(error))
+                }
+            } else {
+                reply(Boom.badRequest("Invalid password"))
+            }
 
+        }
+    },
+    {  // select all notification
+        method: 'GET',
+        path: '/notification/test',
+        config: {
+            tags: ['api'],
+            description: 'Select all notification  ',
+            notes: 'Select all notification '
+        },
+        handler: async (request, reply) => {
+            let dbm = Util.getDb(request)
+            try {
+                const res = await dbm.collection('notification').find().toArray()
+                if (res.length == 0) {
+                    reply(Boom.notFound)
+                } else {
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: res
+                    })
+                }
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
+        }
+    },
     // //===============================================================================================================
 
     // {  // select all notification

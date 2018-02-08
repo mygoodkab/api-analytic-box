@@ -111,7 +111,7 @@ module.exports = [
     },
     {
         method: 'POST',
-        path: '/docker/command/mongo',
+        path: '/docker/command',
         config: {
             tags: ['api'],
             description: 'Get All analytics data',
@@ -150,7 +150,7 @@ module.exports = [
                             else if (stdout) {
                                 console.log("respone cmd curl=>", stdout);
                                 if (payload._command == 'start') {
-                                    const update = yield dbm.collection('assignAnalytics').updateOne({ _id: payload._assignAnayticsId }, { $set: { status: payload._command } });
+                                    const update = yield dbm.collection('assignAnalytics').updateOne({ _id: mongoObjectId(payload._assignAnayticsId) }, { $set: { status: payload._command } });
                                     reply({
                                         statusCode: 200,
                                         message: "OK",
@@ -158,7 +158,7 @@ module.exports = [
                                     });
                                 }
                                 else {
-                                    const update = yield dbm.collection('assignAnalytics').updateOne({ _id: payload._assignAnayticsId }, { $set: { status: payload._command, stopTime: Date.now() } });
+                                    const update = yield dbm.collection('assignAnalytics').updateOne({ _id: mongoObjectId(payload._assignAnayticsId) }, { $set: { status: payload._command, stopTime: Date.now() } });
                                     reply({
                                         statusCode: 200,
                                         message: "OK",

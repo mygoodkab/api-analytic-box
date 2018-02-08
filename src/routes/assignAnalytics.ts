@@ -113,6 +113,7 @@ module.exports = [
             validate: {
                 payload: {
                     nickname: Joi.string().required(),
+                    nameAssignAnalytics: Joi.string(),
                     _refCameraId: Joi.string().required(),
                     _refAnalyticsId: Joi.string().required(),
                     environment: Joi.array().required(),
@@ -163,28 +164,23 @@ module.exports = [
                                             } else {
                                                 //write file docker-compose.yml
                                                 writeyaml(dockerAnalyticsCameraPath + nickname + pathSep.sep + 'docker-compose.yml', result, async (err) => {
-                                                    if (err) {
-                                                        // badRequest(err)
+                                                    console.log('create folder and docker-compose.yaml file')
+                                                    let analyticsInfo = resAnalytics;
+                                                    const resCamera: any = await mongo.collection('camera').findOne({ _id: ObjectIdMongo(payload._refCameraId) })
+                                                    if (resCamera) {
+                                                        let cameraInfo = resCamera;
+                                                        let command = "nvidia-docker run --rm -td --name '" + nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights"
+                                                        payload.cmd = command + " '" + cameraInfo.rtsp + "''";
+                                                        payload.type = analyticsInfo.analyticsProfile.name;
+                                                        payload.analyticsInfo = analyticsInfo;
+                                                        payload.cameraInfo = cameraInfo
+                                                        const insertAssignAnalytics = await mongo.collection('assignAnalytics').insertOne(payload)
+                                                        reply({
+                                                            statusCode: 200,
+                                                            msg: 'insert data success',
+                                                        })
                                                     } else {
-                                                        console.log('create folder and docker-compose.yaml file')
-                                                        let analyticsInfo = resAnalytics;
-                                                        const resCamera: any = await mongo.collection('camera').findOne({ _id: ObjectIdMongo(payload._refCameraId) })
-                                                        if (resCamera) {
-                                                            let cameraInfo = resCamera;
-                                                            let command = "nvidia-docker run --rm -td --name '" + nickname + "' -v ${HOME}/darknet-cropping -person/crop_data:/home/dev/darknet-cropping-person/crop_data -v ${HOME}/darknet-cropping-person/log_data:/home/dev/darknet-cropping-person/log_data embedded-performance-server.local:5000/eslab/darknet-cropping-person:latest /bin/sh -c './darknet detector demo cfg/coco.data cfg/yolo.cfg weights/yolo.weights"
-                                                            payload.cmd = command + " '" + cameraInfo.rtsp + "''";
-                                                            payload.type = analyticsInfo.analyticsProfile.name;
-                                                            payload.analyticsInfo = analyticsInfo;
-                                                            payload.cameraInfo = cameraInfo
-                                                            const insertAssignAnalytics = await mongo.collection('assignAnalytics').insertOne(payload)
-                                                            reply({
-                                                                statusCode: 200,
-                                                                msg: 'insert data success',
-                                                            })
-                                                        } else {
-                                                            reply(Boom.notFound)
-                                                        }
-
+                                                        reply(Boom.notFound)
                                                     }
                                                 });
                                             }
@@ -299,16 +295,12 @@ module.exports = [
                         console.log("Error " + error)
                     } else if (stdout) {
                         const delAssign = await mongo.collection('assignAnalytics').deleteOne({ _id: ObjectIdMongo(payload._id) })
-                        const delRules = await mongo.collection('rules').deleteOne({ dockerNickname: resAssign.nickname })
-                        db.collection('assignAnalytics').remove().make((builder: any) => {
-                            builder.where("_id", request.payload._id)
-                            builder.callback((err: any, res: any) => {
-                                reply({
-                                    statusCode: 200,
-                                    message: "OK",
-                                })
-                            });
-                        });
+                        const delRules = await mongo.collection('rules').deleteMany({ dockerNickname: resAssign.nickname })
+                        const delNoti = await mongo.collection('notification').deleteMany({ dockerNickname: resAssign.nickname })
+                        reply({
+                            statusCode: 200,
+                            message: "OK",
+                        })
                     } else {
                         console.log("Stderr " + stderr)
                     }
@@ -318,7 +310,47 @@ module.exports = [
                 reply(Boom.badGateway(error))
             }
         }
-    }
+    },
+    { // Update status assignAnalytics stop/start
+        method: 'POST',
+        path: '/assignAnalytics/container',
+        config: {
+            tags: ['api'],
+            description: 'Update status assignAnalytics ',
+            notes: 'Update status assignAnalytics',
+            validate: {
+                payload: {
+                    id: Joi.string().required(),
+                    command: Joi.string().required()
+                }
+            }
+        },
+        handler: async (request, reply) => {
+            // let status = ""
+            // if (request.payload.command == "start" || request.payload.command == "stop") {
+            //     status = ""
+            // } else if (request.payload.command == "2") {
+            //     status = "start"
+            // } else {
+            //     status = "restart"
+            // }
+
+            let dbm = Util.getDb(request)
+            try {
+                const insertUser = await dbm.collection('assignAnalytics').updateOne({ _id: ObjectIdMongo(request.payload.id) }, { $set: { status: request.payload.command } })
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                })
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                })
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
+        }
+    },
     // =============================================== NO SQL VER ============================================================
     // { // Get all assignAnalytics
     //     method: 'GET',

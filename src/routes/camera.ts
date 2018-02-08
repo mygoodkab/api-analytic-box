@@ -108,7 +108,6 @@ module.exports = [
         handler: async (request, reply) => {
 
             const mongo = Util.getDb(request)
-            console.log(request.params.id)
             try {
                 const resCamera = await mongo.collection('camera').findOne({ _id: ObjectId(request.params.id) })
                 reply({
@@ -209,7 +208,7 @@ module.exports = [
                 reply(Boom.badGateway(error))
             }
         }
-    }
+    },
 
     //========================================================================================================================================================
     // {  // Get all camera profile

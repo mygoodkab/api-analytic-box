@@ -47,6 +47,7 @@
     "objectid": "^3.2.1",
     "path": "^0.12.7",
     "request": "^2.83.0",
+    "request-promise": "^4.1.1",
     "uniqid": "^4.1.1",
     "vision": "^4.1.1",
     "write-yaml": "^1.0.0",
