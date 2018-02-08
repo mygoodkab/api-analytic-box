@@ -171,11 +171,11 @@ module.exports = [
             let payload = request.payload;
             let ruleUpdate = {
                 type: payload.type,
-                dayStart: payload.type,
-                dayEnd: payload.type,
-                timeStart: payload.type,
-                timeEnd: payload.type,
-                metadata: payload.type,
+                dayStart: payload.dayStart,
+                dayEnd: payload.dayEnd,
+                timeStart: payload.timeStart,
+                timeEnd: payload.timeEnd,
+                metadata: payload.metadata,
             };
             try {
                 console.log("++++++++++++++++++++++++++++++++++++++");
