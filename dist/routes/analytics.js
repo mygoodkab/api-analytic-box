@@ -176,7 +176,6 @@ module.exports = [
                                                 });
                                             }
                                             catch (err) {
-                                                console.log(err + "5555555555555555");
                                                 console.log(err);
                                                 removeFile(filename);
                                                 reply(Boom.badGateway(err));

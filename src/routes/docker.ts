@@ -137,11 +137,11 @@ module.exports = [
                         let cmd;
                         if (payload._command == "start") {
 
-                            cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/" + nickname + "/up"
+                            cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/relay/execute/analytics/status/" + nickname + "/up"
                             console.log("full command string=>", cmd)
                             // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose up -d"
                         } else {
-                            cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/magic/relay/execute/analytics/status/" + nickname + "/down"
+                            cmd = "curl --unix-socket /opt/vam/vam-microservice-relay.sock http:/relay/execute/analytics/status/" + nickname + "/down"
                             console.log("full command string=>", cmd)
                             // cmd = "cd ../../vam-data/uploads/docker-analytics-camera/" + nickname + " && docker-compose down "
                         }

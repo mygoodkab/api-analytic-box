@@ -104,6 +104,7 @@ module.exports = [
                             console.log("file name's exist")
                             filename = filename + objectid.toString().substring(0, 5);
                         }
+
                         let path = Util.analyticsPath() + filename + pathSep.sep;
                         console.log("Upload Analytics Profile ... path /analytics/upload-profile : " + path)
                         // create folder
@@ -201,7 +202,6 @@ module.exports = [
                                             })
 
                                         } catch (err) { // try catch error 
-                                            console.log(err+"5555555555555555")
                                             console.log(err)
                                             removeFile(filename)
                                             reply(Boom.badGateway(err))
@@ -436,6 +436,7 @@ module.exports = [
                     }
                     let analyticsFileInfo = resAnalytics.analyticsFileInfo
                     let analyticsProfile = resAnalytics.analyticsProfile
+                    
                     let path: any = Util.analyticsPath() + analyticsFileInfo.name + pathSep.sep + analyticsProfile.logo // path + folder + \ + filename.png
                     //console.log("Path analytics logo : " + path)
                     reply.file(path,

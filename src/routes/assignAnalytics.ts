@@ -164,6 +164,7 @@ module.exports = [
                                             } else {
                                                 //write file docker-compose.yml
                                                 writeyaml(dockerAnalyticsCameraPath + nickname + pathSep.sep + 'docker-compose.yml', result, async (err) => {
+                                                  
                                                     console.log('create folder and docker-compose.yaml file')
                                                     let analyticsInfo = resAnalytics;
                                                     const resCamera: any = await mongo.collection('camera').findOne({ _id: ObjectIdMongo(payload._refCameraId) })
