@@ -134,7 +134,6 @@ module.exports = [
         handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
             let payload = request.payload;
             let dbm = util_1.Util.getDb(request);
-            let validate = payload.rule;
             try {
                 const insert = yield dbm.collection('rules').insertOne(payload);
                 reply({
@@ -170,7 +169,6 @@ module.exports = [
         handler: (request, reply) => __awaiter(this, void 0, void 0, function* () {
             let dbm = util_1.Util.getDb(request);
             let payload = request.payload;
-            let validate = payload.rule[0];
             let ruleUpdate = {
                 type: payload.type,
                 dayStart: payload.type,
@@ -180,6 +178,7 @@ module.exports = [
                 metadata: payload.type,
             };
             try {
+                console.log("++++++++++++++++++++++++++++++++++++++");
                 const update = yield dbm.collection('rules').updateOne({ _id: mongoObjectId(payload._id) }, { $set: ruleUpdate });
                 reply({
                     statusCode: 200,

@@ -122,7 +122,6 @@ module.exports = [
         handler: async (request, reply) => {
             let payload = request.payload
             let dbm = Util.getDb(request)
-            let validate = payload.rule;
             try {
                 const insert = await dbm.collection('rules').insertOne(payload)
                 reply({
@@ -158,7 +157,6 @@ module.exports = [
         handler: async (request, reply) => {
             let dbm = Util.getDb(request)
             let payload = request.payload
-            let validate = payload.rule[0];
             let ruleUpdate = {
                 type: payload.type,
                 dayStart: payload.type,
@@ -168,6 +166,7 @@ module.exports = [
                 metadata: payload.type,
             }
             try {
+                console.log("++++++++++++++++++++++++++++++++++++++")
                 const update = await dbm.collection('rules').updateOne({ _id: mongoObjectId(payload._id) }, { $set: ruleUpdate })
                 reply({
                     statusCode: 200,
