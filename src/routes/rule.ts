@@ -115,6 +115,7 @@ module.exports = [
                     dayEnd: Joi.string().required(),
                     timeStart: Joi.string().required(),
                     timeEnd: Joi.string().required(),
+                    status: Joi.boolean().required(),
                     metadata: Joi.any()
                 }
             }
