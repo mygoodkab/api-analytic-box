@@ -20,7 +20,6 @@ import { ObjectId } from 'bson';
 const mongoObjectId = require('mongodb').ObjectId;
 module.exports = [
     //// =======================================================   version 2  ===========================================================================================
-
     { // Get all analytic-record
         method: 'GET',
         path: '/analytics-record/get',
