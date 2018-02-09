@@ -55,5 +55,4 @@ fi
 
 cd $APP_HOME
 npm i
-npm run build 
 npm start
