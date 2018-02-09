@@ -218,7 +218,7 @@ module.exports = [
                         resNotification = resNotification[0]
                         if (!resNotification) {
                             console.log("Frist Notification " + payload.dockerNickname)
-                            notification()
+                            checkRule()
                         } else {
                             let currentTime: any = new Date
                             let limitTime = 5 // minute
@@ -227,7 +227,7 @@ module.exports = [
                             console.log("difftime : " + diffTime)
                             if (diffTime > limitTime) { // ข้อมูลล่าสุดส่งมาเกิน 5 นาที 
                                 console.log("Notification more 5 minute")
-                                notification()
+                                checkRule()
                             } else {
                                 sentDataToSmartliving()
                             }
@@ -236,7 +236,7 @@ module.exports = [
                         // =----------------------------------------------=
                         // | check rule by dockerNickname to notification |
                         // =----------------------------------------------=
-                        async function notification() {
+                        async function checkRule() {
                             const resRules: any = await mongo.collection('rules').find({ dockerNickname: payload.dockerNickname }).toArray()
                             if (!resRules) {
                                 console.log("No rule")
@@ -245,7 +245,7 @@ module.exports = [
                                 console.log("rule compare")
                                 for (let rule of resRules) {
                                     rule = rule.rule
-                                    if (diffdate(rule)) {
+                                    if (Util.isNotification(rule) && rule.status) {
                                         let notificationData = payload
                                         //notificationData.id = objectid()
                                         notificationData.isRead = false
@@ -253,9 +253,7 @@ module.exports = [
                                         let isNotification = false
                                         // notification
                                         if (rule.type == "cropping") {
-
                                             isNotification = true
-
                                         } else if (rule.type == "counting") {
                                             if (rule.metadata.condition == "more") {
                                                 if (parseInt(rule.value) <= parseInt(payload.metadata.n)) isNotification = true
@@ -321,73 +319,6 @@ module.exports = [
                     } else {
                         badrequest("Please check 'outputType'")
                     }
-                }
-
-                // db.collection('assignAnalytics').find().make((builder) => {
-                //     builder.where('nickname', payload.dockerNickname)
-                //     builder.first()
-                //     builder.callback(async (err, res) => {
-                //         if (!res) {
-                //             console.log("Can't find docker contrainer" + payload.dockerNickname)
-                //             badrequest("Can't find docker contrainer" + payload.dockerNickname)
-                //         } else {
-
-                //         }
-                //     })
-                // })
-
-                function diffdate(data) {
-
-                    let isToday = false;
-                    var year = parseInt(dateFormat(now, "yy"))
-                    var month = parseInt(dateFormat(now, "m"))
-                    var day = parseInt(dateFormat(now, "d"))
-                    var hour = parseInt(dateFormat(now, "HH")) // 7 is time-zone bangkok
-                    var min = parseInt(dateFormat(now, "MM"))
-                    var tomorrowYear = parseInt(dateFormat(tomorrow, "yy"))
-                    var tomorrowMonth = parseInt(dateFormat(tomorrow, "m"))
-                    var tomorrowDay = parseInt(dateFormat(tomorrow, "d"))
-
-                    if (data.day == dateFormat(now, "ddd").toLowerCase()) {
-                        isToday = true
-                    }
-
-                    if (isToday) {
-                        let timeEndH = parseInt(data.timeEnd.split(':')[0])
-                        let timeStartH = parseInt(data.timeStart.split(':')[0])
-                        let timeEndM = parseInt(data.timeEnd.split(':')[1])
-                        let timeStartM = parseInt(data.timeStart.split(':')[1])
-
-                        if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) {//ถ้าเวลาเริ่มมากกว่าเวลาจบ เช่น 5.30-22.30 , 23.30-23.31 , 14.00-14.00
-                            var start = differenceInMinutes( // diff กันแล้วผลลัพธ์  - คือยังไม่ถึงเวลา แต่ถ้าเป็น + คือผ่านมาแล้ว
-                                new Date(year, month, day, hour, min, 0), //เวลาปัจจุบัน
-                                new Date(year, month, day, timeStartH, timeStartM, 0) //เวลาเทียบ
-                            )
-                            var end = differenceInMinutes(
-                                new Date(year, month, day, hour, min, 0),
-                                new Date(year, month, day, timeEndH, timeEndM, 0)
-                            )
-                            //console.log("*-************************** " + end )
-                            if (start >= 0 && end <= 0) {
-                                return true
-                            }
-                        }
-                        else if (timeStartH > timeEndH || (timeStartH == timeEndH) && (timeStartM >= timeEndM)) { //ถ้าเวลาเริ่มมากกว่าเวลาจบ เช่น 23.30-5.30 , 23.31-23.30
-                            var start = differenceInMinutes( // diff กันแล้วผลลัพธ์  - คือยังไม่ถึงเวลา แต่ถ้าเป็น + คือผ่านมาแล้ว
-                                new Date(year, month, day, hour, min, 0), //เวลาปัจจุบัน
-                                new Date(year, month, day, timeStartH, timeStartM, 0) //เวลาเทียบ
-                            )
-                            var end = differenceInMinutes(
-                                new Date(year, month, day, hour, min, 0),
-                                new Date(tomorrowYear, tomorrowMonth, tomorrowDay, timeEndH, timeEndM, 0)
-                            )
-                            if (start >= 0 && end <= 0) {
-                                return true
-                            }
-                        }
-
-                    }
-                    return false
                 }
                 function badrequest(msg) {
                     console.log("Bad Request: " + msg)
