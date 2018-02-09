@@ -242,7 +242,7 @@ module.exports = [
                                 console.log("No rule")
                                 sentDataToSmartliving()
                             } else {
-                                console.log("rule compare")
+                                console.log("rule compare : " , resRules)
                                 for (let rule of resRules) {
                                     console.log(Util.isNotification(rule))
                                     if (Util.isNotification(rule) && rule.status) {
