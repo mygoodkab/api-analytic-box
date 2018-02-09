@@ -170,8 +170,7 @@ export class Util {
 		return path
 	}
 	static analyticsPath() {
-		let path = __dirname  + pathSep.sep + "uploads" + pathSep.sep + "analytics"
-
+		let path = pathSep.join(__dirname, 'uploads', 'analytics')
 		return path
 	}
 	static uploadImagePath() {
