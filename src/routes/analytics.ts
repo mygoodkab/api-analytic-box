@@ -438,7 +438,7 @@ module.exports = [
                     let analyticsProfile = resAnalytics.analyticsProfile
                     
                     let path: any = Util.analyticsPath() + analyticsFileInfo.name + pathSep.sep + analyticsProfile.logo // path + folder + \ + filename.png
-                    //console.log("Path analytics logo : " + path)
+                    console.log("Path analytics logo : " + path)
                     reply.file(path,
                         {
                             filename: resAnalytics.name + '.' + resAnalytics.fileType,
