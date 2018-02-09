@@ -9,7 +9,7 @@
     "start": "node ./dist/server.js",
     "start-dev": "\"NODE_ENV=test\" && node ./dist/server.js",
     "serve": "npm run build && npm start",
-    "build": "echo Using TypeScript && tsc --version && tsc --pretty"
+    "build": "echo Using TypeScript && tsc --version"
   },
   "dependencies": {
     "async": "^2.6.0",
