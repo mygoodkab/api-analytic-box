@@ -8,8 +8,8 @@
   "scripts": {
     "start": "node ./dist/server.js",
     "start-dev": "\"NODE_ENV=test\" && node ./dist/server.js",
-    "build": "npm run build",
-    "serve": "npm start"
+    "serve": "npm run build && npm start",
+    "build": "npm run build"
   },
   "dependencies": {
     "async": "^2.6.0",
