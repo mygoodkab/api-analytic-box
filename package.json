@@ -7,8 +7,9 @@
   "license": "ISC",
   "scripts": {
     "start": "node ./dist/server.js",
-    "serve": "npm build",
-    "start-dev": "\"NODE_ENV=test\" && node ./dist/server.js"
+    "start-dev": "\"NODE_ENV=test\" && node ./dist/server.js",
+    "build": "npm run build",
+    "serve": "npm start"
   },
   "dependencies": {
     "async": "^2.6.0",
