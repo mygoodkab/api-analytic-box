@@ -244,7 +244,6 @@ module.exports = [
                             } else {
                                 console.log("rule compare")
                                 for (let rule of resRules) {
-                                    rule = rule.rule
                                     console.log(Util.isNotification(rule))
                                     if (Util.isNotification(rule) && rule.status) {
                                         let notificationData = payload
