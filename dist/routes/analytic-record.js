@@ -218,7 +218,7 @@ module.exports = [
                         resNotification = resNotification[0];
                         if (!resNotification) {
                             console.log("Frist Notification " + payload.dockerNickname);
-                            notification();
+                            checkRule();
                         }
                         else {
                             let currentTime = new Date;
@@ -228,13 +228,13 @@ module.exports = [
                             console.log("difftime : " + diffTime);
                             if (diffTime > limitTime) {
                                 console.log("Notification more 5 minute");
-                                notification();
+                                checkRule();
                             }
                             else {
                                 sentDataToSmartliving();
                             }
                         }
-                        function notification() {
+                        function checkRule() {
                             return __awaiter(this, void 0, void 0, function* () {
                                 const resRules = yield mongo.collection('rules').find({ dockerNickname: payload.dockerNickname }).toArray();
                                 if (!resRules) {
@@ -242,10 +242,10 @@ module.exports = [
                                     sentDataToSmartliving();
                                 }
                                 else {
-                                    console.log("rule compare");
+                                    console.log("Rule compare : ", resRules);
                                     for (let rule of resRules) {
-                                        rule = rule.rule;
-                                        if (diffdate(rule)) {
+                                        console.log(util_1.Util.isNotification(rule));
+                                        if (util_1.Util.isNotification(rule) && rule.status) {
                                             let notificationData = payload;
                                             notificationData.isRead = false;
                                             notificationData.isHide = false;
@@ -321,41 +321,6 @@ module.exports = [
                     else {
                         badrequest("Please check 'outputType'");
                     }
-                }
-                function diffdate(data) {
-                    let isToday = false;
-                    var year = parseInt(dateFormat(now, "yy"));
-                    var month = parseInt(dateFormat(now, "m"));
-                    var day = parseInt(dateFormat(now, "d"));
-                    var hour = parseInt(dateFormat(now, "HH"));
-                    var min = parseInt(dateFormat(now, "MM"));
-                    var tomorrowYear = parseInt(dateFormat(tomorrow, "yy"));
-                    var tomorrowMonth = parseInt(dateFormat(tomorrow, "m"));
-                    var tomorrowDay = parseInt(dateFormat(tomorrow, "d"));
-                    if (data.day == dateFormat(now, "ddd").toLowerCase()) {
-                        isToday = true;
-                    }
-                    if (isToday) {
-                        let timeEndH = parseInt(data.timeEnd.split(':')[0]);
-                        let timeStartH = parseInt(data.timeStart.split(':')[0]);
-                        let timeEndM = parseInt(data.timeEnd.split(':')[1]);
-                        let timeStartM = parseInt(data.timeStart.split(':')[1]);
-                        if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) {
-                            var start = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeStartH, timeStartM, 0));
-                            var end = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeEndH, timeEndM, 0));
-                            if (start >= 0 && end <= 0) {
-                                return true;
-                            }
-                        }
-                        else if (timeStartH > timeEndH || (timeStartH == timeEndH) && (timeStartM >= timeEndM)) {
-                            var start = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeStartH, timeStartM, 0));
-                            var end = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(tomorrowYear, tomorrowMonth, tomorrowDay, timeEndH, timeEndM, 0));
-                            if (start >= 0 && end <= 0) {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
                 }
                 function badrequest(msg) {
                     console.log("Bad Request: " + msg);
