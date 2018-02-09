@@ -1,9 +1,17 @@
 const pathSep = require('path');
 const crypto = require('crypto');
-import { Db } from 'mongodb'
+var dateFormat = require('dateformat');
+var differenceInMinutes = require('date-fns/difference_in_minutes')
+var now = new Date();
+let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+let dayModel = { mon: "1", tue: "2", wed: "3", thu: "4", fri: "5", sat: "6", sun: "7" }
+import { Db } from 'mongodb';
+
 //pathSep.sep is check os that use / or \
-exports.MONGODB = { URL:  "mongodb",// "10.0.0.71",
-                    PORT: "27017" }
+exports.MONGODB = {
+	URL: "mongodb",// "10.0.0.71",
+	PORT: "27017"
+}
 exports.SECRET_KEY = "2CD1DF62C76F2122599E17B894A92"
 export class Util {
 	static getDb(request: any): Db {
@@ -218,4 +226,94 @@ export class Util {
 		return key;
 	}
 
+	static isNotification(data) {
+		let isToday = false;
+		var year = parseInt(dateFormat(now, "yyy"))
+		var month = parseInt(dateFormat(now, "m"))
+		var day = parseInt(dateFormat(now, "d"))
+		var hour = parseInt(dateFormat(now, "HH"))
+		var min = parseInt(dateFormat(now, "MM"))
+		var tomorrowYear = parseInt(dateFormat(tomorrow, "yyy"))
+		var tomorrowMonth = parseInt(dateFormat(tomorrow, "m"))
+		var tomorrowDay = parseInt(dateFormat(tomorrow, "d"))
+		var valueDayStart;
+		var valueDayEnd;
+		var valueToday;
+		if (data.dayStart == data.dayEnd && data.dayStart == dateFormat(now, "ddd").toLowerCase()) {
+			isToday = true
+		}
+		if (data.dayStart != data.dayEnd) {
+			for (let fieldDay in dayModel) {  // day to value = 1-7 (mon-sun)
+				if (data.dayStart == fieldDay) {
+					valueDayStart = dayModel[fieldDay];
+				}
+				if (data.dayEnd == fieldDay) {
+					valueDayEnd = dayModel[fieldDay];
+				}
+				if (dateFormat(now, "ddd").toLowerCase() == fieldDay) {
+					valueToday = dayModel[fieldDay]
+				}
+			}
+			// compare day
+			if (valueDayStart < valueDayEnd) {  //ถ้าเลขหน้าน้อยกว่าเลขหลัง เช่น  1-3
+				if (valueToday >= valueDayStart && valueToday <= valueDayEnd) {  // if  1-3 = mon, tue, wed
+					isToday = true
+				}
+			} else {       //ถ้าเลขหน้ามากกว่าเลขหลัง เช่น  3 - 1
+				if (!(valueToday < valueDayStart && valueToday > valueDayEnd)) { // if  7-3  sun,mon,tue,wed
+					isToday = true
+				}
+			}
+		}
+		if (isToday) {
+			let timeEndH = parseInt(data.timeEnd.split(':')[0])
+			let timeStartH = parseInt(data.timeStart.split(':')[0])
+			let timeEndM = parseInt(data.timeEnd.split(':')[1])
+			let timeStartM = parseInt(data.timeStart.split(':')[1])
+			var TodayDiffTimeStart = differenceInMinutes( // diff กันแล้วผลลัพธ์  - คือยังไม่ถึงเวลา แต่ถ้าเป็น + คือผ่านมาแล้ว
+				new Date(year, month, day, hour, min, 0), //เวลาปัจจุบัน
+				new Date(year, month, day, timeStartH, timeStartM, 0) //เวลาเทียบ
+			)
+			var TodayDiffTimeEnd = differenceInMinutes(
+				new Date(year, month, day, hour, min, 0),
+				new Date(year, month, day, timeEndH, timeEndM, 0)
+			)
+			if (data.dayStart == data.dayEnd) { // ถ้ากำหนดเป็นวันเดียว เช่น  Mon 17.00 - 23.59
+				if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) { //ถ้าเวลาเริ่มน้อยกว่าเวลาจบ เช่น 5.30-22.30 , 23.30-23.31 , 14.00-14.00
+					console.log(TodayDiffTimeStart + " " + TodayDiffTimeEnd)
+					if (TodayDiffTimeStart >= 0 && TodayDiffTimeEnd <= 0) { //  ถ้า TodayDiffTimeStart เป็น +  และ  TodayDiffTimeEnd เป็น -  แสดงว่าเวลาปัจจุบันอยู่ระหว่างเวลาที่กำหนด
+						return true
+					}
+				}
+			}
+			else {
+				if (valueDayStart < valueDayEnd) {  // if  1-3 = mon, tue, wed
+					if (valueToday > valueDayStart && valueToday < valueDayEnd) { // ถ้าวันปัจจุบันอยู่ระหว่างเวลาที่กำหนด 
+						return true
+					} else if (valueToday == valueDayStart) { // ถ้าวันปัจจุบันตรงกับวันแรกที่กำหนด
+						if (TodayDiffTimeStart >= 0) { //  ถ้า TodayDiffTimeStart เป็น + แสดงว่าเวลาผ่านมาแล้ว 
+							return true
+						}
+					} else if (valueToday == valueDayEnd) { // ถ้าวันปัจจุบันตรงกำวันสุดท้ายที่กำหนด
+						if (TodayDiffTimeEnd <= 0) { //  ถ้า TodayDiffTimeEnd เป็น -  แสดงว่าเวลาปัจจุบันอยู่ยังไม่เลยเวลาที่กำหนด
+							return true
+						}
+					}
+				} else {        // if  7-3  sun,mon,tue,wed
+					if (valueToday == valueDayStart) { // ถ้าวันปัจจุบันตรงกับวันแรกที่กำหนด
+						if (TodayDiffTimeStart >= 0) { //  ถ้า TodayDiffTimeStart เป็น + แสดงว่าเวลาผ่านมาแล้ว 
+							return true
+						}
+					} else if (valueToday == valueDayEnd) { // ถ้าวันปัจจุบันตรงกำวันสุดท้ายที่กำหนด
+						if (TodayDiffTimeEnd <= 0) { //  ถ้า TodayDiffTimeEnd เป็น -  แสดงว่าเวลาปัจจุบันอยู่ยังไม่เลยเวลาที่กำหนด
+							return true
+						}
+					} else if (!(valueToday < valueDayStart && valueToday > valueDayEnd)) {  // ถ้าวันปัจจุบันอยู่ระหว่างเวลาที่กำหนด 
+						return true
+					}
+				}
+			}
+		}
+		return false
+	}
 }
