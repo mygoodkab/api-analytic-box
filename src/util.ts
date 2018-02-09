@@ -170,12 +170,8 @@ export class Util {
 		return path
 	}
 	static analyticsPath() {
-		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics"
-		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = '/vam-data/uploads/analytics/';
-			// path = '/vam_env/webconfig-api/analytics/';			
-		}
+		let path = __dirname  + pathSep.sep + "uploads" + pathSep.sep + "analytics"
+
 		return path
 	}
 	static uploadImagePath() {
