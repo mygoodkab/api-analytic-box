@@ -171,7 +171,7 @@ export class Util {
 	}
 	static analyticsPath() {
 		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'analytics')
-		console.log('path : ' + path)
+		//console.log('path : ' + path)
 		return path
 	}
 	static uploadImagePath() {
