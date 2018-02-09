@@ -55,13 +55,13 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "@types/mongodb": "^3.0.5",
     "@types/boom": "^4.3.7",
     "@types/del": "^3.0.0",
     "@types/hapi": "^16.1.10",
     "@types/lokijs": "^1.2.30",
+    "@types/mongodb": "^3.0.5",
     "@types/node": "^8.0.34",
     "@types/uuid": "^3.4.3",
-    "typescript": "^2.5.3"
+    "typescript": "^2.7.1"
   }
 }
