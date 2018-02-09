@@ -2,7 +2,7 @@ version: '3'
 services:
  vam_webconfig-api:
   build: .
-  image: embedded-performance-server.local:5000/eslab/webconfig-api:BACKEND-RFC01-V0.5
+  image: node-example:latest
   labels:
         - "traefik.backend=webconfig-api"
         - "traefik.frontend.entryPoints=legacyapi"
@@ -22,6 +22,7 @@ services:
         - ${HOME}/vam-data/:/vam-data/
         - /var/run/docker.sock:/var/run/docker.sock
         - /opt/vam/:/opt/vam/
+        - ${HOME}/./git_dir:/usr/local/src
   restart: unless-stopped
 
 networks:
