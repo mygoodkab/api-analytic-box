@@ -1,7 +1,6 @@
 version: '3'
 services:
  vam_webconfig-api:
-  build: .
   image: node-example:latest
   labels:
         - "traefik.backend=webconfig-api"
@@ -22,7 +21,8 @@ services:
         - ${HOME}/vam-data/:/vam-data/
         - /var/run/docker.sock:/var/run/docker.sock
         - /opt/vam/:/opt/vam/
-        - ${HOME}/./git_dir:/usr/local/src
+        - ${HOME}/web-api/git_dir:/usr/local/src
+        - ${HOME}/web-api/ssh_config:/root/.ssh
   restart: unless-stopped
 
 networks:
