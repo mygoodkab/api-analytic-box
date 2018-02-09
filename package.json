@@ -8,8 +8,7 @@
   "scripts": {
     "start": "node ./dist/server.js",
     "start-dev": "\"NODE_ENV=test\" && node ./dist/server.js",
-    "build": "echo Using TypeScript && tsc --version && tsc --pretty",
-    "serve": "npm run build && npm start"
+    "serve": "npm start"
   },
   "dependencies": {
     "async": "^2.6.0",
