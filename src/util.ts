@@ -225,7 +225,6 @@ export class Util {
 		let key = hash.digest('hex');
 		return key;
 	}
-
 	static isNotification(data) {
 		let isToday = false;
 		var year = parseInt(dateFormat(now, "yyy"))

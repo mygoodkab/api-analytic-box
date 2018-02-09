@@ -238,7 +238,7 @@ module.exports = [
                         async function checkRule() {
                             const resRules: any = await mongo.collection('rules').find({ dockerNickname: payload.dockerNickname }).toArray()
                             if (!resRules) {
-                                console.log("No rule")
+                                console.log("No rule") 
                                 sentDataToSmartliving()
                             } else {
                                 console.log("Rule compare : " , resRules)
