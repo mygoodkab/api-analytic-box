@@ -198,9 +198,6 @@ module.exports = [
             let mongo = Util.getDb(request)
             const payload = request.payload;
             console.log("revcive data from analytics " + payload.dockerNickname)
-            let timezone = (7) * 60 * 60 * 1000;
-            let now: any = new Date(new Date().getTime() + timezone); // * timezone thai
-            let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000); // * timezone thai * 24 hours
             payload.timedb = Date.now()
             payload.fileType = payload.fileType.toLowerCase()
             try {
@@ -237,11 +234,11 @@ module.exports = [
                         // =----------------------------------------------=
                         async function checkRule() {
                             const resRules: any = await mongo.collection('rules').find({ dockerNickname: payload.dockerNickname }).toArray()
-                            if (!resRules) {
-                                console.log("No rule") 
+                            if (resRules.length == 0) {
+                                console.log("No rule")
                                 sentDataToSmartliving()
                             } else {
-                                console.log("Rule compare : " , resRules)
+                                console.log("Rule compare : ", resRules)
                                 for (let rule of resRules) {
                                     console.log(Util.isNotification(rule))
                                     if (Util.isNotification(rule) && rule.status) {
