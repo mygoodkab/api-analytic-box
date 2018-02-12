@@ -335,9 +335,8 @@ module.exports = [
                 let payload = request.payload;
                 const mongo = Util.getDb(request)
                 const resAnalytics = await mongo.collection('analytics').findOne({ _id: ObjectIdMongo(payload._id) })
-                console.log(resAnalytics.name)
                 if (resAnalytics) {
-                    const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _id: ObjectIdMongo(payload._id) })
+                    const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _refAnalyticsId: payload._id })
                     if (!resAssignAnalytics) {
                         let path = Util.analyticsPath() + resAnalytics.analyticsFileInfo.name
                         if (Util.removeFolder(path)) {
