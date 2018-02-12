@@ -3,8 +3,9 @@ const crypto = require('crypto');
 const dateFormat = require('dateformat');
 const fs = require('fs');
 const differenceInMinutes = require('date-fns/difference_in_minutes')
-var now = new Date();
-let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+let timezone = (7) * 60 * 60 * 1000;
+let now: any = new Date(new Date().getTime() + timezone); // * timezone thai
+let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000); // * timezone thai * 24 hours
 let dayModel = { mon: "1", tue: "2", wed: "3", thu: "4", fri: "5", sat: "6", sun: "7" }
 import { Db } from 'mongodb';
 
@@ -227,6 +228,8 @@ export class Util {
 					isToday = true
 				}
 			}
+		}
+		console.log(isToday + "1")
 		if (isToday) {
 			let timeEndH = parseInt(data.timeEnd.split(':')[0])
 			let timeStartH = parseInt(data.timeStart.split(':')[0])
