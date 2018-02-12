@@ -337,26 +337,20 @@ module.exports = [
                 const resAnalytics = await mongo.collection('analytics').findOne({ _id: ObjectIdMongo(payload._id) })
                 console.log(resAnalytics.name)
                 if (resAnalytics) {
-                    const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _id: payload._id })
+                    const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _id: ObjectIdMongo(payload._id) })
                     if (!resAssignAnalytics) {
-                        const cmd = "cd " + Util.analyticsPath() + " &&  rm -rf " + resAnalytics.analyticsFileInfo.name + " && echo eslab";
-                        //const test = "cd ../.." + Util.analyticsPath() + " && ls"
-                        console.log("Command remove file  : " + cmd)
-                        exec(cmd, async (error, stdout, stderr) => {
-                            if (stdout) {
-                                console.log("stdout " + stderr)
-                                const removeAnalytics: any = await mongo.collection('analytics').deleteOne({ _id: ObjectIdMongo(payload._id) })
+                        let path = Util.analyticsPath() + resAnalytics.analyticsFileInfo.name
+                        if (Util.removeFile(path)) {
+                            const removeAnalytics: any = await mongo.collection('analytics').deleteOne({ _id: ObjectIdMongo(payload._id) })
+                            reply({
+                                statusCode: 200,
+                                message: "OK",
+                            })
 
-                                reply({
-                                    statusCode: 200,
-                                    message: "OK",
-                                })
+                        } else {
+                            badRequest("Can't remove no such file or dir " + path)
+                        }
 
-                            } else {
-                                console.log("Stderr " + stderr)
-                                badRequest("Stderr" + stderr)
-                            }
-                        });
                     } else {
                         badRequest("Can't delete because data is used")
                     }
