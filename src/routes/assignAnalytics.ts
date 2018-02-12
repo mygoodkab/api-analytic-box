@@ -164,7 +164,7 @@ module.exports = [
                                             } else {
                                                 //write file docker-compose.yml
                                                 writeyaml(dockerAnalyticsCameraPath + nickname + pathSep.sep + 'docker-compose.yml', result, async (err) => {
-                                                  
+
                                                     console.log('create folder and docker-compose.yaml file')
                                                     let analyticsInfo = resAnalytics;
                                                     const resCamera: any = await mongo.collection('camera').findOne({ _id: ObjectIdMongo(payload._refCameraId) })
@@ -289,23 +289,22 @@ module.exports = [
                 let payload = request.payload;
                 const mongo = Util.getDb(request)
                 const resAssign = await mongo.collection('assignAnalytics').findOne({ _id: ObjectIdMongo(payload._id) })
-                const cmd = "cd ../.." + Util.dockerAnalyticsCameraPath() + " &&  rm -rf " + resAssign.nickname + " && echo eslab";
+                let path = Util.dockerAnalyticsCameraPath() + resAssign.nickname
                 //const test = "cd ../.." + Util.analyticsPath() + " && ls"
-                exec(cmd, async (error, stdout, stderr) => {
-                    if (error) {
-                        console.log("Error " + error)
-                    } else if (stdout) {
-                        const delAssign = await mongo.collection('assignAnalytics').deleteOne({ _id: ObjectIdMongo(payload._id) })
-                        const delRules = await mongo.collection('rules').deleteMany({ dockerNickname: resAssign.nickname })
-                        const delNoti = await mongo.collection('notification').deleteMany({ dockerNickname: resAssign.nickname })
-                        reply({
-                            statusCode: 200,
-                            message: "OK",
-                        })
-                    } else {
-                        console.log("Stderr " + stderr)
-                    }
-                });
+                if (Util.removeFile(path)) {
+                    const delAssign = await mongo.collection('assignAnalytics').deleteOne({ _id: ObjectIdMongo(payload._id) })
+                    const delRules = await mongo.collection('rules').deleteMany({ dockerNickname: resAssign.nickname })
+                    const delNoti = await mongo.collection('notification').deleteMany({ dockerNickname: resAssign.nickname })
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                    })
+                } else {
+                    reply({
+                        statusCode: 400,
+                        message: "Can't remove no such file or dir " + path
+                    })
+                }
             }
             catch (error) {
                 reply(Boom.badGateway(error))
@@ -352,5 +351,5 @@ module.exports = [
             }
         }
     },
-  
+
 ]
