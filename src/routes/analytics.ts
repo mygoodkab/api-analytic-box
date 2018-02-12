@@ -21,15 +21,15 @@ import { ObjectID } from 'bson';
 const analyticProfileModel = {
     name: "",
     cmd: "",
-    price:"",
-    shortDetail:"",
-    fullDetail:"",
-    level:"",
-    framework:"",
-    proccessingUnit:"",
+    price: "",
+    shortDetail: "",
+    fullDetail: "",
+    level: "",
+    framework: "",
+    proccessingUnit: "",
     language: "",
-    logo:"",
-    screenshot:""
+    logo: "",
+    screenshot: ""
 };
 
 module.exports = [
@@ -120,7 +120,7 @@ module.exports = [
                                 extract(fileUploadName, { dir: path }, async (err) => {
                                     if (err) {
                                         console.log(err)
-                                        removeFile(filename)
+                                        removeFile(path)
                                         // badRequest("Can't extract file")
                                     } else {
                                         console.log("extract success  path : " + path)
@@ -130,28 +130,28 @@ module.exports = [
                                             YAML.load(path + 'docker-compose.yaml', (result) => {
                                                 if (!result) {
                                                     console.log("can't find 'docker-compose.yaml'")
-                                                    removeFile(filename)
+                                                    removeFile(path)
                                                     //badRequest("can't find 'docker-compose.yaml'")
                                                 } else {
                                                     jsonfile.readFile(path + '/profile.json', async (err, result) => {
                                                         var analyticsProfile = result.analytics;
                                                         if (!result) {//  can't read or find JSON file 
-                                                            removeFile(filename)
+                                                            removeFile(path)
                                                             badRequest("Can't read or find JSON file")
                                                         } else {
                                                             // check ข้อมูลภายในไฟล์ JSON ว่าครบไหม
                                                             let isMissingField = false;
-                                                            for(let field in analyticProfileModel) {
-                                                                if(typeof analyticsProfile[field] == 'undefined') {
+                                                            for (let field in analyticProfileModel) {
+                                                                if (typeof analyticsProfile[field] == 'undefined') {
                                                                     isMissingField = true;
-                                                                    break;        
+                                                                    break;
                                                                 }
                                                             }
-                                                            if(isMissingField) {
-                                                                removeFile(filename)
+                                                            if (isMissingField) {
+                                                                removeFile(path)
                                                                 badRequest("Invaild data please check your file JSON")
                                                             } else {
-                                                                    // check ข้อมูลรูปว่าตรงกับใน folder ไหม
+                                                                // check ข้อมูลรูปว่าตรงกับใน folder ไหม
                                                                 var fileimages = true;
                                                                 if (!fs.existsSync(path + analyticsProfile.logo)) { // check logo ถ้าไม่มีไฟล์
                                                                     fileimages = false;
@@ -166,7 +166,7 @@ module.exports = [
                                                                             }
                                                                         }
                                                                     } else {
-                                                                        removeFile(filename)
+                                                                        removeFile(path)
                                                                         badRequest("JSON analytics.screenchot not match folder")
                                                                     }
                                                                 }
@@ -179,7 +179,7 @@ module.exports = [
                                                                     };
                                                                     // insert  analytics profile to db
                                                                     const insertAnalytics: any = await mongo.collection('analytics').insertOne(analytics)
-                                                                
+
                                                                     // if (insertAnalytics.acknowledged) {
                                                                     reply({
                                                                         statusCode: 200,
@@ -189,7 +189,7 @@ module.exports = [
                                                                     //  }
 
                                                                 } else {
-                                                                    removeFile(filename)
+                                                                    removeFile(path)
                                                                     badRequest("Please check your screenshot/logo images")
                                                                 }
                                                             }
@@ -200,7 +200,7 @@ module.exports = [
 
                                         } catch (err) { // try catch error 
                                             console.log(err)
-                                            removeFile(filename)
+                                            removeFile(path)
                                             reply(Boom.badGateway(err))
                                         }
                                     }
@@ -219,16 +219,12 @@ module.exports = [
                 reply(Boom.badRequest(msg))
             }
 
-            function removeFile(analytics) {
-                let cmd = "cd " + Util.analyticsPath() + " &&  rm -rf " + analytics + " && echo eslab";
-                exec(cmd, (error, stdout, stderr) => {
-                    if (stdout) {
-                        console.log("Remove file success Analytics : " + analytics)
-                    } else {
-                        console.log("Can't Remove " + analytics)
-                        console.log("cmd : " + cmd)
-                    }
-                })
+            function removeFile(path) {
+                if (Util.removeFile(path)) {
+                    console.log("Remove file success Analytics : " + path)
+                } else {
+                    console.log("Can't Remove no such file ot dir " + path)
+                }
             }
         }
 
@@ -430,7 +426,7 @@ module.exports = [
                     }
                     let analyticsFileInfo = resAnalytics.analyticsFileInfo
                     let analyticsProfile = resAnalytics.analyticsProfile
-                    
+
                     let path: any = Util.analyticsPath() + analyticsFileInfo.name + pathSep.sep + analyticsProfile.logo // path + folder + \ + filename.png
                     reply.file(path,
                         {

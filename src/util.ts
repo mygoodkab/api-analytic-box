@@ -291,6 +291,13 @@ export class Util {
 			return true
 		})
 	}
-
+    static removeFile(path){
+		if(fs.existsSync(path)){
+			fs.unlinkSync(path);
+			return true
+		}else{
+			return false
+		}
+	}
 
 }
