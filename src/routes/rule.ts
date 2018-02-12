@@ -84,8 +84,8 @@ module.exports = [
         handler: async (request, reply) => {
             let dbm = Util.getDb(request)
             try {
-                const res = await dbm.collection('rules').findOne({ dockerNickname: request.params.id })
-                if (res) {
+                const res = await dbm.collection('rules').find({ dockerNickname: request.params.id }).toArray()
+                if (res.length != 0) {
                     reply({
                         statusCode: 200,
                         message: "OK",
@@ -208,5 +208,32 @@ module.exports = [
             }
         }
     },
-
+    { // delete rules by nickname 
+        method: 'POST',
+        path: '/rules/delete/nickname',
+        config: {
+            tags: ['api'],
+            description: 'delete all',
+            notes: 'delete all',
+            validate: {
+                payload: {
+                    dockerNickname: Joi.string().required(),
+                }
+            }
+        },
+        handler: async (request, reply) => {
+            let dbm = Util.getDb(request)
+            let payload = request.payload
+            try {
+                const del = await dbm.collection('rules').deleteMany({ dockerNickname: payload.id })
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: "Delete rule Success"
+                })
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
+        }
+    }
 ]
