@@ -139,7 +139,7 @@ export class Util {
 		return uniqid();
 	}
 	static uploadPath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads','files') + pathSep.sep
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'files') + pathSep.sep
 		return path;
 	}
 	static JSMpegPath() {
@@ -147,18 +147,18 @@ export class Util {
 		return path;
 	}
 	static csvPath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads','cctv') + pathSep.sep
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'cctv') + pathSep.sep
 		return path
 	}
 	static dockerAnalyticsCameraPath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads','docker-analytics-camera') + pathSep.sep
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'docker-analytics-camera') + pathSep.sep
 		return path
 	}
 	static analyticsPath() {
 		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'analytics') + pathSep.sep
 		return path
 	}
-	static uploadImagePath() { 
+	static uploadImagePath() {
 		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'register-images') + pathSep.sep
 		return path;
 	}
@@ -189,20 +189,21 @@ export class Util {
 	}
 	static isNotification(data) {
 		let isToday = false;
-		var year = parseInt(dateFormat(now, "yyy"))
-		var month = parseInt(dateFormat(now, "m"))
-		var day = parseInt(dateFormat(now, "d"))
-		var hour = parseInt(dateFormat(now, "HH"))
-		var min = parseInt(dateFormat(now, "MM"))
-		var tomorrowYear = parseInt(dateFormat(tomorrow, "yyy"))
-		var tomorrowMonth = parseInt(dateFormat(tomorrow, "m"))
-		var tomorrowDay = parseInt(dateFormat(tomorrow, "d"))
-		var valueDayStart;
-		var valueDayEnd;
-		var valueToday;
+		let year = parseInt(dateFormat(now, "yyy"))
+		let month = parseInt(dateFormat(now, "m"))
+		let day = parseInt(dateFormat(now, "d"))
+		let hour = parseInt(dateFormat(now, "HH"))
+		let min = parseInt(dateFormat(now, "MM"))
+		let tomorrowYear = parseInt(dateFormat(tomorrow, "yyy"))
+		let tomorrowMonth = parseInt(dateFormat(tomorrow, "m"))
+		let tomorrowDay = parseInt(dateFormat(tomorrow, "d"))
+		let valueDayStart;
+		let valueDayEnd;
+		let valueToday;
 		if (data.dayStart == data.dayEnd && data.dayStart == dateFormat(now, "ddd").toLowerCase()) {
 			isToday = true
 		}
+
 		if (data.dayStart != data.dayEnd) {
 			for (let fieldDay in dayModel) {  // day to value = 1-7 (mon-sun)
 				if (data.dayStart == fieldDay) {
@@ -215,6 +216,7 @@ export class Util {
 					valueToday = dayModel[fieldDay]
 				}
 			}
+
 			// compare day
 			if (valueDayStart < valueDayEnd) {  //ถ้าเลขหน้าน้อยกว่าเลขหลัง เช่น  1-3
 				if (valueToday >= valueDayStart && valueToday <= valueDayEnd) {  // if  1-3 = mon, tue, wed
@@ -226,6 +228,7 @@ export class Util {
 				}
 			}
 		}
+		console.log(isToday + "1")
 		if (isToday) {
 			let timeEndH = parseInt(data.timeEnd.split(':')[0])
 			let timeStartH = parseInt(data.timeStart.split(':')[0])
@@ -239,6 +242,7 @@ export class Util {
 				new Date(year, month, day, hour, min, 0),
 				new Date(year, month, day, timeEndH, timeEndM, 0)
 			)
+			console.log("2")
 			if (data.dayStart == data.dayEnd) { // ถ้ากำหนดเป็นวันเดียว เช่น  Mon 17.00 - 23.59
 				if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) { //ถ้าเวลาเริ่มน้อยกว่าเวลาจบ เช่น 5.30-22.30 , 23.30-23.31 , 14.00-14.00
 					console.log(TodayDiffTimeStart + " " + TodayDiffTimeEnd)
@@ -248,14 +252,18 @@ export class Util {
 				}
 			}
 			else {
+				console.log("3")
 				if (valueDayStart < valueDayEnd) {  // if  1-3 = mon, tue, wed
+					console.log("4")
 					if (valueToday > valueDayStart && valueToday < valueDayEnd) { // ถ้าวันปัจจุบันอยู่ระหว่างเวลาที่กำหนด 
 						return true
 					} else if (valueToday == valueDayStart) { // ถ้าวันปัจจุบันตรงกับวันแรกที่กำหนด
+						console.log("5")
 						if (TodayDiffTimeStart >= 0) { //  ถ้า TodayDiffTimeStart เป็น + แสดงว่าเวลาผ่านมาแล้ว 
 							return true
 						}
 					} else if (valueToday == valueDayEnd) { // ถ้าวันปัจจุบันตรงกำวันสุดท้ายที่กำหนด
+						console.log("6")
 						if (TodayDiffTimeEnd <= 0) { //  ถ้า TodayDiffTimeEnd เป็น -  แสดงว่าเวลาปัจจุบันอยู่ยังไม่เลยเวลาที่กำหนด
 							return true
 						}
