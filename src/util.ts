@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const dateFormat = require('dateformat');
 const fs = require('fs');
 const differenceInMinutes = require('date-fns/difference_in_minutes')
+let rimraf  = require('rimraf')
 let timezone = (7) * 60 * 60 * 1000;
 let now: any = new Date(new Date().getTime() + timezone); // * timezone thai
 let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000); // * timezone thai * 24 hours
@@ -293,7 +294,7 @@ export class Util {
 	}
     static removeFolder(path){
 		if(fs.existsSync(path)){
-			fs.rmdirSync(path);
+			rimraf.sync(path)
 			return true
 		}else{
 			return false
