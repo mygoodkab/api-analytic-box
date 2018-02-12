@@ -139,37 +139,36 @@ export class Util {
 		return uniqid();
 	}
 	static uploadPath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads','files')
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads','files') + pathSep.sep
 		return path;
 	}
 	static JSMpegPath() {
-		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "JSMpeg" + pathSep.sep;
+		let path = pathSep.join(__dirname, 'JSMpeg') + pathSep.sep
 		return path;
 	}
 	static csvPath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads','cctv')
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads','cctv') + pathSep.sep
 		return path
 	}
 	static dockerAnalyticsCameraPath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads','docker-analytics-camera')
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads','docker-analytics-camera') + pathSep.sep
 		return path
 	}
 	static analyticsPath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'analytics')
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'analytics') + pathSep.sep
 		return path
 	}
-	static uploadImagePath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'register-images')
+	static uploadImagePath() { 
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'register-images') + pathSep.sep
 		return path;
 	}
 	static uploadMatchImagePath() {
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'recognition-match-images')
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'recognition-match-images') + pathSep.sep
 		return path;
 	}
 	static uploadRootPath() {
 
-		let path = pathSep.join(__dirname, 'vam-data', 'uploads')
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads') + pathSep.sep
 
 		return path;
 	}
