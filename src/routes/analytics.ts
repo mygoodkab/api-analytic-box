@@ -220,7 +220,7 @@ module.exports = [
             }
 
             function removeFile(path) {
-                if (Util.removeFile(path)) {
+                if (Util.removeFolder(path)) {
                     console.log("Remove file success Analytics : " + path)
                 } else {
                     console.log("Can't Remove no such file ot dir " + path)
@@ -340,7 +340,7 @@ module.exports = [
                     const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _id: ObjectIdMongo(payload._id) })
                     if (!resAssignAnalytics) {
                         let path = Util.analyticsPath() + resAnalytics.analyticsFileInfo.name
-                        if (Util.removeFile(path)) {
+                        if (Util.removeFolder(path)) {
                             const removeAnalytics: any = await mongo.collection('analytics').deleteOne({ _id: ObjectIdMongo(payload._id) })
                             reply({
                                 statusCode: 200,

@@ -294,7 +294,7 @@ module.exports = [
                 let path = Util.dockerAnalyticsCameraPath() + resAssign.nickname
                 //const test = "cd ../.." + Util.analyticsPath() + " && ls"
                 console.log("3"  + path)
-                if (Util.removeFile(path)) {
+                if (Util.removeFolder(path)) {
                     const delAssign = await mongo.collection('assignAnalytics').deleteOne({ _id: ObjectIdMongo(payload._id) })
                     const delRules = await mongo.collection('rules').deleteMany({ dockerNickname: resAssign.nickname })
                     const delNoti = await mongo.collection('notification').deleteMany({ dockerNickname: resAssign.nickname })

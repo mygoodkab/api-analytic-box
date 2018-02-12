@@ -291,9 +291,9 @@ export class Util {
 			return true
 		})
 	}
-    static removeFile(path){
+    static removeFolder(path){
 		if(fs.existsSync(path)){
-			fs.unlinkSync(path);
+			fs.rmdirSync(path);
 			return true
 		}else{
 			return false
