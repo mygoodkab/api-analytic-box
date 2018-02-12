@@ -209,6 +209,39 @@ module.exports = [
                     // ถ้า outputType ต้องตรงตามเงือนไข  
                     if (payload && (payload.outputType == 'cropping-counting' || payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
                         const insertAnalyticsRecord = await mongo.collection('analytics-record').insertOne(payload)
+
+                        if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
+                            let str = {
+                                ts: payload.ts,
+                                dockerNickname: payload.dockerNickname,
+                                outputType: payload.outputType,
+                                fileType: payload.fileType,
+                                metadata: payload.metadata
+                            }
+                            //get file
+                            let path: any = Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + Util.hash(str) + "." + payload.fileType;
+                            if (!fs.existsSync(path)) {
+                                console.log("Can't find image file")
+                                badrequest("Can't find image file")
+                            } else {
+                                var formData = new FormData();
+                                formData.append('refId', camInfo._id.toString()) //"5a6fe68f478d4b0100000010" camInfo._id
+                                formData.append('type', payload.outputType)
+                                formData.append('file', fs.createReadStream(path))
+                                formData.append('ts', payload.ts)
+                                formData.append('meta', "test")
+
+                                console.log("sending data . . . .")
+                                formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
+                                    if (err) {
+                                        console.log(err)
+                                        //badrequest(err)
+                                    } else {
+                                        console.log("-----------------sent data to smart living--------------------")
+                                    }
+                                })
+                            }
+                        }
                         //// check latest notification
                         let resNotification: any = await mongo.collection('notification').find({ dockerNickname: payload.dockerNickname }).sort({ timedb: -1 }).limit(1).toArray()
                         resNotification = resNotification[0]
@@ -225,10 +258,14 @@ module.exports = [
                                 console.log("Notification more 5 minute")
                                 checkRule()
                             } else {
-                                sentDataToSmartliving()
+                                reply({
+                                    statusCode: 200,
+                                    msg: "OK",
+                                })
                             }
 
                         }
+
                         // =----------------------------------------------=
                         // | check rule by dockerNickname to notification |
                         // =----------------------------------------------=
@@ -236,7 +273,10 @@ module.exports = [
                             const resRules: any = await mongo.collection('rules').find({ dockerNickname: payload.dockerNickname }).toArray()
                             if (resRules.length == 0) {
                                 console.log("No rule")
-                                sentDataToSmartliving()
+                                reply({
+                                    statusCode: 200,
+                                    msg: "OK",
+                                })
                             } else {
                                 console.log("Rule compare : ", resRules)
                                 for (let rule of resRules) {
@@ -263,55 +303,15 @@ module.exports = [
                                         }
                                     }
                                 }
-                                sentDataToSmartliving()
+                                reply({
+                                    statusCode: 200,
+                                    msg: "OK",
+                                })
                             }
 
                         }
                         // ถ้า file type เป็นแบบรูปภาพจะส่งไปยัง smart living 
-                        function sentDataToSmartliving() {
-                            if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
-                                let str = {
-                                    ts: payload.ts,
-                                    dockerNickname: payload.dockerNickname,
-                                    outputType: payload.outputType,
-                                    fileType: payload.fileType,
-                                    metadata: payload.metadata
-                                }
-                                //get file
-                                let path: any = Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + Util.hash(str) + "." + payload.fileType;
-                                if (!fs.existsSync(path)) {
-                                    console.log("Can't find image file")
-                                    badrequest("Can't find image file")
-                                } else {
-                                    var formData = new FormData();
-                                    formData.append('refId', camInfo._id.toString()) //"5a6fe68f478d4b0100000010" camInfo._id
-                                    formData.append('type', payload.outputType)
-                                    formData.append('file', fs.createReadStream(path))
-                                    formData.append('ts', payload.ts)
-                                    formData.append('meta', "test")
 
-                                    console.log("sending data . . . .")
-                                    formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
-                                        if (err) {
-                                            console.log(err)
-                                            //badrequest(err)
-                                        } else {
-                                            console.log("-----------------sent data to smart living--------------------")
-                                            reply({
-                                                statusCode: 200,
-                                                data: res
-                                            })
-                                        }
-                                    })
-                                }
-                            } else {
-                                console.log("-----------------------Reord data-------------------")
-                                reply({
-                                    statusCode: 200,
-                                    msg: "OK Insert success",
-                                })
-                            }
-                        }
                     } else {
                         badrequest("Please check 'outputType'")
                     }
