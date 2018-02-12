@@ -229,7 +229,6 @@ export class Util {
 				}
 			}
 		}
-		console.log(isToday + "1")
 		if (isToday) {
 			let timeEndH = parseInt(data.timeEnd.split(':')[0])
 			let timeStartH = parseInt(data.timeStart.split(':')[0])
@@ -243,7 +242,6 @@ export class Util {
 				new Date(year, month, day, hour, min, 0),
 				new Date(year, month, day, timeEndH, timeEndM, 0)
 			)
-			console.log(TodayDiffTimeStart + " " + TodayDiffTimeEnd)
 			if (data.dayStart == data.dayEnd) { // ถ้ากำหนดเป็นวันเดียว เช่น  Mon 17.00 - 23.59
 				if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) { //ถ้าเวลาเริ่มน้อยกว่าเวลาจบ เช่น 5.30-22.30 , 23.30-23.31 , 14.00-14.00
 					console.log(TodayDiffTimeStart + " " + TodayDiffTimeEnd)
@@ -258,7 +256,6 @@ export class Util {
 						return true
 					} else if (valueToday == valueDayStart) { // ถ้าวันปัจจุบันตรงกับวันแรกที่กำหนด
 						if (TodayDiffTimeStart >= 0) { //  ถ้า TodayDiffTimeStart เป็น + แสดงว่าเวลาผ่านมาแล้ว 
-							console.log("7")
 							return true
 						}
 					} else if (valueToday == valueDayEnd) { // ถ้าวันปัจจุบันตรงกำวันสุดท้ายที่กำหนด
