@@ -1,7 +1,8 @@
 const pathSep = require('path');
 const crypto = require('crypto');
-var dateFormat = require('dateformat');
-var differenceInMinutes = require('date-fns/difference_in_minutes')
+const dateFormat = require('dateformat');
+const fs = require('fs');
+const differenceInMinutes = require('date-fns/difference_in_minutes')
 var now = new Date();
 let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 let dayModel = { mon: "1", tue: "2", wed: "3", thu: "4", fri: "5", sat: "6", sun: "7" }
@@ -138,12 +139,7 @@ export class Util {
 		return uniqid();
 	}
 	static uploadPath() {
-		let path: any = process.cwd().split(pathSep.sep);
-		//	path.splice(path.indexOf('src'), path.length - path.indexOf('src'));
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "files" + pathSep.sep;
-		// if(!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-		// 	path = '/var/ab-storage/files/';
-		// }
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads','files')
 		return path;
 	}
 	static JSMpegPath() {
@@ -152,58 +148,29 @@ export class Util {
 		return path;
 	}
 	static csvPath() {
-		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "cctv"
-		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = '/vam-data/uploads/cctv/';
-			// path = '/vam_env/webconfig-api/analytics/';			
-		}
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads','cctv')
 		return path
 	}
 	static dockerAnalyticsCameraPath() {
-		let path: any = process.cwd().split(pathSep.sep);
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "docker-analytics-camera"
-		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = '/vam-data/uploads/docker-analytics-camera/';
-			// path = '/vam_env/webconfig-api/analytics/';			
-		}
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads','docker-analytics-camera')
 		return path
 	}
 	static analyticsPath() {
 		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'analytics')
-		//console.log('path : ' + path)
 		return path
 	}
 	static uploadImagePath() {
-		//pathSep.sep is check os that use / or \
-		let path: any = process.cwd().split(pathSep.sep);
-		//	path.splice(path.indexOf('src'), path.length - path.indexOf('src'));
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "register-images" + pathSep.sep;
-		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = '/vam-data/uploads/register-images/';
-		}
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'register-images')
 		return path;
 	}
 	static uploadMatchImagePath() {
-
-		//pathSep.sep is check os that use / or \
-		let path: any = process.cwd().split(pathSep.sep);
-		//	path.splice(path.indexOf('src'), path.length - path.indexOf('src'));
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "recognition-match-images" + pathSep.sep;
-		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = '/vam-data/uploads/recognition-match-images/';
-		}
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'recognition-match-images')
 		return path;
 	}
 	static uploadRootPath() {
 
-		let path: any = process.cwd().split(pathSep.sep);
-		//	path.splice(path.indexOf('src'), path.length - path.indexOf('src'));
-		path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep;
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads')
 
-		if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-			path = '/vam-data/uploads/';
-		}
 		return path;
 	}
 	static calculatePageQuery(pageIndex: any, pageSize: any) {
@@ -311,4 +278,17 @@ export class Util {
 		}
 		return false
 	}
+	static existFolder(path) {
+		let createPath = pathSep.join(__dirname, path)
+		fs.stat(createPath, async (err, stats) => {
+			if (err) {
+				fs.mkdir(createPath, (err) => {
+					return true
+				})
+			}
+			return true
+		})
+	}
+
+
 }

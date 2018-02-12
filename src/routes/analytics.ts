@@ -76,9 +76,6 @@ module.exports = [
                 fs.stat(pathAnalytics, async (err, stats) => {
                     if (err) { // if file analytics not exist
                         fs.mkdir(Util.uploadRootPath() + "analytics", (err) => {
-                            if (err) {
-                                badRequest("can't create folder")
-                            }
                             existFile()
                         })
                     } else { // if file cctv exist
@@ -223,7 +220,7 @@ module.exports = [
             }
 
             function removeFile(analytics) {
-                let cmd = "cd ../.." + Util.analyticsPath() + " &&  rm -rf " + analytics + " && echo eslab";
+                let cmd = "cd " + Util.analyticsPath() + " &&  rm -rf " + analytics + " && echo eslab";
                 exec(cmd, (error, stdout, stderr) => {
                     if (stdout) {
                         console.log("Remove file success Analytics : " + analytics)
@@ -342,14 +339,11 @@ module.exports = [
                 let payload = request.payload;
                 const mongo = Util.getDb(request)
                 const resAnalytics = await mongo.collection('analytics').findOne({ _id: ObjectIdMongo(payload._id) })
-
-
                 console.log(resAnalytics.name)
                 if (resAnalytics) {
                     const resAssignAnalytics = await mongo.collection('assignAnalytics').findOne({ _id: payload._id })
                     if (!resAssignAnalytics) {
-
-                        const cmd = "cd ../.." + Util.analyticsPath() + " &&  rm -rf " + resAnalytics.analyticsFileInfo.name + " && echo eslab";
+                        const cmd = "cd " + Util.analyticsPath() + " &&  rm -rf " + resAnalytics.analyticsFileInfo.name + " && echo eslab";
                         //const test = "cd ../.." + Util.analyticsPath() + " && ls"
                         console.log("Command remove file  : " + cmd)
                         exec(cmd, async (error, stdout, stderr) => {
