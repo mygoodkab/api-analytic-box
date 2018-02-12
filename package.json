@@ -48,12 +48,13 @@
     "path": "^0.12.7",
     "request": "^2.83.0",
     "request-promise": "^4.1.1",
+    "rimraf": "^2.6.2",
+    "typescript": "^2.7.1",
     "uniqid": "^4.1.1",
     "vision": "^4.1.1",
     "write-yaml": "^1.0.0",
     "ws": "^3.3.1",
-    "yamljs": "^0.3.0",
-    "typescript": "^2.7.1"
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/boom": "^4.3.7",
