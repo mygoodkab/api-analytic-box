@@ -225,7 +225,7 @@ module.exports = [
             let dbm = Util.getDb(request)
             let payload = request.payload
             try {
-                const del = await dbm.collection('rules').deleteMany({ dockerNickname: payload.id })
+                const del = await dbm.collection('rules').deleteMany({ dockerNickname: payload.dockerNickname })
                 reply({
                     statusCode: 200,
                     message: "OK",
