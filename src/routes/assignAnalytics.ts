@@ -285,15 +285,12 @@ module.exports = [
             }
         },
         handler: async (request, reply) => {
-            console.log("1")
             try {
                 let payload = request.payload;
                 const mongo = Util.getDb(request)
-                console.log("2")
                 const resAssign = await mongo.collection('assignAnalytics').findOne({ _id: ObjectIdMongo(payload._id) })
                 let path = Util.dockerAnalyticsCameraPath() + resAssign.nickname
                 //const test = "cd ../.." + Util.analyticsPath() + " && ls"
-                console.log("3"  + path)
                 if (Util.removeFolder(path)) {
                     const delAssign = await mongo.collection('assignAnalytics').deleteOne({ _id: ObjectIdMongo(payload._id) })
                     const delRules = await mongo.collection('rules').deleteMany({ dockerNickname: resAssign.nickname })

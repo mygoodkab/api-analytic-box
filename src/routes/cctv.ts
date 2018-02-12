@@ -289,14 +289,12 @@ module.exports = [
 
                 function removeFile(file) {
                     let cmd = "cd ../.." + Util.csvPath() + " &&  rm -rf " + file + " && echo eslab";
-                    console.log(cmd)
-                    exec(cmd, (error, stdout, stderr) => {
-                        if (stdout) {
-                            console.log("Remove file success Analytics : " + file)
-                        } else {
-                            console.log("Can't Remove")
-                        }
-                    })
+                    let path = Util.csvPath() + file
+                    if(Util.removeFolder(path)){
+                        console.log("Remove file success Analytics : " + file)
+                    }else{
+                        console.log("Can't Remove")
+                    }
                 }
             } catch (error) {
                 reply(Boom.badGateway(error))
