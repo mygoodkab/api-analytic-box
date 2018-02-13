@@ -36,7 +36,13 @@ module.exports = [
                     status: Joi.string(),
                     file: Joi.any().meta({ swaggerType: 'file' }).description('upload image'),
                 }
-            }
+            },
+            payload: {
+                maxBytes: 5000000,
+                parse: true,
+                output: 'stream',
+                allow: 'multipart/form-data'
+            },
         },
         handler: async (request, reply) => {
             let payload = request.payload;
