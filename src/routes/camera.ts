@@ -60,15 +60,10 @@ module.exports = [
                 payload.updateDate = new Date();
                 payload.runrelay = "cd ../JSMpeg node websocket-relay.js embedded " + payload.portffmpeg + " " + payload.portrelay;
                 payload.cmdffmpeg = "ffmpeg -f rtsp  -rtsp_transport tcp -i \"" + payload.rtsp + "\" -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://localhost:" + payload.portffmpeg + "/embedded";
-  console.log("1")
                 if (payload.file) {
-                    console.log(payload.file)
                     let filename = payload.file.hapi.filename.split('.');
-                    console.log("2")
                     let fileType = filename.splice(filename.length - 1, 1)[0];
-                    console.log("3")
                     if (fileType.toLowerCase() == 'png' || fileType.toLowerCase() == 'jpg' || fileType.toLowerCase() == 'jpeg') {
-                        console.log("4")
                         filename = filename.join('.')
                         let storeName = Util.uniqid() + "." + fileType.toLowerCase()
                         // create imageInfo for insert info db
@@ -80,7 +75,6 @@ module.exports = [
                             fileType: fileType,
                             ts: new Date(),
                         }
-                        console.log("5")
                         // create file Stream
                         const imageCamera = Util.imageCamera() + storeName
                         let file = fs.createWriteStream(imageCamera);

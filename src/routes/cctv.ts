@@ -6,7 +6,7 @@ const objectid = require('objectid');
 const Joi = require('joi')
 const fs = require('fs');
 const pathSep = require('path');
-const csv = require('csvtojson');
+var csv = require('csvtojson');
 const { exec } = require('child_process');
 const mongoObjectId = require('mongodb').ObjectId;
 module.exports = [
@@ -181,8 +181,7 @@ module.exports = [
             payload: {
                 maxBytes: 5000000,
                 parse: true,
-                output: 'stream',
-                allow: 'multipart/form-data'
+                output: 'stream'
             },
         },
         handler: (request, reply) => {
