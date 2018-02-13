@@ -55,31 +55,34 @@ module.exports = [
                 payload.runrelay = "cd ../JSMpeg node websocket-relay.js embedded " + payload.portffmpeg + " " + payload.portrelay;
                 payload.cmdffmpeg = "ffmpeg -f rtsp  -rtsp_transport tcp -i \"" + payload.rtsp + "\" -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://localhost:" + payload.portffmpeg + "/embedded";
                 const insertCamera: any = await mongo.collection('camera').insertOne(payload)
-                // ======================  upload image file ============================== 
-                let filename = payload.file.hapi.filename.split('.');
-                let fileType = filename.splice(filename.length - 1, 1)[0];
-                if (fileType.toLowerCase() == 'png' || fileType.toLowerCase() == 'jpg' || fileType.toLowerCase() == 'jpeg') {
-                    filename = filename.join('.')
-                    let storeName = Util.uniqid() + "." + fileType.toLowerCase()
-                    // create imageInfo for insert info db
-                    let id = objectid()
-                    let fileInfo: any = {
-                        id: id,
-                        name: filename,
-                        storeName: storeName,
-                        fileType: fileType,
-                        ts: new Date(),
+                if (payload.file) {
+                    let filename = payload.file.hapi.filename.split('.');
+                    let fileType = filename.splice(filename.length - 1, 1)[0];
+                    if (fileType.toLowerCase() == 'png' || fileType.toLowerCase() == 'jpg' || fileType.toLowerCase() == 'jpeg') {
+                        filename = filename.join('.')
+                        let storeName = Util.uniqid() + "." + fileType.toLowerCase()
+                        // create imageInfo for insert info db
+                        let id = objectid()
+                        let fileInfo: any = {
+                            id: id,
+                            name: filename,
+                            storeName: storeName,
+                            fileType: fileType,
+                            ts: new Date(),
+                        }
+                        // create file Stream
+                        const imageCamera = Util.imageCamera() + storeName
+                        let file = fs.createWriteStream(imageCamera);
+                        payload.file.pipe(file);
+                        payload.file.on('end', (err: any) => {
+                            const filestat = fs.statSync(imageCamera);
+                            fileInfo.fileSize = filestat.size;
+                            fileInfo.createdata = new Date();
+                        })
+                        payload.imageInfo = fileInfo
                     }
-                    // create file Stream
-                    const imageCamera = Util.imageCamera() + storeName
-                    let file = fs.createWriteStream(imageCamera);
-                    payload.file.pipe(file);
-                    payload.file.on('end', (err: any) => {
-                        const filestat = fs.statSync(imageCamera);
-                        fileInfo.fileSize = filestat.size;
-                        fileInfo.createdata = new Date();
-                    })
-                    payload.imageInfo = fileInfo
+                    // ======================  upload image file ============================== 
+
                     const insertCamera: any = await mongo.collection('camera').insertOne(payload)
                     reply({
                         statusCode: 200,
