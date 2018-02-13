@@ -275,7 +275,7 @@ module.exports = [
                     let path: any = Util.imageCamera() + resCamera.file.storeName
                     reply.file(path,
                         {
-                            filename: resCamera.imageInfo.name + '.' + resCamera.imageInfo.fileType,
+                            filename: resCamera.file.name + '.' + resCamera.file.fileType,
                             mode: 'inline'
                         })
 
