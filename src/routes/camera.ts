@@ -90,7 +90,7 @@ module.exports = [
                             fileInfo.fileSize = filestat.size;
                             fileInfo.createdata = new Date();
                         })
-                        payload.imageInfo = fileInfo
+                        payload.file = fileInfo
                     } else {
                         reply(Boom.badRequest("Invalid file type"))
                     }
@@ -273,7 +273,7 @@ module.exports = [
                     })
                 } else {
 
-                    let path: any = Util.imageCamera() + resCamera.imageInfo.storeName
+                    let path: any = Util.imageCamera() + resCamera.file.storeName
                     reply.file(path,
                         {
                             filename: resCamera.imageInfo.name + '.' + resCamera.imageInfo.fileType,
