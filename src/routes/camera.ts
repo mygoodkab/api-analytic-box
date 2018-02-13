@@ -34,7 +34,7 @@ module.exports = [
                     mac: Joi.string(),
                     location: Joi.string(),
                     status: Joi.string(),
-                    file: Joi.any().meta({ swaggerType: 'file' }).description('upload file csv'),
+                    file: Joi.any().meta({ swaggerType: 'file' }).description('upload image'),
                 }
             }
         },
@@ -56,6 +56,7 @@ module.exports = [
                 payload.cmdffmpeg = "ffmpeg -f rtsp  -rtsp_transport tcp -i \"" + payload.rtsp + "\" -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://localhost:" + payload.portffmpeg + "/embedded";
   console.log("1")
                 if (payload.file) {
+                    console.log(payload.file)
                     let filename = payload.file.hapi.filename.split('.');
                     console.log("2")
                     let fileType = filename.splice(filename.length - 1, 1)[0];
