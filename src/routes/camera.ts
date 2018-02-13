@@ -54,7 +54,7 @@ module.exports = [
                 payload.updateDate = new Date();
                 payload.runrelay = "cd ../JSMpeg node websocket-relay.js embedded " + payload.portffmpeg + " " + payload.portrelay;
                 payload.cmdffmpeg = "ffmpeg -f rtsp  -rtsp_transport tcp -i \"" + payload.rtsp + "\" -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://localhost:" + payload.portffmpeg + "/embedded";
-                const insertCamera: any = await mongo.collection('camera').insertOne(payload)
+
                 if (payload.file) {
                     let filename = payload.file.hapi.filename.split('.');
                     let fileType = filename.splice(filename.length - 1, 1)[0];
@@ -80,19 +80,17 @@ module.exports = [
                             fileInfo.createdata = new Date();
                         })
                         payload.imageInfo = fileInfo
+                    } else {
+                        reply(Boom.badRequest("Invalid file type"))
                     }
-                    // ======================  upload image file ============================== 
 
-                    const insertCamera: any = await mongo.collection('camera').insertOne(payload)
-                    reply({
-                        statusCode: 200,
-                        message: "OK",
-                        data: "insert success"
-                    })
-                } else {
-                    reply(Boom.badRequest("Invalid file type"))
                 }
-                // }
+                const insertCamera: any = await mongo.collection('camera').insertOne(payload)
+                reply({
+                    statusCode: 200,
+                    message: "OK",
+                    data: "insert success"
+                })
             } catch (error) {
                 reply(Boom.badGateway(error))
             }
