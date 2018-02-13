@@ -61,8 +61,10 @@ module.exports = [
                 payload.runrelay = "cd ../JSMpeg node websocket-relay.js embedded " + payload.portffmpeg + " " + payload.portrelay;
                 payload.cmdffmpeg = "ffmpeg -f rtsp  -rtsp_transport tcp -i \"" + payload.rtsp + "\" -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://localhost:" + payload.portffmpeg + "/embedded";
                 if (payload.file) {
-                    if (!Util.existFolder(Util.imageCamera())) {
-                        console.log("create file camera image")
+                    if (!fs.existsSync(Util.imageCamera())) {
+                        fs.mkdir(Util.imageCamera(), (err) => {
+                            console.log('Create camera image')
+                        })
                     }
                     let filename = payload.file.hapi.filename.split('.');
                     let fileType = filename.splice(filename.length - 1, 1)[0];
