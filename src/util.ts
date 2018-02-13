@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const dateFormat = require('dateformat');
 const fs = require('fs');
 const differenceInMinutes = require('date-fns/difference_in_minutes')
-let rimraf  = require('rimraf')
+let rimraf = require('rimraf')
 let timezone = (7) * 60 * 60 * 1000;
 let now: any = new Date(new Date().getTime() + timezone); // * timezone thai
 let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000); // * timezone thai * 24 hours
@@ -174,6 +174,11 @@ export class Util {
 
 		return path;
 	}
+	static imageCamera() {
+		let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'camera') + pathSep.sep
+
+		return path;
+	}
 	static calculatePageQuery(pageIndex: any, pageSize: any) {
 		if (isNaN(pageIndex) || isNaN(pageSize)) return false;
 		let pageSkip = +pageSize * +pageIndex;
@@ -292,11 +297,11 @@ export class Util {
 			return true
 		})
 	}
-    static removeFolder(path){
-		if(fs.existsSync(path)){
+	static removeFolder(path) {
+		if (fs.existsSync(path)) {
 			rimraf.sync(path)
 			return true
-		}else{
+		} else {
 			return false
 		}
 	}

@@ -7,6 +7,8 @@ const Joi = require('joi')
 const jsonfile = require('jsonfile')
 var child_process = require('child_process');
 var fork = require('child_process').fork;
+const fs = require('fs');
+const pathSep = require('path');
 //import { sqliteUtil } from '../sqlite-util';
 //import { dbpath } from '../server';
 const { exec } = require('child_process');
@@ -32,6 +34,7 @@ module.exports = [
                     mac: Joi.string(),
                     location: Joi.string(),
                     status: Joi.string(),
+                    file: Joi.any().meta({ swaggerType: 'file' }).description('upload file csv'),
                 }
             }
         },
@@ -48,20 +51,44 @@ module.exports = [
                     payload.portffmpeg = resCamera[0].portrelay + 1
                     payload.portrelay = resCamera[0].portrelay + 2
                 }
-
-                //payload._id = objectid();
                 payload.updateDate = new Date();
                 payload.runrelay = "cd ../JSMpeg node websocket-relay.js embedded " + payload.portffmpeg + " " + payload.portrelay;
                 payload.cmdffmpeg = "ffmpeg -f rtsp  -rtsp_transport tcp -i \"" + payload.rtsp + "\" -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://localhost:" + payload.portffmpeg + "/embedded";
-
                 const insertCamera: any = await mongo.collection('camera').insertOne(payload)
-                //  console.log(insertCamera)
-                // if (insertCamera.acknowledged) {
-                reply({
-                    statusCode: 200,
-                    message: "OK",
-                    data: "insert success"
-                })
+                // ======================  upload image file ============================== 
+                let filename = payload.file.hapi.filename.split('.');
+                let fileType = filename.splice(filename.length - 1, 1)[0];
+                if (fileType.toLowerCase() == 'png' || fileType.toLowerCase() == 'jpg' || fileType.toLowerCase() == 'jpeg') {
+                    filename = filename.join('.')
+                    let storeName = Util.uniqid() + "." + fileType.toLowerCase()
+                    // create imageInfo for insert info db
+                    let id = objectid()
+                    let fileInfo: any = {
+                        id: id,
+                        name: filename,
+                        storeName: storeName,
+                        fileType: fileType,
+                        ts: new Date(),
+                    }
+                    // create file Stream
+                    const imageCamera = Util.imageCamera() + storeName
+                    let file = fs.createWriteStream(imageCamera);
+                    payload.file.pipe(file);
+                    payload.file.on('end', (err: any) => {
+                        const filestat = fs.statSync(imageCamera);
+                        fileInfo.fileSize = filestat.size;
+                        fileInfo.createdata = new Date();
+                    })
+                    payload.imageInfo = fileInfo
+                    const insertCamera: any = await mongo.collection('camera').insertOne(payload)
+                    reply({
+                        statusCode: 200,
+                        message: "OK",
+                        data: "insert success"
+                    })
+                } else {
+                    reply(Boom.badRequest("Invalid file type"))
+                }
                 // }
             } catch (error) {
                 reply(Boom.badGateway(error))
@@ -191,7 +218,7 @@ module.exports = [
                 let payload = request.payload;
                 const mongo = Util.getDb(request)
                 const camera = await mongo.collection('assignAnalytics').findOne({ _refCameraId: payload._id })
-                
+
                 if (!camera) {
                     const removeAnalytics: any = await mongo.collection('camera').deleteOne({ _id: ObjectId(payload._id) })
                     reply({
@@ -209,5 +236,42 @@ module.exports = [
             }
         }
     },
+    {  // Get image file
+        method: 'GET',
+        path: '/camera/image/{id}',
+        config: {
+            tags: ['api'],
+            description: 'Get image for UI',
+            notes: 'Get image ',
+            validate: {
+                params: {
+                    id: Joi.string().required().description('id camera')
+                }
+            }
+        },
+        handler: async (request, reply) => {
+            const mongo = Util.getDb(request)
+            try {
+                const resCamera = await mongo.collection('camera').findOne({ _id: ObjectId(request.params.id) })
+                if (!resCamera) {
+                    reply({
+                        statusCode: 404,
+                        message: "Bad Request",
+                        data: "Data not found"
+                    })
+                } else {
 
+                    let path: any = Util.imageCamera() + resCamera.imageInfo.storeName
+                    reply.file(path,
+                        {
+                            filename: resCamera.imageInfo.name + '.' + resCamera.imageInfo.fileType,
+                            mode: 'inline'
+                        })
+
+                }
+            } catch (error) {
+                reply(Boom.badGateway(error))
+            }
+        }
+    },
 ];

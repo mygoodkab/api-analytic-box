@@ -280,7 +280,6 @@ module.exports = [
                             } else {
                                 console.log("Rule compare : ", resRules)
                                 for (let rule of resRules) {
-                                    console.log(Util.isNotification(rule))
                                     if (Util.isNotification(rule) && rule.status) {
                                         let notificationData = payload
                                         //notificationData.id = objectid()
