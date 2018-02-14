@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const pathSep = require('path');
 const crypto = require('crypto');
@@ -125,61 +133,39 @@ class Util {
         return uniqid();
     }
     static uploadPath() {
-        let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "files" + pathSep.sep;
+        let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'files') + pathSep.sep;
         return path;
     }
     static JSMpegPath() {
-        let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "JSMpeg" + pathSep.sep;
+        let path = pathSep.join(__dirname, 'JSMpeg') + pathSep.sep;
         return path;
     }
     static csvPath() {
-        let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "cctv";
-        if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/cctv/';
-        }
+        let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'cctv') + pathSep.sep;
         return path;
     }
     static dockerAnalyticsCameraPath() {
-        let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "docker-analytics-camera";
-        if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/docker-analytics-camera/';
-        }
+        let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'docker-analytics-camera') + pathSep.sep;
         return path;
     }
     static analyticsPath() {
-        let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "analytics";
-        if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/analytics/';
-        }
+        let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'analytics') + pathSep.sep;
         return path;
     }
     static uploadImagePath() {
-        let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "register-images" + pathSep.sep;
-        if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/register-images/';
-        }
+        let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'register-images') + pathSep.sep;
         return path;
     }
     static uploadMatchImagePath() {
-        let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep + "recognition-match-images" + pathSep.sep;
-        if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/recognition-match-images/';
-        }
+        let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'recognition-match-images') + pathSep.sep;
         return path;
     }
     static uploadRootPath() {
-        let path = process.cwd().split(pathSep.sep);
-        path = path.join(pathSep.sep) + pathSep.sep + "uploads" + pathSep.sep;
-        if (!process.env.NODE_ENV || process.env.NODE_ENV != 'dev') {
-            path = '/vam-data/uploads/';
-        }
+        let path = pathSep.join(__dirname, 'vam-data', 'uploads') + pathSep.sep;
+        return path;
+    }
+    static imageCamera() {
+        let path = pathSep.join(__dirname, 'vam-data', 'uploads', 'camera') + pathSep.sep;
         return path;
     }
     static calculatePageQuery(pageIndex, pageSize) {
@@ -198,6 +184,115 @@ class Util {
         hash.update(JSON.stringify(data));
         let key = hash.digest('hex');
         return key;
+    }
+    static isNotification(data) {
+        let isToday = false;
+        let year = parseInt(dateFormat(now, "yyy"));
+        let month = parseInt(dateFormat(now, "m"));
+        let day = parseInt(dateFormat(now, "d"));
+        let hour = parseInt(dateFormat(now, "HH"));
+        let min = parseInt(dateFormat(now, "MM"));
+        let tomorrowYear = parseInt(dateFormat(tomorrow, "yyy"));
+        let tomorrowMonth = parseInt(dateFormat(tomorrow, "m"));
+        let tomorrowDay = parseInt(dateFormat(tomorrow, "d"));
+        let valueDayStart;
+        let valueDayEnd;
+        let valueToday;
+        if (data.dayStart == data.dayEnd && data.dayStart == dateFormat(now, "ddd").toLowerCase()) {
+            isToday = true;
+        }
+        if (data.dayStart != data.dayEnd) {
+            for (let fieldDay in dayModel) {
+                if (data.dayStart == fieldDay) {
+                    valueDayStart = dayModel[fieldDay];
+                }
+                if (data.dayEnd == fieldDay) {
+                    valueDayEnd = dayModel[fieldDay];
+                }
+                if (dateFormat(now, "ddd").toLowerCase() == fieldDay) {
+                    valueToday = dayModel[fieldDay];
+                }
+            }
+            if (valueDayStart < valueDayEnd) {
+                if (valueToday >= valueDayStart && valueToday <= valueDayEnd) {
+                    isToday = true;
+                }
+            }
+            else {
+                if (!(valueToday < valueDayStart && valueToday > valueDayEnd)) {
+                    isToday = true;
+                }
+            }
+        }
+        if (isToday) {
+            let timeEndH = parseInt(data.timeEnd.split(':')[0]);
+            let timeStartH = parseInt(data.timeStart.split(':')[0]);
+            let timeEndM = parseInt(data.timeEnd.split(':')[1]);
+            let timeStartM = parseInt(data.timeStart.split(':')[1]);
+            var TodayDiffTimeStart = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeStartH, timeStartM, 0));
+            var TodayDiffTimeEnd = differenceInMinutes(new Date(year, month, day, hour, min, 0), new Date(year, month, day, timeEndH, timeEndM, 0));
+            if (data.dayStart == data.dayEnd) {
+                if (timeStartH < timeEndH || (timeStartH == timeEndH) && (timeStartM <= timeEndM)) {
+                    console.log(TodayDiffTimeStart + " " + TodayDiffTimeEnd);
+                    if (TodayDiffTimeStart >= 0 && TodayDiffTimeEnd <= 0) {
+                        return true;
+                    }
+                }
+            }
+            else {
+                if (valueDayStart < valueDayEnd) {
+                    if (valueToday > valueDayStart && valueToday < valueDayEnd) {
+                        return true;
+                    }
+                    else if (valueToday == valueDayStart) {
+                        if (TodayDiffTimeStart >= 0) {
+                            return true;
+                        }
+                    }
+                    else if (valueToday == valueDayEnd) {
+                        if (TodayDiffTimeEnd <= 0) {
+                            return true;
+                        }
+                    }
+                }
+                else {
+                    if (valueToday == valueDayStart) {
+                        if (TodayDiffTimeStart >= 0) {
+                            return true;
+                        }
+                    }
+                    else if (valueToday == valueDayEnd) {
+                        if (TodayDiffTimeEnd <= 0) {
+                            return true;
+                        }
+                    }
+                    else if (!(valueToday < valueDayStart && valueToday > valueDayEnd)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    static existFolder(path) {
+        let createPath = pathSep.join(__dirname, path);
+        fs.stat(createPath, (err, stats) => __awaiter(this, void 0, void 0, function* () {
+            if (err) {
+                fs.mkdir(createPath, (err) => {
+                    return true;
+                });
+            }
+            return true;
+        }));
+    }
+    static removeFolder(path) {
+        if (fs.existsSync(path)) {
+            rimraf.sync(path);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     static isNotification(data) {
         let isToday = false;

@@ -200,9 +200,6 @@ module.exports = [
             let mongo = util_1.Util.getDb(request);
             const payload = request.payload;
             console.log("revcive data from analytics " + payload.dockerNickname);
-            let timezone = (7) * 60 * 60 * 1000;
-            let now = new Date(new Date().getTime() + timezone);
-            let tomorrow = new Date(new Date().getTime() + (24 + 7) * 60 * 60 * 1000);
             payload.timedb = Date.now();
             payload.fileType = payload.fileType.toLowerCase();
             try {
@@ -214,6 +211,37 @@ module.exports = [
                     let camInfo = resAssignAnalytics.cameraInfo;
                     if (payload && (payload.outputType == 'cropping-counting' || payload.outputType == 'cropping' || payload.outputType == 'detection' || payload.outputType == 'recognition' || payload.outputType == 'counting')) {
                         const insertAnalyticsRecord = yield mongo.collection('analytics-record').insertOne(payload);
+                        if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
+                            let str = {
+                                ts: payload.ts,
+                                dockerNickname: payload.dockerNickname,
+                                outputType: payload.outputType,
+                                fileType: payload.fileType,
+                                metadata: payload.metadata
+                            };
+                            let path = util_1.Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + payload.fileType;
+                            if (!fs.existsSync(path)) {
+                                console.log("Can't find image file");
+                                badrequest("Can't find image file");
+                            }
+                            else {
+                                var formData = new FormData();
+                                formData.append('refId', camInfo._id.toString());
+                                formData.append('type', payload.outputType);
+                                formData.append('file', fs.createReadStream(path));
+                                formData.append('ts', payload.ts);
+                                formData.append('meta', "test");
+                                console.log("sending data . . . .");
+                                formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
+                                    if (err) {
+                                        console.log(err);
+                                    }
+                                    else {
+                                        console.log("-----------------sent data to smart living--------------------");
+                                    }
+                                });
+                            }
+                        }
                         let resNotification = yield mongo.collection('notification').find({ dockerNickname: payload.dockerNickname }).sort({ timedb: -1 }).limit(1).toArray();
                         resNotification = resNotification[0];
                         if (!resNotification) {
@@ -231,15 +259,21 @@ module.exports = [
                                 checkRule();
                             }
                             else {
-                                sentDataToSmartliving();
+                                reply({
+                                    statusCode: 200,
+                                    msg: "OK",
+                                });
                             }
                         }
                         function checkRule() {
                             return __awaiter(this, void 0, void 0, function* () {
                                 const resRules = yield mongo.collection('rules').find({ dockerNickname: payload.dockerNickname }).toArray();
-                                if (!resRules) {
+                                if (resRules.length == 0) {
                                     console.log("No rule");
-                                    sentDataToSmartliving();
+                                    reply({
+                                        statusCode: 200,
+                                        msg: "OK",
+                                    });
                                 }
                                 else {
                                     console.log("Rule compare : ", resRules);
@@ -269,53 +303,12 @@ module.exports = [
                                             }
                                         }
                                     }
-                                    sentDataToSmartliving();
-                                }
-                            });
-                        }
-                        function sentDataToSmartliving() {
-                            if (payload.fileType == 'png' || payload.fileType == 'jpg' || payload.fileType == 'jpeg') {
-                                let str = {
-                                    ts: payload.ts,
-                                    dockerNickname: payload.dockerNickname,
-                                    outputType: payload.outputType,
-                                    fileType: payload.fileType,
-                                    metadata: payload.metadata
-                                };
-                                let path = util_1.Util.dockerAnalyticsCameraPath() + payload.dockerNickname + pathSep.sep + "output" + pathSep.sep + util_1.Util.hash(str) + "." + payload.fileType;
-                                if (!fs.existsSync(path)) {
-                                    console.log("Can't find image file");
-                                    badrequest("Can't find image file");
-                                }
-                                else {
-                                    var formData = new FormData();
-                                    formData.append('refId', camInfo._id.toString());
-                                    formData.append('type', payload.outputType);
-                                    formData.append('file', fs.createReadStream(path));
-                                    formData.append('ts', payload.ts);
-                                    formData.append('meta', "test");
-                                    console.log("sending data . . . .");
-                                    formData.submit('https://api.thailand-smartliving.com/v1/file/upload', (err, res) => {
-                                        if (err) {
-                                            console.log(err);
-                                        }
-                                        else {
-                                            console.log("-----------------sent data to smart living--------------------");
-                                            reply({
-                                                statusCode: 200,
-                                                data: res
-                                            });
-                                        }
+                                    reply({
+                                        statusCode: 200,
+                                        msg: "OK",
                                     });
                                 }
-                            }
-                            else {
-                                console.log("-----------------------Reord data-------------------");
-                                reply({
-                                    statusCode: 200,
-                                    msg: "OK Insert success",
-                                });
-                            }
+                            });
                         }
                     }
                     else {
