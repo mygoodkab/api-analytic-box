@@ -278,14 +278,8 @@ module.exports = [
                                     msg: "OK",
                                 })
                             } else {
-<<<<<<< HEAD
-                                console.log("Rule compare : " , resRules)
-                                for (let rule of resRules) {
-                                    console.log(Util.isNotification(rule))
-=======
                                 console.log("Rule compare : ", resRules)
                                 for (let rule of resRules) {
->>>>>>> mongodb
                                     if (Util.isNotification(rule) && rule.status) {
                                         let notificationData = payload
                                         //notificationData.id = objectid()
@@ -313,14 +307,10 @@ module.exports = [
                                     msg: "OK",
                                 })
                             }
-<<<<<<< HEAD
-                        }
-=======
 
                         }
                         // ถ้า file type เป็นแบบรูปภาพจะส่งไปยัง smart living 
 
->>>>>>> mongodb
                     } else {
                         badrequest("Please check 'outputType'")
                     }

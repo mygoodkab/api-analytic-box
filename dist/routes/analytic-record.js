@@ -278,7 +278,6 @@ module.exports = [
                                 else {
                                     console.log("Rule compare : ", resRules);
                                     for (let rule of resRules) {
-                                        console.log(util_1.Util.isNotification(rule));
                                         if (util_1.Util.isNotification(rule) && rule.status) {
                                             let notificationData = payload;
                                             notificationData.isRead = false;
