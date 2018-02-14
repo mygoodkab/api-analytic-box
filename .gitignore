@@ -1,4 +1,4 @@
 node_modules
-package-lock.jso
+package-lock.json
 dist
 docker-compose.yaml
