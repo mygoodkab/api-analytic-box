@@ -15,6 +15,11 @@ exports.MONGODB = {
 	URL: "mongodb",// "10.0.0.71",
 	PORT: "27017"
 }
+
+exports.SERVICE = {
+	PORT: "8000"
+}
+
 exports.SECRET_KEY = "2CD1DF62C76F2122599E17B894A92"
 export class Util {
 	static getDb(request: any): Db {
